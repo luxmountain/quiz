@@ -11,6 +11,7 @@ import com.uilover.project247.LeaderActivity.LeaderActivity
 import com.uilover.project247.QuestionActivity.Model.QuestionModel
 import com.uilover.project247.QuestionActivity.QuestionActivity
 import com.uilover.project247.R
+import com.uilover.project247.ReviewActivity.ReviewActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +27,13 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }, onBoardClick = {
                 startActivity(Intent(this, LeaderActivity::class.java))
+            }, onTopicClick = {
+                val intent = Intent(this, QuestionActivity::class.java)
+                intent.putParcelableArrayListExtra("list", ArrayList(questionList()))
+                startActivity(intent)
+            }, onReviewClick = {
+                val intent=Intent(this, ReviewActivity::class.java)
+                startActivity(intent)
             })
         }
     }
