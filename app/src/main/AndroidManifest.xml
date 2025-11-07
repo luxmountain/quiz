@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Project247">
         <activity
+            android:name=".LearningActivity.LearningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReviewActivity.ReviewActivity"
+            android:exported="false" />
+        <activity
             android:name=".LeaderActivity.LeaderActivity"
             android:exported="false" />
         <activity

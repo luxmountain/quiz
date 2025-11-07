@@ -25,12 +25,14 @@ import androidx.compose.ui.graphics.Color
 // import androidx.compose.ui.layout.ContentScale // Tạm thời chưa dùng
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.uilover.project247.DashboardActivity.screens.Topic
+
 // SỬA LỖI IMPORT: Import `Topic` từ package `screens` nơi bạn định nghĩa nó
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopicItem(topic: com.uilover.project247.DashboardActivity.screens.Topic, onClick: () -> Unit){
+fun TopicItem(topic: Topic, onClick: () -> Unit){
     Card (
         // Modifier này đúng nếu bạn KHÔNG set contentPadding trong LazyColumn
         modifier = Modifier

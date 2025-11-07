@@ -3,6 +3,8 @@ package com.uilover.project247.QuestionActivity
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,6 +54,23 @@ fun QuestionScreen(
         )
     }
 
+    // FIX 1: Thêm kiểm tra danh sách rỗng để tránh crash
+    if (state.questions.isEmpty()) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Không có câu hỏi nào cho chủ đề này.",
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+        return // Dừng thực thi ở đây
+    }
+
+
     val currentQuestion = state.questions[state.currentIndex]
     var selectedAnswer = currentQuestion.clickedAnswer
     val context = LocalContext.current
@@ -75,10 +94,11 @@ fun QuestionScreen(
                     .padding(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { onBackClick }) {
+                // FIX 2: Sửa lại cách gọi hàm onClick
+                IconButton(onClick = onBackClick) {
                     Icon(
                         painter = painterResource(R.drawable.back),
-                        contentDescription = null
+                        contentDescription = "Back"
                     )
                 }
                 Spacer(Modifier.width(16.dp))
@@ -98,8 +118,9 @@ fun QuestionScreen(
                     .padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // FIX 3: Dùng state.questions.size thay vì hardcode
                 Text(
-                    text = "Question ${state.currentIndex + 1}/10",
+                    text = "Question ${state.currentIndex + 1}/${state.questions.size}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
@@ -116,7 +137,8 @@ fun QuestionScreen(
                 }
                 IconButton(
                     onClick = {
-                        if (state.currentIndex == 9) {
+                        // FIX 3: Dùng state.questions.size
+                        if (state.currentIndex == state.questions.size - 1) {
                             onFinish(state.score)
                         } else {
                             selectedAnswer = null
@@ -130,8 +152,9 @@ fun QuestionScreen(
         }
 
         item {
+            // FIX 3: Dùng state.questions.size
             LinearProgressIndicator(
-                progress = (state.currentIndex + 1) / 10f,
+                progress = (state.currentIndex + 1) / state.questions.size.toFloat(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
@@ -156,16 +179,18 @@ fun QuestionScreen(
 
         item {
             //Image
-            Image(
-                painterResource(imageResId),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
+            if (imageResId != 0) { // Thêm kiểm tra xem ảnh có tồn tại không
+                Image(
+                    painterResource(imageResId),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
 
         itemsIndexed(
@@ -217,7 +242,7 @@ fun QuestionScreenPreview() {
             answer_2 = "London",
             answer_3 = "Berlin",
             answer_4 = "Madrid",
-            correctAnswer = "Paris",
+            correctAnswer = "a", // Sửa lại correctAnswer để khớp với letter
             score = 10,
             picPath = "q_1",
             clickedAnswer = null
