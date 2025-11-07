@@ -42,7 +42,7 @@ android {
 }
 
 dependencies {
-
+    implementation("androidx.compose.material:material-icons-extended-android:1.6.7")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -54,6 +54,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.ads.adservices)
+    implementation(libs.material3)
+    implementation(libs.ui)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.ui.text)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
