@@ -4,6 +4,7 @@ package com.uilover.project247.QuestionActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,12 +15,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,216 +51,137 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.uilover.project247.QuestionActivity.Model.QuestionModel
+import com.uilover.project247.LearningActivity.Model.CheckResult
 import com.uilover.project247.QuestionActivity.Model.QuestionUiState
-import com.uilover.project247.QuestionActivity.components.AnswerItem
+import com.uilover.project247.QuestionActivity.Model.QuestionViewModel
 import com.uilover.project247.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionScreen(
-    questions: List<QuestionModel>,
-    onFinish: (finalscore: Int) -> Unit,
-    onBackClick: () -> Unit
+    viewModel: QuestionViewModel,
+    onNavigateBack: () -> Unit,
+    onNavigateToScore: (Int) -> Unit
 ) {
-    var state by remember {
-        mutableStateOf(
-            QuestionUiState(questions = questions)
-        )
-    }
-
-    // FIX 1: Thêm kiểm tra danh sách rỗng để tránh crash
-    if (state.questions.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "Không có câu hỏi nào cho chủ đề này.",
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center
-            )
+    val uiState by viewModel.uiState.collectAsState()
+    val currentQuiz = uiState.currentQuiz
+    if (uiState.isFinished){
+        LaunchedEffect(Unit) {
+            onNavigateToScore(uiState.score)
         }
-        return // Dừng thực thi ở đây
     }
-
-
-    val currentQuestion = state.questions[state.currentIndex]
-    var selectedAnswer = currentQuestion.clickedAnswer
-    val context = LocalContext.current
-    val imageResId = remember(currentQuestion.picPath) {
-        context.resources.getIdentifier(
-            currentQuestion.picPath ?: "",
-            "drawable",
-            context.packageName
-        )
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(R.color.grey))
-    ) {
-        item {
-            Row(        //Header
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // FIX 2: Sửa lại cách gọi hàm onClick
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        painter = painterResource(R.drawable.back),
-                        contentDescription = "Back"
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    LinearProgressIndicator(
+                        progress = uiState.progress,
+                        modifier = Modifier.fillMaxWidth(0.6f).clip(CircleShape)
                     )
-                }
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = "Single Player",
-                    fontSize = 20.sp,
-                    color = colorResource(R.color.navy_blue),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-        item {
-            //Questions
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // FIX 3: Dùng state.questions.size thay vì hardcode
-                Text(
-                    text = "Question ${state.currentIndex + 1}/${state.questions.size}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(
-                    onClick = {
-                        if (state.currentIndex > 0) {
-                            selectedAnswer = null
-                            state = state.copy(currentIndex = state.currentIndex - 1)
-                        }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.Close, contentDescription = "Đóng")
                     }
-                ) {
-                    Icon(painterResource(R.drawable.left_arrow), contentDescription = null)
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFFF7F7F7)
+                )
+            )
+        },
+        containerColor = Color(0xFFF7F7F7)
+    ){
+            paddingValues ->
+
+        Box(
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                uiState.isLoading -> CircularProgressIndicator()
+
+                uiState.isFinished -> {
+                    Text("Hoàn thành! Đang chuyển đến màn hình điểm...")
                 }
-                IconButton(
-                    onClick = {
-                        // FIX 3: Dùng state.questions.size
-                        if (state.currentIndex == state.questions.size - 1) {
-                            onFinish(state.score)
-                        } else {
-                            selectedAnswer = null
-                            state = state.copy(currentIndex = state.currentIndex + 1)
+
+                currentQuiz != null -> {
+                    // Cột chứa toàn bộ nội dung quiz
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Cụm 1: Câu hỏi
+                        Text(
+                            text = currentQuiz.question,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Cụm 2: Các lựa chọn
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            currentQuiz.options.forEach { option ->
+                                QuizOptionButton(
+                                    text = option,
+                                    isSelected = uiState.selectedAnswer == option,
+                                    checkResult = uiState.checkResult,
+                                    correctAnswer = currentQuiz.correctAnswer,
+                                    onClick = {
+                                        viewModel.submitAnswer(option)
+                                    }
+                                )
+                            }
                         }
+
+                        // Cụm 3: Placeholder (để đẩy 2 cụm kia lên)
+                        Spacer(modifier = Modifier.height(1.dp))
                     }
-                ) {
-                    Icon(painterResource(R.drawable.right_arrow), contentDescription = null)
+                }
+
+                else -> {
+                    Text("Không có câu hỏi nào cho chủ đề này.")
                 }
             }
         }
-
-        item {
-            // FIX 3: Dùng state.questions.size
-            LinearProgressIndicator(
-                progress = (state.currentIndex + 1) / state.questions.size.toFloat(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .height(14.dp)
-                    .clip(RoundedCornerShape(50)),
-                color = colorResource(R.color.orange),
-                trackColor = Color(0xffd1d1d1)
-            )
-        }
-        item {
-            Text(
-                text = currentQuestion.question ?: "",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                textAlign = TextAlign.Center,
-                color = colorResource(R.color.navy_blue),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        item {
-            //Image
-            if (imageResId != 0) { // Thêm kiểm tra xem ảnh có tồn tại không
-                Image(
-                    painterResource(imageResId),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
-
-        itemsIndexed(
-            listOf(
-                currentQuestion.answer_1 ?: "",
-                currentQuestion.answer_2 ?: "",
-                currentQuestion.answer_3 ?: "",
-                currentQuestion.answer_4 ?: ""
-
-            )
-        ) { index, answerText ->
-            val answerLetter = listOf("a", "b", "c", "d")[index]
-            val isCorrect = selectedAnswer != null && answerLetter == currentQuestion.correctAnswer
-            val isWrong = selectedAnswer == answerLetter && !isCorrect
-
-            AnswerItem(
-                text = answerText,
-                isCorrect = isCorrect,
-                isWrong = isWrong,
-                isSelected = selectedAnswer != null
-            ) {
-                val updatedQuestion = state.questions.toMutableList()
-                val updateQuestion =
-                    updatedQuestion[state.currentIndex].copy(clickedAnswer = answerLetter)
-                updatedQuestion[state.currentIndex] = updateQuestion
-                val scoreToAdd = if (answerLetter == updateQuestion.correctAnswer) 5 else 0
-                state = state.copy(
-                    questions = updatedQuestion,
-                    score = state.score + scoreToAdd
-                )
-            }
-
-        }
-        item {
-            Spacer(Modifier.height(32.dp))
-        }
-
     }
 }
-
-@Preview
 @Composable
-fun QuestionScreenPreview() {
-    val questions = listOf(
-        QuestionModel(
-            id = 1,
-            question = "What is the capital of France?",
-            answer_1 = "Paris",
-            answer_2 = "London",
-            answer_3 = "Berlin",
-            answer_4 = "Madrid",
-            correctAnswer = "a", // Sửa lại correctAnswer để khớp với letter
-            score = 10,
-            picPath = "q_1",
-            clickedAnswer = null
+private fun QuizOptionButton(
+    text: String,
+    isSelected: Boolean,
+    checkResult: CheckResult,
+    correctAnswer: String,
+    onClick: () -> Unit
+) {
+    val isCorrect = text == correctAnswer
+    val buttonIsEnabled = checkResult == CheckResult.NEUTRAL
+
+    // Logic quyết định màu sắc
+    val buttonColors = when (checkResult) {
+        CheckResult.NEUTRAL -> ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Color.Black
         )
-    )
-    QuestionScreen(questions = questions, onFinish = {}, onBackClick = {})
+        CheckResult.CORRECT -> if (isSelected) ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)) else ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+        CheckResult.INCORRECT -> if (isSelected) ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)) else if (isCorrect) ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)) else ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+    }
+
+    Button(
+        onClick = onClick,
+        enabled = buttonIsEnabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = buttonColors,
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+    ) {
+        Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
 }
