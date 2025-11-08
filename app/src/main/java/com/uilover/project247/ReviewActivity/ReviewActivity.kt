@@ -35,7 +35,7 @@ class ReviewActivity : ComponentActivity() {
                     },
                     onTopicClick = { topicId ->
                         val intent = Intent(this, QuestionActivity::class.java)
-                        intent.putExtra("TOPIC_ID", topicId.toString())
+                        intent.putExtra("TOPIC_ID", topicId)
                         startActivity(intent)
                     }
                 )

@@ -1,6 +1,6 @@
 package com.uilover.project247.ReviewActivity.Model
 
-import com.uilover.project247.DashboardActivity.components.Topic
+import com.uilover.project247.data.Topic
 
 data class ReviewTopic(
     val topic: Topic,
