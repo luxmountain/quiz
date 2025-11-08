@@ -20,27 +20,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
-import com.uilover.project247.DashboardActivity.components.Topic
 import com.uilover.project247.DashboardActivity.components.TopicItem
+import com.uilover.project247.data.Topic
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
 fun MainScreen(
+    viewModel: MainViewModel , // <-- 1. Thêm ViewModel
     onBoardClick: () -> Unit = {},
-    onTopicClick: (String) -> Unit = {},
+    onTopicClick: (String) -> Unit = {}, // <-- 2. Đảm bảo là (String)
     onReviewClick: () -> Unit = {}
 ) {
-    val sampleTopics = listOf(
-        Topic(1, "Schools", "1.Trường học", android.R.drawable.ic_menu_gallery),
-        Topic(2, "Examination", "2.Kì thi", R.drawable.ic_menu_gallery),
-        Topic(3, "Extracurricular Activities", "3.Hoạt động ngoại khóa", android.R.drawable.ic_menu_gallery),
-        Topic(4, "School Stationery", "4.Dụng cụ học tập", android.R.drawable.ic_menu_gallery),
-        Topic(5, "School Subjects", "5.Các môn học", android.R.drawable.ic_menu_gallery),
-        Topic(6, "Classroom", "6.Lớp học", android.R.drawable.ic_menu_gallery)
-    )
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -86,29 +80,36 @@ fun MainScreen(
         containerColor = Color(0xFFF5F5F5)
     ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-
-            item {
-                StartMochiItem(onClick = { })
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                item {
+                    StartMochiItem(onClick = { /* ... */ })
+                }
 
-            items(sampleTopics) { topic ->
-                TopicItem(
-                    topic = topic,
-                    onClick = {
-                        onTopicClick(topic.id.toString())
-                    }
-                )
+                // 5. Dùng `uiState.topics` (từ MockData)
+                items(uiState.topics) { topic ->
+                    TopicItem(
+                        topic = topic,
+                        onClick = {
+                            // topic.id bây giờ đã là String
+                            onTopicClick(topic.id)
+                        }
+                    )
+                }
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
