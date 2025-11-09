@@ -35,7 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.uilover.project247.DashboardActivity.components.VocabularyWord
+import com.uilover.project247.data.VocabularyWord
 import  com.uilover.project247.LearningActivity.Model.CheckResult
 
 

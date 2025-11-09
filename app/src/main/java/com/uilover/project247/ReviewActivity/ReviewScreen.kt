@@ -1,5 +1,6 @@
 package com.uilover.project247.ReviewActivity
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -21,7 +22,7 @@ import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
 fun ReviewScreen(
     viewModel: ReviewViewModel,
     onNavigateBack: () -> Unit,
-    onTopicClick: (Int) -> Unit
+    onTopicClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -61,9 +62,7 @@ fun ReviewScreen(
                 items(uiState.reviewTopics) { reviewTopic ->
                     ReviewTopicItem(
                         item = reviewTopic,
-                        onClick = {
-
-                        }
+                        onClick = { onTopicClick(reviewTopic.topic.id) }
                     )
                 }
             }

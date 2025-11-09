@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.uilover.project247.DashboardActivity.components.VocabularyWord
+import com.uilover.project247.data.VocabularyWord
 
 @Composable
 fun MultipleChoiceView(word: VocabularyWord, onComplete: () -> Unit) {

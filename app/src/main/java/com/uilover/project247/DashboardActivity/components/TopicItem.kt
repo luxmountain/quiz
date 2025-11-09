@@ -22,19 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-// import androidx.compose.ui.layout.ContentScale // Tạm thời chưa dùng
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.uilover.project247.DashboardActivity.screens.Topic
-
-// SỬA LỖI IMPORT: Import `Topic` từ package `screens` nơi bạn định nghĩa nó
+import com.uilover.project247.data.Topic
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicItem(topic: Topic, onClick: () -> Unit){
     Card (
-        // Modifier này đúng nếu bạn KHÔNG set contentPadding trong LazyColumn
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -60,7 +56,7 @@ fun TopicItem(topic: Topic, onClick: () -> Unit){
                     .background(Color.Gray) // Tạo một hình tròn màu xám
             )
 
-            /*
+            /*TODO
             // 2. KHI CÓ ẢNH THẬT, BẠN SẼ DÙNG LẠI CODE NÀY:
             Image(
                 painter = painterResource(id = topic.imageResId), // Phải chắc chắn id này tồn tại

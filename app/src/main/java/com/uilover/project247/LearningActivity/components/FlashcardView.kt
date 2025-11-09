@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle // <-- THAY ĐỔI: Import
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.uilover.project247.DashboardActivity.components.VocabularyWord
+import com.uilover.project247.data.VocabularyWord
 
 // *** HÀM HELPER ĐỂ TẠO CHỮ IN ĐẬM ***
 // (Bạn đã comment nó ra, nhưng chúng ta cần nó cho mặt trước của thẻ)
