@@ -1,15 +1,14 @@
 package com.uilover.project247.DashboardActivity.components
 
-// import androidx.compose.foundation.Image // Tạm thời chưa dùng Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer // Thêm Import
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width // Thêm Import
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -18,12 +17,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-// import androidx.compose.ui.res.painterResource // Tạm thời chưa dùng
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.uilover.project247.data.models.Topic
 
 
@@ -47,26 +47,18 @@ fun TopicItem(topic: Topic, onClick: () -> Unit){
             verticalAlignment = Alignment.CenterVertically
         ){
 
-            // --- SỬA LỖI CRASH ---
-            // 1. Dùng Box làm placeholder (ảnh giả) vì chưa có ảnh thật
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray) // Tạo một hình tròn màu xám
-            )
-
-            /*TODO
-            // 2. KHI CÓ ẢNH THẬT, BẠN SẼ DÙNG LẠI CODE NÀY với Coil để load imageUrl:
+            // Load image from Firebase imageUrl using Coil
             AsyncImage(
                 model = topic.imageUrl,
                 contentDescription = topic.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                placeholder = null,
+                error = null,
+                fallback = null
             )
-            */
 
             // Thêm một khoảng cách giữa ảnh và chữ
             Spacer(modifier = Modifier.width(16.dp))

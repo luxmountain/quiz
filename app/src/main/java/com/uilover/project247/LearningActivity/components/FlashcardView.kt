@@ -1,8 +1,8 @@
 package com.uilover.project247.LearningActivity.components
 
-import androidx.compose.animation.core.animateFloatAsState // <-- THAY ĐỔI: Import animation
-import androidx.compose.animation.core.tween // <-- THAY ĐỔI: Import animation spec
-import androidx.compose.foundation.clickable // <-- THAY ĐỔI: Import clickable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,19 +11,22 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.* // <-- THAY ĐỔI: Import `getValue`, `setValue`, `remember`
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer // <-- THAY ĐỔI: Import để xoay
-import androidx.compose.ui.text.AnnotatedString // <-- THAY ĐỔI: Import
-import androidx.compose.ui.text.SpanStyle // <-- THAY ĐỔI: Import
-import androidx.compose.ui.text.buildAnnotatedString // <-- THAY ĐỔI: Import
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle // <-- THAY ĐỔI: Import
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.uilover.project247.data.VocabularyWord
 
 // *** HÀM HELPER ĐỂ TẠO CHỮ IN ĐẬM ***
@@ -138,6 +141,21 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
+                            // Show image if available
+                            word.imageUrl?.let { imageUrl ->
+                                AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = word.word,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .clip(RoundedCornerShape(16.dp)),
+                                    placeholder = null,
+                                    error = null
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                            }
+                            
                             Text(
                                 text = word.word,
                                 style = MaterialTheme.typography.headlineLarge,
@@ -145,7 +163,6 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            // (Bạn đã comment phần này, tôi mở lại vì nó cần cho mặt trước)
                             Text(
                                 text = createExampleSentence(
                                     sentence = word.exampleSentence ?: "",
