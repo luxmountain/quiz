@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.uilover.project247.data.models.Flashcard
-import com.uilover.project247.utils.createBoldText
+import com.uilover.project247.utils.parseHtmlToAnnotatedString
 import com.uilover.project247.utils.getWordTypeAbbreviation
 
 
@@ -53,59 +53,56 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
-        // Cụm 1: Nút Âm thanh & Tốc độ (Giữ nguyên)
+        // Cụm 1: Nút Âm thanh & Tốc độ (Giảm kích thước)
         Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.padding(top = 16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(top = 8.dp)
         ) {
             val buttonColor = Color(0xFFFFEB3B)
             FilledTonalIconButton(
                 onClick = { /* TODO: Play audio */ },
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(56.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = Color.White,
                     contentColor = buttonColor
                 )
             ) {
-                Icon(Icons.Default.VolumeUp, "Phát âm thanh", modifier = Modifier.size(36.dp))
+                Icon(Icons.Default.VolumeUp, "Phát âm thanh", modifier = Modifier.size(28.dp))
             }
             FilledTonalIconButton(
                 onClick = { /* TODO: Play slow audio */ },
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(56.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = Color.White,
                     contentColor = buttonColor
                 )
             ) {
-                Icon(Icons.Default.AccessTime, "Phát chậm", modifier = Modifier.size(36.dp))
+                Icon(Icons.Default.AccessTime, "Phát chậm", modifier = Modifier.size(28.dp))
             }
         }
 
-        // Cụm 2: Thẻ từ vựng (Card)
+        // Cụm 2: Thẻ từ vựng (Card - Tăng kích thước)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(vertical = 24.dp),
+                .padding(vertical = 16.dp, horizontal = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             Card(
-                // --- BƯỚC 3: Thêm Modifier.clickable để kích hoạt lật ---
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { isFlipped = !isFlipped }, // <-- KÍCH HOẠT LẬT
+                    .clickable { isFlipped = !isFlipped },
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                // --- BƯỚC 4: Áp dụng animation và logic hiện 2 mặt ---
                 Column(
-                    // 4a: Áp dụng góc quay (rotationY)
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp)
+                        .padding(20.dp)
                         .graphicsLayer {
                             rotationY = rotation
                             // Thêm "chiều sâu" 3D cho đẹp
@@ -136,15 +133,13 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                             
-                            // Hiển thị câu ví dụ với từ in đậm
+                            // Hiển thị câu ví dụ với HTML formatting (từ in đậm, gạch chân)
                             Text(
-                                text = createBoldText(
-                                    sentence = card.contextSentence,
-                                    wordToBold = card.word
-                                ),
-                                style = MaterialTheme.typography.headlineMedium,
+                                text = parseHtmlToAnnotatedString(card.contextSentence),
+                                style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center,
-                                lineHeight = 40.sp
+                                lineHeight = 28.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                     } else {
