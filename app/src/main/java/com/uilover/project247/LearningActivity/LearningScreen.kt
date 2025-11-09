@@ -65,13 +65,13 @@ fun LearningScreen(
             when {
                 uiState.isLoading -> CircularProgressIndicator()
                 uiState.isTopicComplete -> CompletionView(onNavigateBack)
-                uiState.currentWord != null -> {
-                    val word = uiState.currentWord!!
+                uiState.currentCard != null -> {
+                    val card = uiState.currentCard!!
 
                     when (uiState.currentStudyMode) {
                         // GỌI COMPONENT FLASHCARDVIEW MỚI
                         StudyMode.FLASHCARD -> FlashcardView(
-                            word = word,
+                            card = card,
                             onComplete = { viewModel.onActionCompleted() },
                             onKnowWord = {
                                 // TODO: Gọi 1 hàm khác trong ViewModel, ví dụ: viewModel.markAsKnown()
@@ -79,7 +79,7 @@ fun LearningScreen(
                             }
                         )
                         StudyMode.WRITE_WORD -> WriteWordView(
-                            word = word,
+                            card = card,
                             checkResult = uiState.checkResult, // (1) Trạng thái
                             onCheck = { userAnswer -> // (2) Hàm kiểm tra
                                 viewModel.checkWrittenAnswer(userAnswer)
@@ -88,7 +88,7 @@ fun LearningScreen(
                                 viewModel.clearCheckResult()
                             }
                         )
-                        StudyMode.MULTIPLE_CHOICE -> MultipleChoiceView(word, { viewModel.onActionCompleted() })
+                        StudyMode.MULTIPLE_CHOICE -> MultipleChoiceView(card, { viewModel.onActionCompleted() })
                     }
                 }
                 else -> Text("Không có từ vựng cho chủ đề này.")

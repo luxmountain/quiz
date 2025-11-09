@@ -27,7 +27,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.uilover.project247.data.VocabularyWord
+import com.uilover.project247.data.models.Flashcard
 
 // *** HÀM HELPER ĐỂ TẠO CHỮ IN ĐẬM ***
 // (Bạn đã comment nó ra, nhưng chúng ta cần nó cho mặt trước của thẻ)
@@ -53,7 +53,7 @@ fun createExampleSentence(sentence: String, wordToBold: String): AnnotatedString
 
 
 @Composable
-fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -> Unit) {
+fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Unit) {
 
     // --- BƯỚC 1: Thêm State để biết thẻ lật hay chưa ---
     var isFlipped by remember { mutableStateOf(false) }
@@ -142,10 +142,10 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                             verticalArrangement = Arrangement.Center
                         ) {
                             // Show image if available
-                            word.imageUrl?.let { imageUrl ->
+                            card.imageUrl.let { imageUrl ->
                                 AsyncImage(
                                     model = imageUrl,
-                                    contentDescription = word.word,
+                                    contentDescription = card.word,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(200.dp)
@@ -157,7 +157,7 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                             }
                             
                             Text(
-                                text = word.word,
+                                text = card.word,
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center
@@ -165,8 +165,8 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = createExampleSentence(
-                                    sentence = word.exampleSentence ?: "",
-                                    wordToBold = word.word
+                                    sentence = card.contextSentence,
+                                    wordToBold = card.word
                                 ),
                                 style = MaterialTheme.typography.titleLarge,
                                 textAlign = TextAlign.Center,
@@ -184,7 +184,7 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = word.meaning,
+                                text = card.meaning,
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
