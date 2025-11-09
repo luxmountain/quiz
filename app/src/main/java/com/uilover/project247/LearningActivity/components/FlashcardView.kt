@@ -28,28 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.uilover.project247.data.models.Flashcard
-
-// *** HÀM HELPER ĐỂ TẠO CHỮ IN ĐẬM ***
-// (Bạn đã comment nó ra, nhưng chúng ta cần nó cho mặt trước của thẻ)
-fun createExampleSentence(sentence: String, wordToBold: String): AnnotatedString {
-    return buildAnnotatedString {
-        try {
-            val startIndex = sentence.indexOf(wordToBold, ignoreCase = true)
-            if (startIndex == -1) {
-                append(sentence)
-                return@buildAnnotatedString
-            }
-            val endIndex = startIndex + wordToBold.length
-            append(sentence.substring(0, startIndex))
-            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append(sentence.substring(startIndex, endIndex))
-            }
-            append(sentence.substring(endIndex))
-        } catch (e: Exception) {
-            append(sentence)
-        }
-    }
-}
+import com.uilover.project247.utils.createBoldText
+import com.uilover.project247.utils.getWordTypeAbbreviation
 
 
 @Composable
@@ -135,7 +115,7 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                     verticalArrangement = Arrangement.Center
                 ) {
                     // 4b: Logic hiển thị 2 mặt
-                    // Nếu chưa lật quá 90 độ, hiện MẶT TRƯỚC (Từ vựng)
+                    // Nếu chưa lật quá 90 độ, hiện MẶT TRƯỚC (Câu ví dụ)
                     if (rotation < 90f) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -156,25 +136,19 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                             
+                            // Hiển thị câu ví dụ với từ in đậm
                             Text(
-                                text = card.word,
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = createExampleSentence(
+                                text = createBoldText(
                                     sentence = card.contextSentence,
                                     wordToBold = card.word
                                 ),
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.headlineMedium,
                                 textAlign = TextAlign.Center,
                                 lineHeight = 40.sp
                             )
                         }
                     } else {
-                        // Nếu đã lật > 90 độ, hiện MẶT SAU (Nghĩa)
+                        // Nếu đã lật > 90 độ, hiện MẶT SAU (Word + Pronunciation + Meaning + Type)
                         // (Phải xoay 180 độ để nó không bị ngược)
                         Column(
                             modifier = Modifier.fillMaxSize().graphicsLayer {
@@ -183,12 +157,45 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
+                            // Word (từ vựng)
                             Text(
-                                text = card.meaning,
+                                text = card.word,
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                color = Color(0xFF00C853) // Màu xanh cho nghĩa
+                                color = Color(0xFF00C853) // Màu xanh
+                            )
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            // Pronunciation (phát âm)
+                            Text(
+                                text = card.pronunciation,
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            // Meaning (nghĩa)
+                            Text(
+                                text = card.meaning,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center,
+                                color = Color.Black
+                            )
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            // Word Type (loại từ - viết tắt trong ngoặc tròn)
+                            Text(
+                                text = "(${getWordTypeAbbreviation(card.wordType)})",
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
