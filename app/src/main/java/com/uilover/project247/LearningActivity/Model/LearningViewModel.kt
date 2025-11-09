@@ -24,12 +24,9 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
     private fun loadWordsForTopic() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            delay(2000L)
 
-            // *** SỬA 4: THAY THẾ LOGIC FAKEWORDS BẰNG MOCKDATA ***
-            // Lấy `topicId` (ví dụ: "topic1_animals") từ constructor
-            // và dùng nó làm "chìa khóa" (key) để tra cứu trong Map.
             val wordsFromMock = MockData.wordsByTopicId[topicId] ?: emptyList()
-            // ******************************************************
 
             _uiState.update {
                 // Tải danh sách từ vựng từ MockData vào state
