@@ -1,8 +1,8 @@
 package com.uilover.project247.LearningActivity.components
 
-import androidx.compose.animation.core.animateFloatAsState // <-- THAY ĐỔI: Import animation
-import androidx.compose.animation.core.tween // <-- THAY ĐỔI: Import animation spec
-import androidx.compose.foundation.clickable // <-- THAY ĐỔI: Import clickable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,46 +11,29 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.* // <-- THAY ĐỔI: Import `getValue`, `setValue`, `remember`
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer // <-- THAY ĐỔI: Import để xoay
-import androidx.compose.ui.text.AnnotatedString // <-- THAY ĐỔI: Import
-import androidx.compose.ui.text.SpanStyle // <-- THAY ĐỔI: Import
-import androidx.compose.ui.text.buildAnnotatedString // <-- THAY ĐỔI: Import
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle // <-- THAY ĐỔI: Import
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.uilover.project247.data.VocabularyWord
-
-// *** HÀM HELPER ĐỂ TẠO CHỮ IN ĐẬM ***
-// (Bạn đã comment nó ra, nhưng chúng ta cần nó cho mặt trước của thẻ)
-fun createExampleSentence(sentence: String, wordToBold: String): AnnotatedString {
-    return buildAnnotatedString {
-        try {
-            val startIndex = sentence.indexOf(wordToBold, ignoreCase = true)
-            if (startIndex == -1) {
-                append(sentence)
-                return@buildAnnotatedString
-            }
-            val endIndex = startIndex + wordToBold.length
-            append(sentence.substring(0, startIndex))
-            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append(sentence.substring(startIndex, endIndex))
-            }
-            append(sentence.substring(endIndex))
-        } catch (e: Exception) {
-            append(sentence)
-        }
-    }
-}
+import coil.compose.AsyncImage
+import com.uilover.project247.data.models.Flashcard
+import com.uilover.project247.utils.parseHtmlToAnnotatedString
+import com.uilover.project247.utils.getWordTypeAbbreviation
 
 
 @Composable
-fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -> Unit) {
+fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Unit) {
 
     // --- BƯỚC 1: Thêm State để biết thẻ lật hay chưa ---
     var isFlipped by remember { mutableStateOf(false) }
@@ -70,59 +53,56 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
-        // Cụm 1: Nút Âm thanh & Tốc độ (Giữ nguyên)
+        // Cụm 1: Nút Âm thanh & Tốc độ (Giảm kích thước)
         Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.padding(top = 16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(top = 8.dp)
         ) {
             val buttonColor = Color(0xFFFFEB3B)
             FilledTonalIconButton(
                 onClick = { /* TODO: Play audio */ },
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(56.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = Color.White,
                     contentColor = buttonColor
                 )
             ) {
-                Icon(Icons.Default.VolumeUp, "Phát âm thanh", modifier = Modifier.size(36.dp))
+                Icon(Icons.Default.VolumeUp, "Phát âm thanh", modifier = Modifier.size(28.dp))
             }
             FilledTonalIconButton(
                 onClick = { /* TODO: Play slow audio */ },
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(56.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = Color.White,
                     contentColor = buttonColor
                 )
             ) {
-                Icon(Icons.Default.AccessTime, "Phát chậm", modifier = Modifier.size(36.dp))
+                Icon(Icons.Default.AccessTime, "Phát chậm", modifier = Modifier.size(28.dp))
             }
         }
 
-        // Cụm 2: Thẻ từ vựng (Card)
+        // Cụm 2: Thẻ từ vựng (Card - Tăng kích thước)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(vertical = 24.dp),
+                .padding(vertical = 16.dp, horizontal = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             Card(
-                // --- BƯỚC 3: Thêm Modifier.clickable để kích hoạt lật ---
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { isFlipped = !isFlipped }, // <-- KÍCH HOẠT LẬT
+                    .clickable { isFlipped = !isFlipped },
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                // --- BƯỚC 4: Áp dụng animation và logic hiện 2 mặt ---
                 Column(
-                    // 4a: Áp dụng góc quay (rotationY)
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp)
+                        .padding(20.dp)
                         .graphicsLayer {
                             rotationY = rotation
                             // Thêm "chiều sâu" 3D cho đẹp
@@ -132,32 +112,38 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                     verticalArrangement = Arrangement.Center
                 ) {
                     // 4b: Logic hiển thị 2 mặt
-                    // Nếu chưa lật quá 90 độ, hiện MẶT TRƯỚC (Từ vựng)
+                    // Nếu chưa lật quá 90 độ, hiện MẶT TRƯỚC (Câu ví dụ)
                     if (rotation < 90f) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
+                            // Show image if available
+                            card.imageUrl.let { imageUrl ->
+                                AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = card.word,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .clip(RoundedCornerShape(16.dp)),
+                                    placeholder = null,
+                                    error = null
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                            }
+                            
+                            // Hiển thị câu ví dụ với HTML formatting (từ in đậm, gạch chân)
                             Text(
-                                text = word.word,
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            // (Bạn đã comment phần này, tôi mở lại vì nó cần cho mặt trước)
-                            Text(
-                                text = createExampleSentence(
-                                    sentence = word.exampleSentence ?: "",
-                                    wordToBold = word.word
-                                ),
-                                style = MaterialTheme.typography.titleLarge,
+                                text = parseHtmlToAnnotatedString(card.contextSentence),
+                                style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center,
-                                lineHeight = 40.sp
+                                lineHeight = 28.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                     } else {
-                        // Nếu đã lật > 90 độ, hiện MẶT SAU (Nghĩa)
+                        // Nếu đã lật > 90 độ, hiện MẶT SAU (Word + Pronunciation + Meaning + Type)
                         // (Phải xoay 180 độ để nó không bị ngược)
                         Column(
                             modifier = Modifier.fillMaxSize().graphicsLayer {
@@ -166,12 +152,45 @@ fun FlashcardView(word: VocabularyWord, onComplete: () -> Unit, onKnowWord: () -
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
+                            // Word (từ vựng)
                             Text(
-                                text = word.meaning,
+                                text = card.word,
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                color = Color(0xFF00C853) // Màu xanh cho nghĩa
+                                color = Color(0xFF00C853) // Màu xanh
+                            )
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            // Pronunciation (phát âm)
+                            Text(
+                                text = card.pronunciation,
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            // Meaning (nghĩa)
+                            Text(
+                                text = card.meaning,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center,
+                                color = Color.Black
+                            )
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            // Word Type (loại từ - viết tắt trong ngoặc tròn)
+                            Text(
+                                text = "(${getWordTypeAbbreviation(card.wordType)})",
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }

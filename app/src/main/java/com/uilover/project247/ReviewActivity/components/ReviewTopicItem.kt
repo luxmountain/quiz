@@ -38,15 +38,15 @@ fun ReviewTopicItem(
                     .clip(CircleShape)
                     .background(Color.LightGray)
             ) {
-                // TODO: Dùng `Image` khi có ảnh thật
-                // painter = painterResource(id = item.topic.imageResId)
+                // TODO: Dùng AsyncImage (Coil) khi muốn hiển thị ảnh
+                // model = item.topic.imageUrl
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Tên Topic
             Text(
-                text = item.topic.title,
+                text = item.topic.name, // Thay đổi từ title -> name
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1

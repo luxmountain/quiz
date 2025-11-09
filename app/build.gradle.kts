@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("kotlin-parcelize")
     id("kotlin-android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -57,6 +58,12 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.ads.adservices)
     implementation(libs.material3)
+    
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-database-ktx")
+    
     implementation(libs.ui)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.ui.text)

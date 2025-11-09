@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "191162635723",
+    "firebase_url": "https://english-learning-app-17885-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "english-learning-app-17885",
+    "storage_bucket": "english-learning-app-17885.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191162635723:android:d736f06a12b75e4c71d24e",
+        "android_client_info": {
+          "package_name": "com.uilover.project247"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlEiWdXq8uX5COuB6eyVFR6_WgIcrITo4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

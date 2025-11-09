@@ -23,8 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
 import com.uilover.project247.DashboardActivity.components.TopicItem
-import com.uilover.project247.LoadingActivity.LoadingScreen
-import com.uilover.project247.data.Topic
+import com.uilover.project247.data.models.Topic
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,87 +36,101 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Box(Modifier.fillMaxSize()) {
-        if (uiState.isLoading){
-            LoadingScreen()
-        }
-        else{
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable { /* TODO: Mở DropdownMenu */ }
-                            ) {
-                                Text(
-                                    text = "1000 Từ cơ bản",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Chọn bộ từ"
-                                )
-                            }
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { /*TODO: Mở drawer */ }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface // Màu trắng
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { /* TODO: Mở DropdownMenu */ }
+                    ) {
+                        Text(
+                            text = "1000 Từ cơ bản",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
                         )
-                    )
-                },
-                bottomBar = {
-                    BottomNavigationBarStub(
-                        onItemSelected = { itemId ->
-                            if (itemId == "Board") {
-                                onBoardClick()
-                            }
-                            if (itemId == "Review") {
-                                onReviewClick()
-                            }
-                        }
-                    )
-                },
-                containerColor = Color(0xFFF5F5F5)
-            ) { paddingValues ->
-
-                if (uiState.isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Chọn bộ từ"
+                        )
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        item {
-                            StartMochiItem(onClick = { /* ... */ })
-                        }
-
-                        // 5. Dùng `uiState.topics` (từ MockData)
-                        items(uiState.topics) { topic ->
-                            TopicItem(
-                                topic = topic,
-                                onClick = {
-                                    // topic.id bây giờ đã là String
-                                    onTopicClick(topic.id)
-                                }
-                            )
-                        }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { /*TODO: Mở drawer */ }) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface // Màu trắng
+                )
+            )
+        },
+        bottomBar = {
+            BottomNavigationBarStub(
+                onItemSelected = { itemId ->
+                    if (itemId == "Board") {
+                        onBoardClick()
+                    }
+                    if (itemId == "Review") {
+                        onReviewClick()
+                    }
+                }
+            )
+        },
+        containerColor = Color(0xFFF5F5F5)
+    ) { paddingValues ->
+
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (uiState.errorMessage != null) {
+            // Hiển thị lỗi nếu có
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = uiState.errorMessage ?: "Lỗi không xác định",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Button(onClick = { viewModel.retryLoadTopics() }) {
+                        Text("Thử lại")
+                    }
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                item {
+                    StartMochiItem(onClick = { /* ... */ })
+                }
+
+                // 5. Dùng `uiState.topics` (từ Firebase)
+                items(uiState.topics) { topic ->
+                    TopicItem(
+                        topic = topic,
+                        onClick = {
+                            // topic.id bây giờ đã là String
+                            onTopicClick(topic.id)
+                        }
+                    )
                 }
             }
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartMochiItem(onClick: () -> Unit) {

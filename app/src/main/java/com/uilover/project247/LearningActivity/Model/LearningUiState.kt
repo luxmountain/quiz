@@ -1,19 +1,19 @@
 package com.uilover.project247.LearningActivity.Model
 
-import com.uilover.project247.data.VocabularyWord
+import com.uilover.project247.data.models.Flashcard
 
 data class LearningUiState(
-    val words: List<VocabularyWord> = emptyList(),
-    val currentWordIndex: Int = 0,
+    val flashcards: List<Flashcard> = emptyList(),
+    val currentCardIndex: Int = 0,
     val currentStudyMode: StudyMode = StudyMode.FLASHCARD,
     val isLoading: Boolean = true,
     val isTopicComplete: Boolean = false,
     val checkResult: CheckResult = CheckResult.NEUTRAL
 ) {
-    val currentWord: VocabularyWord?
-        get() = words.getOrNull(currentWordIndex)
+    val currentCard: Flashcard?
+        get() = flashcards.getOrNull(currentCardIndex)
 
-    // (Thêm lại trường progress để dùng cho thanh tiến trình)
+    // Tính tiến trình
     val progress: Float
-        get() = if (words.isEmpty()) 0f else (currentWordIndex + 1) / words.size.toFloat()
+        get() = if (flashcards.isEmpty()) 0f else (currentCardIndex + 1) / flashcards.size.toFloat()
 }
