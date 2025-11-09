@@ -22,6 +22,7 @@ data class VocabularyWord(
     val meaning: String,
     val pronunciation: String?,
     val exampleSentence: String?,
+    val imageUrl: String? = null,
     // MỖI TỪ sẽ có 1 list các quiz (trắc nghiệm, điền từ, v.v.)
     // Hiện tại chúng ta chỉ thêm trắc nghiệm
     val quizzes: List<MultipleChoiceQuiz>

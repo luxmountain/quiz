@@ -5,30 +5,51 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.uilover.project247.data.VocabularyWord
+import coil.compose.AsyncImage
+import com.uilover.project247.data.models.Flashcard
 
 @Composable
-fun MultipleChoiceView(word: VocabularyWord, onComplete: () -> Unit) {
+fun MultipleChoiceView(card: Flashcard, onComplete: () -> Unit) {
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Màn hình Chọn nghĩa", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(32.dp))
-        Text("Từ là: ${word.word}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        
+        // Show image if available
+        card.imageUrl.let { imageUrl ->
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = card.word,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                placeholder = null,
+                error = null
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+        
+        Text("Từ là: ${card.word}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(32.dp))
 
-        // TODO: Tạo 4 nút bấm, 1 đáp án đúng (word.meaning)
-        // và 3 đáp án sai (lấy ngẫu nhiên từ `words` trong ViewModel)
-        Button(onClick = onComplete, modifier = Modifier.fillMaxWidth()) { Text(word.meaning) }
+        // TODO: Tạo 4 nút bấm, 1 đáp án đúng (card.meaning)
+        // và 3 đáp án sai (lấy ngẫu nhiên từ `flashcards` trong ViewModel)
+        Button(onClick = onComplete, modifier = Modifier.fillMaxWidth()) { Text(card.meaning) }
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { /* TODO: Xử lý chọn sai */ }, modifier = Modifier.fillMaxWidth()) { Text("Nghĩa sai 1") }
         Spacer(modifier = Modifier.height(8.dp))

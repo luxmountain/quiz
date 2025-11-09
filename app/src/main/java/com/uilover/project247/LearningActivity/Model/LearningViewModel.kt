@@ -1,9 +1,9 @@
 package com.uilover.project247.LearningActivity.Model
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uilover.project247.data.MockData
-import com.uilover.project247.data.VocabularyWord
+import com.uilover.project247.data.repository.FirebaseRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,24 +16,37 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LearningUiState())
     val uiState: StateFlow<LearningUiState> = _uiState.asStateFlow()
+    
+    private val firebaseRepository = FirebaseRepository()
 
     init {
-        loadWordsForTopic()
+        loadFlashcardsForTopic()
     }
 
-    private fun loadWordsForTopic() {
+    private fun loadFlashcardsForTopic() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            // *** SỬA 4: THAY THẾ LOGIC FAKEWORDS BẰNG MOCKDATA ***
-            // Lấy `topicId` (ví dụ: "topic1_animals") từ constructor
-            // và dùng nó làm "chìa khóa" (key) để tra cứu trong Map.
-            val wordsFromMock = MockData.wordsByTopicId[topicId] ?: emptyList()
-            // ******************************************************
-
-            _uiState.update {
-                // Tải danh sách từ vựng từ MockData vào state
-                it.copy(words = wordsFromMock, isLoading = false)
+            try {
+                // Load flashcards từ Firebase theo topicId
+                val flashcards = firebaseRepository.getFlashcardsByTopic(topicId)
+                
+                _uiState.update {
+                    it.copy(
+                        flashcards = flashcards,
+                        isLoading = false
+                    )
+                }
+                
+                Log.d("LearningViewModel", "Loaded ${flashcards.size} flashcards for topic $topicId")
+            } catch (e: Exception) {
+                Log.e("LearningViewModel", "Error loading flashcards for topic $topicId", e)
+                _uiState.update {
+                    it.copy(
+                        flashcards = emptyList(),
+                        isLoading = false
+                    )
+                }
             }
         }
     }
@@ -51,18 +64,18 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
             }
             StudyMode.WRITE_WORD -> { /* Chờ checkWrittenAnswer */ }
             StudyMode.MULTIPLE_CHOICE -> {
-                goToNextWord()
+                goToNextCard()
             }
         }
     }
 
     fun checkWrittenAnswer(userAnswer: String) {
-        val correctWord = _uiState.value.currentWord?.word ?: return
+        val correctWord = _uiState.value.currentCard?.word ?: return
         if (userAnswer.equals(correctWord, ignoreCase = true)) {
             _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
             viewModelScope.launch {
                 delay(1000)
-                goToNextWord()
+                goToNextCard()
             }
         } else {
             _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
@@ -75,12 +88,12 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
         }
     }
 
-    private fun goToNextWord() {
+    private fun goToNextCard() {
         val currentState = _uiState.value
-        if (currentState.currentWordIndex < currentState.words.size - 1) {
+        if (currentState.currentCardIndex < currentState.flashcards.size - 1) {
             _uiState.update {
                 it.copy(
-                    currentWordIndex = it.currentWordIndex + 1,
+                    currentCardIndex = it.currentCardIndex + 1,
                     currentStudyMode = StudyMode.FLASHCARD,
                     checkResult = CheckResult.NEUTRAL
                 )

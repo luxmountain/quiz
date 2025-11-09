@@ -35,14 +35,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.uilover.project247.data.VocabularyWord
+import com.uilover.project247.data.models.Flashcard
 import  com.uilover.project247.LearningActivity.Model.CheckResult
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteWordView(
-    word: VocabularyWord,
+    card: Flashcard,
     checkResult: CheckResult,
     onCheck: (String) -> Unit,
     onClearResult: () -> Unit
@@ -95,7 +95,7 @@ fun WriteWordView(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = word.meaning,
+                text = card.meaning,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
