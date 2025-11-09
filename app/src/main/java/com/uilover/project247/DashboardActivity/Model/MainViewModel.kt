@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uilover.project247.data.MockData
 import com.uilover.project247.data.Topic
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +28,7 @@ class MainViewModel : ViewModel() {
     private fun loadTopics() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-
+            delay(2000L)
             // Lấy topics trực tiếp từ MockData
             val allTopics = MockData.allTopics
 
