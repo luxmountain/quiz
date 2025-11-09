@@ -24,7 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.uilover.project247.data.Topic
+import com.uilover.project247.data.models.Topic
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,10 +57,10 @@ fun TopicItem(topic: Topic, onClick: () -> Unit){
             )
 
             /*TODO
-            // 2. KHI CÓ ẢNH THẬT, BẠN SẼ DÙNG LẠI CODE NÀY:
-            Image(
-                painter = painterResource(id = topic.imageResId), // Phải chắc chắn id này tồn tại
-                contentDescription = topic.title,
+            // 2. KHI CÓ ẢNH THẬT, BẠN SẼ DÙNG LẠI CODE NÀY với Coil để load imageUrl:
+            AsyncImage(
+                model = topic.imageUrl,
+                contentDescription = topic.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(56.dp)
@@ -75,12 +75,12 @@ fun TopicItem(topic: Topic, onClick: () -> Unit){
                 modifier = Modifier.weight(1f) // Bỏ padding(start = 16.dp) vì đã có Spacer
             ){
                 Text(
-                    text = topic.title,
+                    text = topic.name, // Thay đổi từ title -> name
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = topic.subtitle,
+                    text = topic.nameVi, // Thay đổi từ subtitle -> nameVi
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 4.dp)

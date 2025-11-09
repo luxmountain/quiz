@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
 import com.uilover.project247.DashboardActivity.components.TopicItem
-import com.uilover.project247.data.Topic
+import com.uilover.project247.data.models.Topic
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +87,26 @@ fun MainScreen(
             ) {
                 CircularProgressIndicator()
             }
+        } else if (uiState.errorMessage != null) {
+            // Hiển thị lỗi nếu có
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = uiState.errorMessage ?: "Lỗi không xác định",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Button(onClick = { viewModel.retryLoadTopics() }) {
+                        Text("Thử lại")
+                    }
+                }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -96,7 +116,7 @@ fun MainScreen(
                     StartMochiItem(onClick = { /* ... */ })
                 }
 
-                // 5. Dùng `uiState.topics` (từ MockData)
+                // 5. Dùng `uiState.topics` (từ Firebase)
                 items(uiState.topics) { topic ->
                     TopicItem(
                         topic = topic,
