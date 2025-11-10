@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -28,12 +29,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.uilover.project247.data.models.Flashcard
+import com.uilover.project247.utils.TextToSpeechManager
 import com.uilover.project247.utils.parseHtmlToAnnotatedString
 import com.uilover.project247.utils.getWordTypeAbbreviation
 
 
 @Composable
 fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Unit) {
+
+    val context = LocalContext.current
+    val ttsManager = remember { TextToSpeechManager(context) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            ttsManager.shutdown()
+        }
+    }
 
     // --- BƯỚC 1: Thêm State để biết thẻ lật hay chưa ---
     var isFlipped by remember { mutableStateOf(false) }
@@ -60,7 +71,7 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
         ) {
             val buttonColor = Color(0xFFFFEB3B)
             FilledTonalIconButton(
-                onClick = { /* TODO: Play audio */ },
+                onClick = { ttsManager.speak(card.word) },
                 modifier = Modifier.size(56.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -71,7 +82,10 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                 Icon(Icons.Default.VolumeUp, "Phát âm thanh", modifier = Modifier.size(28.dp))
             }
             FilledTonalIconButton(
-                onClick = { /* TODO: Play slow audio */ },
+                onClick = {
+                    ttsManager.setSpeechRate(0.5f)
+                    ttsManager.speak(card.word)
+                },
                 modifier = Modifier.size(56.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -146,9 +160,11 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                         // Nếu đã lật > 90 độ, hiện MẶT SAU (Word + Pronunciation + Meaning + Type)
                         // (Phải xoay 180 độ để nó không bị ngược)
                         Column(
-                            modifier = Modifier.fillMaxSize().graphicsLayer {
-                                rotationY = 180f // <-- Quay mặt sau lại
-                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    rotationY = 180f // <-- Quay mặt sau lại
+                                },
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -214,7 +230,9 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
 
         // Cụm 3: Nút hành động (Giữ nguyên)
         Column(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(

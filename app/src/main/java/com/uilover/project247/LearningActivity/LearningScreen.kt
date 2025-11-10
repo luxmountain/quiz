@@ -39,7 +39,7 @@ fun LearningScreen(
                 title = {
                     // Thanh tiến trình (placeholder)
                     LinearProgressIndicator(
-                        progress = { 0.3f }, // TODO: Lấy tiến trình từ ViewModel
+                        progress = {uiState.progress}, // TODO: Lấy tiến trình từ ViewModel
                         modifier = Modifier.fillMaxWidth(0.6f).clip(CircleShape)
                     )
                 },
