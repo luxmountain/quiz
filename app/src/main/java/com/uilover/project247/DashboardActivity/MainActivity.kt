@@ -22,17 +22,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             Project247Theme {
                 MainScreen(
-                    // 3. Truyền ViewModel vào MainScreen
                     viewModel = viewModel,
 
                     onBoardClick = {
-                        startActivity(Intent(this, MainActivity::class.java))
+                        // Stay on Board tab - do nothing
                     },
 
-                    // 4. SỬA LỖI: topicId giờ đã là String
-                    onTopicClick = { topicId -> // topicId nhận về đã là String
+                    onTopicClick = { topicId ->
                         val intent = Intent(this, LearningActivity::class.java)
-                        // Bỏ .toString() vì topicId đã là String
                         intent.putExtra("TOPIC_ID", topicId)
                         startActivity(intent)
                     },
@@ -40,6 +37,10 @@ class MainActivity : ComponentActivity() {
                     onReviewClick = {
                         val intent = Intent(this, ReviewActivity::class.java)
                         startActivity(intent)
+                    },
+                    
+                    onSearchClick = {
+                        // Stay on Search tab - do nothing
                     }
                 )
             }

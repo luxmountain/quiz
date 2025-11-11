@@ -19,28 +19,26 @@ import androidx.compose.ui.Modifier
 @Composable
 fun BottomNavigationBarStub(
     modifier: Modifier = Modifier,
-    onItemSelected: (String) -> Unit // Dùng String thay vì R.id
+    selectedItem: String = "Board",
+    onItemSelected: (String) -> Unit
 ) {
-    var selectedItemIndex by remember { mutableStateOf(1) } // "Học từ vựng" được chọn
-
     // (Label, Icon, ID)
     val navItems = listOf(
         Triple("Tra từ", Icons.Default.Search, "Search"),
-        Triple("Học từ vựng", Icons.Default.Menu, "Board"), // Dùng "Board" làm ID
-        Triple("Ôn tập", Icons.Default.Home, "Review"), // Cần icon đúng
-        Triple("Hội thoại", Icons.Default.Person, "Chat"), // Cần icon đúng
-        Triple("MochiHub", Icons.Default.Home, "Hub") // Cần icon đúng
+        Triple("Học từ vựng", Icons.Default.Menu, "Board"),
+        Triple("Ôn tập", Icons.Default.Home, "Review"),
+        Triple("Hội thoại", Icons.Default.Person, "Chat"),
+        Triple("MochiHub", Icons.Default.Home, "Hub")
     )
 
     NavigationBar(
         modifier = modifier
     ) {
-        navItems.forEachIndexed { index, item ->
+        navItems.forEach { item ->
             NavigationBarItem(
-                selected = index == selectedItemIndex,
+                selected = item.third == selectedItem,
                 onClick = {
-                    selectedItemIndex = index
-                    onItemSelected(item.third) // Trả về ID là String ("Board")
+                    onItemSelected(item.third)
                 },
                 icon = { Icon(imageVector = item.second, contentDescription = item.first) },
                 label = { Text(item.first) }

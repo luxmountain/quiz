@@ -104,15 +104,9 @@
       "$conversationId": {
         ".read": true,
         ".write": "auth != null && auth.token.admin == true",
-        ".validate": "newData.hasChildren(['id', 'topicId', 'flashcardId', 'title', 'titleVi', 'imageUrl', 'contextDescription', 'contextDescriptionVi', 'dialogue', 'targetWord', 'question', 'questionVi', 'options', 'order', 'createdAt'])",
+        ".validate": "newData.hasChildren(['id', 'title', 'titleVi', 'imageUrl', 'contextDescription', 'contextDescriptionVi', 'dialogue', 'vocabularyWords', 'order', 'createdAt'])",
         "id": {
           ".validate": "newData.isString() && newData.val() == $conversationId"
-        },
-        "topicId": {
-          ".validate": "newData.isString() && root.child('topics').child(newData.val()).exists()"
-        },
-        "flashcardId": {
-          ".validate": "newData.isString() && root.child('flashcards').child(newData.val()).exists()"
         },
         "title": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -145,32 +139,56 @@
             "order": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },
+            "vocabularyWord": {
+              ".validate": "newData.isString() || newData.val() == null"
+            },
+            "question": {
+              ".validate": "newData.isString() || newData.val() == null"
+            },
+            "questionVi": {
+              ".validate": "newData.isString() || newData.val() == null"
+            },
+            "options": {
+              ".validate": "newData.hasChildren() || newData.val() == null",
+              "$optionIndex": {
+                ".validate": "newData.hasChildren(['id', 'text', 'isCorrect'])",
+                "id": {
+                  ".validate": "newData.isString() && newData.val().length > 0"
+                },
+                "text": {
+                  ".validate": "newData.isString() && newData.val().length > 0"
+                },
+                "isCorrect": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
             "$other": {
               ".validate": false
             }
           }
         },
-        "targetWord": {
-          ".validate": "newData.isString() && newData.val().length > 0"
-        },
-        "question": {
-          ".validate": "newData.isString() && newData.val().length > 0"
-        },
-        "questionVi": {
-          ".validate": "newData.isString() && newData.val().length > 0"
-        },
-        "options": {
+        "vocabularyWords": {
           ".validate": "newData.hasChildren()",
-          "$optionIndex": {
-            ".validate": "newData.hasChildren(['id', 'text', 'isCorrect'])",
-            "id": {
+          "$wordIndex": {
+            ".validate": "newData.hasChildren(['word', 'meaning', 'pronunciation', 'wordType', 'wordTypeVi'])",
+            "word": {
               ".validate": "newData.isString() && newData.val().length > 0"
             },
-            "text": {
+            "meaning": {
               ".validate": "newData.isString() && newData.val().length > 0"
             },
-            "isCorrect": {
-              ".validate": "newData.isBoolean()"
+            "pronunciation": {
+              ".validate": "newData.isString()"
+            },
+            "wordType": {
+              ".validate": "newData.isString()"
+            },
+            "wordTypeVi": {
+              ".validate": "newData.isString()"
             },
             "$other": {
               ".validate": false
