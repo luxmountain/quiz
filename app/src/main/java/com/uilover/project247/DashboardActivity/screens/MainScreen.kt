@@ -23,36 +23,48 @@ import androidx.compose.ui.unit.sp
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
 import com.uilover.project247.DashboardActivity.components.TopicItem
+import com.uilover.project247.DashboardActivity.components.DictionaryScreenContent
 import com.uilover.project247.data.models.Topic
+import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel , // <-- 1. Thêm ViewModel
+    viewModel: MainViewModel,
     onBoardClick: () -> Unit = {},
-    onTopicClick: (String) -> Unit = {}, // <-- 2. Đảm bảo là (String)
-    onReviewClick: () -> Unit = {}
+    onTopicClick: (String) -> Unit = {},
+    onReviewClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedTab by remember { mutableStateOf("Board") }
+    val dictionaryViewModel = remember { DictionaryViewModel() }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { /* TODO: Mở DropdownMenu */ }
-                    ) {
-                        Text(
-                            text = "1000 Từ cơ bản",
+                    when (selectedTab) {
+                        "Search" -> Text(
+                            text = "Tra từ điển",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Chọn bộ từ"
-                        )
+                        else -> Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { /* TODO: Mở DropdownMenu */ }
+                        ) {
+                            Text(
+                                text = "1000 Từ cơ bản",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Chọn bộ từ"
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -61,70 +73,79 @@ fun MainScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface // Màu trắng
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
         bottomBar = {
             BottomNavigationBarStub(
+                selectedItem = selectedTab,
                 onItemSelected = { itemId ->
-                    if (itemId == "Board") {
-                        onBoardClick()
-                    }
-                    if (itemId == "Review") {
-                        onReviewClick()
+                    selectedTab = itemId
+                    when (itemId) {
+                        "Board" -> onBoardClick()
+                        "Review" -> onReviewClick()
+                        "Search" -> onSearchClick()
                     }
                 }
             )
         },
         containerColor = Color(0xFFF5F5F5)
     ) { paddingValues ->
-
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        when (selectedTab) {
+            "Search" -> {
+                // Dictionary Screen Content
+                DictionaryScreenContent(
+                    viewModel = dictionaryViewModel,
+                    modifier = Modifier.padding(paddingValues)
+                )
             }
-        } else if (uiState.errorMessage != null) {
-            // Hiển thị lỗi nếu có
-            Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = uiState.errorMessage ?: "Lỗi không xác định",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Button(onClick = { viewModel.retryLoadTopics() }) {
-                        Text("Thử lại")
+            else -> {
+                // Original Board Screen
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                item {
-                    StartMochiItem(onClick = { /* ... */ })
-                }
-
-                // 5. Dùng `uiState.topics` (từ Firebase)
-                items(uiState.topics) { topic ->
-                    TopicItem(
-                        topic = topic,
-                        onClick = {
-                            // topic.id bây giờ đã là String
-                            onTopicClick(topic.id)
+                } else if (uiState.errorMessage != null) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = uiState.errorMessage ?: "Lỗi không xác định",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Button(onClick = { viewModel.retryLoadTopics() }) {
+                                Text("Thử lại")
+                            }
                         }
-                    )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        item {
+                            StartMochiItem(onClick = { /* ... */ })
+                        }
+
+                        items(uiState.topics) { topic ->
+                            TopicItem(
+                                topic = topic,
+                                onClick = {
+                                    onTopicClick(topic.id)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
