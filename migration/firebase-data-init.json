@@ -563,94 +563,111 @@
           "text": "Hey Tom, what time do you usually wake up in the morning?",
           "textVi": "Này Tom, bạn thường thức dậy lúc mấy giờ vào buổi sáng?",
           "order": 0,
-          "highlightedWords": [
-            "wake up"
+          "vocabularyWord": "wake up",
+          "question": "What does 'wake up' mean?",
+          "questionVi": "'wake up' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "thức dậy",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "đi ngủ",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Tom",
-          "text": "I wake up at 6:30 AM every day. How about you?",
-          "textVi": "Tôi thức dậy lúc 6:30 sáng mỗi ngày. Còn bạn thì sao?",
+          "text": "I usually wake up at 6:30 AM. Then I exercise for 30 minutes.",
+          "textVi": "Tôi thường thức dậy lúc 6:30 sáng. Sau đó tôi tập thể dục 30 phút.",
           "order": 1,
-          "highlightedWords": [
-            "wake up"
+          "vocabularyWord": "exercise",
+          "question": "What does 'exercise' mean?",
+          "questionVi": "'exercise' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "tập thể dục",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "ăn sáng",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Sarah",
-          "text": "I'm an early bird! I wake up at 5:30 to exercise before work.",
-          "textVi": "Tôi là người dậy sớm! Tôi thức dậy lúc 5:30 để tập thể dục trước khi đi làm.",
+          "text": "That's great! Do you feel tired after exercising?",
+          "textVi": "Tuyệt quá! Bạn có cảm thấy mệt sau khi tập không?",
           "order": 2,
-          "highlightedWords": [
-            "wake up",
-            "exercise"
+          "vocabularyWord": "tired",
+          "question": "What does 'tired' mean?",
+          "questionVi": "'tired' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "mệt mỏi",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "năng động",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Tom",
-          "text": "Wow, that's impressive! I exercise in the evening because I'm too tired in the morning.",
-          "textVi": "Ồ, ấn tượng đấy! Tôi tập thể dục vào buổi tối vì buổi sáng tôi quá mệt.",
+          "text": "Not really. After that, I take a shower to feel fresh.",
+          "textVi": "Không hẳn. Sau đó tôi tắm để cảm thấy sảng khoái.",
           "order": 3,
-          "highlightedWords": [
-            "exercise",
-            "tired"
+          "vocabularyWord": "shower",
+          "question": "What does 'shower' mean?",
+          "questionVi": "'shower' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "tắm vòi sen",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "rửa mặt",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Sarah",
-          "text": "What do you have for breakfast?",
-          "textVi": "Bạn ăn gì cho bữa sáng?",
+          "text": "That sounds perfect! What do you have for breakfast?",
+          "textVi": "Nghe hoàn hảo đấy! Bạn ăn gì cho bữa sáng?",
           "order": 4,
-          "highlightedWords": [
-            "breakfast"
+          "vocabularyWord": "breakfast",
+          "question": "What does 'breakfast' mean?",
+          "questionVi": "'breakfast' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "bữa sáng",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "bữa trưa",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Tom",
-          "text": "I usually have breakfast at 7 AM. Just some toast and coffee.",
-          "textVi": "Tôi thường ăn sáng lúc 7 giờ. Chỉ bánh mì nướng và cà phê thôi.",
-          "order": 5,
-          "highlightedWords": [
-            "breakfast"
-          ]
-        },
-        {
-          "speaker": "Sarah",
-          "text": "After exercise, I take a quick shower and then have a healthy breakfast.",
-          "textVi": "Sau khi tập thể dục, tôi tắm nhanh rồi ăn một bữa sáng lành mạnh.",
-          "order": 6,
-          "highlightedWords": [
-            "shower",
-            "breakfast"
-          ]
-        },
-        {
-          "speaker": "Tom",
-          "text": "I also take a shower in the morning. It helps me wake up completely.",
-          "textVi": "Tôi cũng tắm vào buổi sáng. Nó giúp tôi thức dậy hoàn toàn.",
-          "order": 7,
-          "highlightedWords": [
-            "shower",
-            "wake up"
-          ]
-        },
-        {
-          "speaker": "Sarah",
-          "text": "Don't you feel tired after such an early morning routine?",
-          "textVi": "Bạn không cảm thấy mệt sau thói quen sáng sớm như vậy à?",
-          "order": 8,
-          "highlightedWords": [
-            "tired"
-          ]
-        },
-        {
-          "speaker": "Tom",
-          "text": "Sometimes I do feel tired, but coffee helps! What about you?",
-          "textVi": "Đôi khi tôi có cảm thấy mệt, nhưng cà phê giúp được! Còn bạn thì sao?",
-          "order": 9,
-          "highlightedWords": [
-            "tired"
-          ]
+          "text": "I usually have some toast and coffee. It's simple but healthy.",
+          "textVi": "Tôi thường ăn bánh mì nướng và cà phê. Đơn giản nhưng lành mạnh.",
+          "order": 5
         }
       ],
       "vocabularyWords": [
@@ -676,155 +693,18 @@
           "wordTypeVi": "tính từ"
         },
         {
-          "word": "breakfast",
-          "meaning": "bữa sáng",
-          "pronunciation": "/ˈbrek.fəst/",
-          "wordType": "noun",
-          "wordTypeVi": "danh từ"
-        },
-        {
           "word": "shower",
           "meaning": "tắm vòi sen",
           "pronunciation": "/ˈʃaʊ.ər/",
           "wordType": "noun",
           "wordTypeVi": "danh từ"
-        }
-      ],
-      "questions": [
-        {
-          "targetWord": "wake up",
-          "question": "What does 'wake up' mean?",
-          "questionVi": "'wake up' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "thức dậy",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "ngủ",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "nghỉ ngơi",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "ăn sáng",
-              "isCorrect": false
-            }
-          ]
         },
         {
-          "targetWord": "exercise",
-          "question": "What does 'exercise' mean?",
-          "questionVi": "'exercise' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "tập thể dục",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "đi làm",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "ăn uống",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "ngủ nghỉ",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "breakfast",
-          "question": "What does 'breakfast' mean?",
-          "questionVi": "'breakfast' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "bữa sáng",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "bữa trưa",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "bữa tối",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "bữa phụ",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "tired",
-          "question": "In the conversation, what does 'tired' describe?",
-          "questionVi": "Trong đoạn hội thoại, 'tired' mô tả điều gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "cảm giác mệt mỏi",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "cảm giác hạnh phúc",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "cảm giác đói",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "cảm giác khỏe mạnh",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "shower",
-          "question": "What does 'shower' mean?",
-          "questionVi": "'shower' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "tắm vòi sen",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "đánh răng",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "chải tóc",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "rửa mặt",
-              "isCorrect": false
-            }
-          ]
+          "word": "breakfast",
+          "meaning": "bữa sáng",
+          "pronunciation": "/ˈbrek.fəst/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
         }
       ],
       "order": 1,
@@ -840,80 +720,114 @@
       "dialogue": [
         {
           "speaker": "Waiter",
-          "text": "Welcome to our restaurant! Are you ready to order?",
-          "textVi": "Chào mừng đến nhà hàng của chúng tôi! Quý khách sẵn sàng gọi món chưa?",
+          "text": "Welcome to our restaurant! Here is the menu.",
+          "textVi": "Chào mừng đến nhà hàng của chúng tôi! Đây là thực đơn.",
           "order": 0,
-          "highlightedWords": [
-            "restaurant",
-            "order"
+          "vocabularyWord": "restaurant",
+          "question": "What does 'restaurant' mean?",
+          "questionVi": "'restaurant' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "nhà hàng",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "khách sạn",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Mike",
-          "text": "Not yet. Can we see the menu first? I'm very hungry!",
-          "textVi": "Chưa ạ. Chúng tôi có thể xem thực đơn trước được không? Tôi rất đói!",
+          "text": "Thank you! I'm very hungry right now.",
+          "textVi": "Cảm ơn! Tôi đang rất đói.",
           "order": 1,
-          "highlightedWords": [
-            "hungry"
+          "vocabularyWord": "hungry",
+          "question": "What does 'hungry' mean?",
+          "questionVi": "'hungry' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "đói",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "no",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Lisa",
-          "text": "Me too! I heard this restaurant has delicious pasta.",
-          "textVi": "Tôi cũng vậy! Tôi nghe nói nhà hàng này có mì Ý ngon lắm.",
+          "text": "I heard their pasta is absolutely delicious!",
+          "textVi": "Tôi nghe nói mì Ý của họ rất ngon!",
           "order": 2,
-          "highlightedWords": [
-            "restaurant",
-            "delicious"
+          "vocabularyWord": "delicious",
+          "question": "What does 'delicious' mean?",
+          "questionVi": "'delicious' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "ngon",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "dở",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Mike",
-          "text": "I want to try their pizza. Do you like spicy food?",
-          "textVi": "Tôi muốn thử pizza của họ. Bạn có thích đồ ăn cay không?",
+          "text": "Great! But I don't like spicy food.",
+          "textVi": "Tuyệt! Nhưng tôi không thích đồ ăn cay.",
           "order": 3,
-          "highlightedWords": [
-            "spicy"
+          "vocabularyWord": "spicy",
+          "question": "What does 'spicy' mean?",
+          "questionVi": "'spicy' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "cay",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "ngọt",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Lisa",
-          "text": "Not really. I prefer something sweet, maybe a dessert after the main course.",
-          "textVi": "Không lắm. Tôi thích món gì ngọt hơn, có thể là món tráng miệng sau món chính.",
+          "text": "No problem. I prefer sweet desserts anyway.",
+          "textVi": "Không sao. Tôi thích món tráng miệng ngọt hơn.",
           "order": 4,
-          "highlightedWords": [
-            "sweet"
+          "vocabularyWord": "sweet",
+          "question": "What does 'sweet' mean?",
+          "questionVi": "'sweet' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "ngọt",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "mặn",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Waiter",
-          "text": "Our chef can cook the pasta mild or spicy, as you prefer.",
-          "textVi": "Đầu bếp của chúng tôi có thể nấu mì Ý nhẹ hoặc cay, tùy theo sở thích của quý khách.",
-          "order": 5,
-          "highlightedWords": [
-            "cook",
-            "spicy"
-          ]
-        },
-        {
-          "speaker": "Mike",
-          "text": "Perfect! I'm so hungry I could eat anything delicious right now.",
-          "textVi": "Hoàn hảo! Tôi đói đến nỗi có thể ăn bất cứ thứ gì ngon bây giờ.",
-          "order": 6,
-          "highlightedWords": [
-            "hungry",
-            "delicious"
-          ]
-        },
-        {
-          "speaker": "Lisa",
-          "text": "Let's order now! I'll have the carbonara pasta, and you can cook it mild, please.",
-          "textVi": "Chúng ta gọi món đi! Tôi sẽ gọi mì carbonara, và làm ơn nấu nhẹ nhé.",
-          "order": 7,
-          "highlightedWords": [
-            "order",
-            "cook"
-          ]
+          "text": "Are you ready to order now?",
+          "textVi": "Quý khách sẵn sàng gọi món chưa?",
+          "order": 5
         }
       ],
       "vocabularyWords": [
@@ -953,89 +867,6 @@
           "wordTypeVi": "tính từ"
         }
       ],
-      "questions": [
-        {
-          "targetWord": "restaurant",
-          "question": "What does 'restaurant' mean?",
-          "questionVi": "'restaurant' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "nhà hàng",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "khách sạn",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "siêu thị",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "quán cà phê",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "hungry",
-          "question": "If someone is 'hungry', how do they feel?",
-          "questionVi": "Nếu ai đó 'hungry', họ cảm thấy thế nào?",
-          "options": [
-            {
-              "id": "a",
-              "text": "đói bụng",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "no bụng",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "khát nước",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "buồn ngủ",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "delicious",
-          "question": "What does 'delicious' describe?",
-          "questionVi": "'delicious' mô tả điều gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "thức ăn ngon",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "thức ăn dở",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "thức ăn đắt",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "thức ăn rẻ",
-              "isCorrect": false
-            }
-          ]
-        }
-      ],
       "order": 2,
       "createdAt": 1699488000000
     },
@@ -1049,78 +880,114 @@
       "dialogue": [
         {
           "speaker": "Emma",
-          "text": "I can't wait for our vacation next month! Where's our destination?",
-          "textVi": "Tôi không thể chờ đợi kỳ nghỉ tháng sau! Điểm đến của chúng ta là đâu?",
+          "text": "I'm so excited about our vacation next month!",
+          "textVi": "Tôi rất háo hức về kỳ nghỉ tháng sau!",
           "order": 0,
-          "highlightedWords": [
-            "vacation",
-            "destination"
+          "vocabularyWord": "vacation",
+          "question": "What does 'vacation' mean?",
+          "questionVi": "'vacation' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "kỳ nghỉ",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "công việc",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Jack",
-          "text": "We're going to Bali! Our destination is one of the most beautiful islands in Indonesia.",
-          "textVi": "Chúng ta sẽ đi Bali! Điểm đến của chúng ta là một trong những hòn đảo đẹp nhất ở Indonesia.",
+          "text": "Me too! Bali is our final destination.",
+          "textVi": "Tôi cũng vậy! Bali là điểm đến cuối cùng của chúng ta.",
           "order": 1,
-          "highlightedWords": [
-            "destination"
+          "vocabularyWord": "destination",
+          "question": "What does 'destination' mean?",
+          "questionVi": "'destination' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "điểm đến",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "điểm xuất phát",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Emma",
-          "text": "Amazing! Have you bought the tickets yet?",
-          "textVi": "Tuyệt vời! Bạn đã mua vé chưa?",
+          "text": "Have you bought the plane ticket yet?",
+          "textVi": "Bạn đã mua vé máy bay chưa?",
           "order": 2,
-          "highlightedWords": [
-            "tickets"
+          "vocabularyWord": "ticket",
+          "question": "What does 'ticket' mean?",
+          "questionVi": "'ticket' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "vé",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "hành lý",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Jack",
-          "text": "Yes, I got the plane tickets yesterday. We depart at 8 AM on June 15th.",
-          "textVi": "Rồi, tôi đã mua vé máy bay hôm qua. Chúng ta khởi hành lúc 8 giờ sáng ngày 15 tháng 6.",
+          "text": "Yes! We need to be at the airport by 6 AM.",
+          "textVi": "Rồi! Chúng ta cần có mặt ở sân bay lúc 6 giờ sáng.",
           "order": 3,
-          "highlightedWords": [
-            "tickets",
-            "depart"
+          "vocabularyWord": "airport",
+          "question": "What does 'airport' mean?",
+          "questionVi": "'airport' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "sân bay",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "bến xe",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Emma",
-          "text": "What time do we need to arrive at the airport?",
-          "textVi": "Chúng ta cần đến sân bay lúc mấy giờ?",
+          "text": "What time does our flight depart?",
+          "textVi": "Chuyến bay của chúng ta khởi hành lúc mấy giờ?",
           "order": 4,
-          "highlightedWords": [
-            "airport"
+          "vocabularyWord": "depart",
+          "question": "What does 'depart' mean?",
+          "questionVi": "'depart' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "khởi hành",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "đến nơi",
+              "isCorrect": false
+            }
           ]
         },
         {
           "speaker": "Jack",
-          "text": "We should be at the airport by 6 AM. International flights depart early.",
-          "textVi": "Chúng ta nên có mặt tại sân bay lúc 6 giờ sáng. Các chuyến bay quốc tế khởi hành sớm.",
-          "order": 5,
-          "highlightedWords": [
-            "airport",
-            "depart"
-          ]
-        },
-        {
-          "speaker": "Emma",
-          "text": "How long is our vacation? One week or two?",
-          "textVi": "Kỳ nghỉ của chúng ta bao lâu? Một tuần hay hai tuần?",
-          "order": 6,
-          "highlightedWords": [
-            "vacation"
-          ]
-        },
-        {
-          "speaker": "Jack",
-          "text": "Our vacation is 10 days. Perfect time to explore the beaches and temples!",
-          "textVi": "Kỳ nghỉ của chúng ta là 10 ngày. Thời gian hoàn hảo để khám phá các bãi biển và đền thờ!",
-          "order": 7,
-          "highlightedWords": [
-            "vacation"
-          ]
+          "text": "At 8 AM sharp. I can't wait to explore the beaches!",
+          "textVi": "Lúc 8 giờ sáng đúng. Tôi không thể chờ để khám phá các bãi biển!",
+          "order": 5
         }
       ],
       "vocabularyWords": [
@@ -1158,116 +1025,6 @@
           "pronunciation": "/dɪˈpɑːrt/",
           "wordType": "verb",
           "wordTypeVi": "động từ"
-        }
-      ],
-      "questions": [
-        {
-          "targetWord": "vacation",
-          "question": "What does 'vacation' mean?",
-          "questionVi": "'vacation' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "kỳ nghỉ",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "công việc",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "cuộc họp",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "bài học",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "destination",
-          "question": "What is a 'destination'?",
-          "questionVi": "'destination' là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "điểm đến của chuyến đi",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "điểm xuất phát",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "phương tiện di chuyển",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "hành lý",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "airport",
-          "question": "What is an 'airport'?",
-          "questionVi": "'airport' là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "sân bay",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "bến xe",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "ga tàu",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "bến cảng",
-              "isCorrect": false
-            }
-          ]
-        },
-        {
-          "targetWord": "depart",
-          "question": "What does 'depart' mean?",
-          "questionVi": "'depart' có nghĩa là gì?",
-          "options": [
-            {
-              "id": "a",
-              "text": "khởi hành, rời đi",
-              "isCorrect": true
-            },
-            {
-              "id": "b",
-              "text": "đến nơi",
-              "isCorrect": false
-            },
-            {
-              "id": "c",
-              "text": "chờ đợi",
-              "isCorrect": false
-            },
-            {
-              "id": "d",
-              "text": "hủy bỏ",
-              "isCorrect": false
-            }
-          ]
         }
       ],
       "order": 3,
