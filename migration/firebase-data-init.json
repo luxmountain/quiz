@@ -1,0 +1,1349 @@
+{
+  "topics": {
+    "topic_001": {
+      "id": "topic_001",
+      "name": "Daily Routine",
+      "nameVi": "Hoạt động hàng ngày",
+      "description": "Common words used in daily activities",
+      "descriptionVi": "Từ vựng thường dùng trong các hoạt động hàng ngày",
+      "imageUrl": "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?w=800",
+      "order": 1,
+      "totalWords": 10,
+      "createdAt": 1699488000000,
+      "updatedAt": 1699488000000
+    },
+    "topic_002": {
+      "id": "topic_002",
+      "name": "Food & Drinks",
+      "nameVi": "Đồ ăn & Đồ uống",
+      "description": "Vocabulary about food and beverages",
+      "descriptionVi": "Từ vựng về đồ ăn và đồ uống",
+      "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800",
+      "order": 2,
+      "totalWords": 10,
+      "createdAt": 1699488000000,
+      "updatedAt": 1699488000000
+    },
+    "topic_003": {
+      "id": "topic_003",
+      "name": "Travel & Transportation",
+      "nameVi": "Du lịch & Phương tiện",
+      "description": "Words related to traveling and transportation",
+      "descriptionVi": "Từ vựng liên quan đến du lịch và phương tiện di chuyển",
+      "imageUrl": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800",
+      "order": 3,
+      "totalWords": 10,
+      "createdAt": 1699488000000,
+      "updatedAt": 1699488000000
+    }
+  },
+  "flashcards": {
+    "flashcard_001": {
+      "id": "flashcard_001",
+      "topicId": "topic_001",
+      "word": "breakfast",
+      "pronunciation": "/ˈbrek.fəst/",
+      "meaning": "bữa sáng",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800",
+      "contextSentence": "I usually have <b><u>breakfast</u></b> at 7 AM every morning.",
+      "contextSentenceVi": "Tôi thường ăn sáng lúc 7 giờ sáng mỗi ngày.",
+      "example": "A healthy breakfast is important for starting your day.",
+      "exampleVi": "Một bữa sáng lành mạnh rất quan trọng để bắt đầu ngày mới.",
+      "order": 1,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_002": {
+      "id": "flashcard_002",
+      "topicId": "topic_001",
+      "word": "exercise",
+      "pronunciation": "/ˈek.sə.saɪz/",
+      "meaning": "tập thể dục",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800",
+      "contextSentence": "She likes to <b><u>exercise</u></b> in the park every evening.",
+      "contextSentenceVi": "Cô ấy thích tập thể dục ở công viên mỗi tối.",
+      "example": "You should exercise at least 30 minutes a day.",
+      "exampleVi": "Bạn nên tập thể dục ít nhất 30 phút mỗi ngày.",
+      "order": 2,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_003": {
+      "id": "flashcard_003",
+      "topicId": "topic_001",
+      "word": "tired",
+      "pronunciation": "/taɪərd/",
+      "meaning": "mệt mỏi",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+      "contextSentence": "After working all day, I feel very <b><u>tired</u></b>.",
+      "contextSentenceVi": "Sau khi làm việc cả ngày, tôi cảm thấy rất mệt mỏi.",
+      "example": "He was too tired to continue the journey.",
+      "exampleVi": "Anh ấy quá mệt để tiếp tục cuộc hành trình.",
+      "order": 3,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_004": {
+      "id": "flashcard_004",
+      "topicId": "topic_001",
+      "word": "shower",
+      "pronunciation": "/ˈʃaʊ.ər/",
+      "meaning": "tắm vòi sen",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800",
+      "contextSentence": "I take a <b><u>shower</u></b> every morning before work.",
+      "contextSentenceVi": "Tôi tắm vòi sen mỗi sáng trước khi đi làm.",
+      "example": "She prefers a hot shower in the winter.",
+      "exampleVi": "Cô ấy thích tắm nước nóng vào mùa đông.",
+      "order": 4,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_005": {
+      "id": "flashcard_005",
+      "topicId": "topic_001",
+      "word": "sleep",
+      "pronunciation": "/sliːp/",
+      "meaning": "ngủ",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=800",
+      "contextSentence": "I usually <b><u>sleep</u></b> for 8 hours every night.",
+      "contextSentenceVi": "Tôi thường ngủ 8 tiếng mỗi đêm.",
+      "example": "You need to sleep well to stay healthy.",
+      "exampleVi": "Bạn cần ngủ ngon để giữ sức khỏe.",
+      "order": 5,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_006": {
+      "id": "flashcard_006",
+      "topicId": "topic_001",
+      "word": "brush",
+      "pronunciation": "/brʌʃ/",
+      "meaning": "chải, đánh (răng)",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=800",
+      "contextSentence": "Don't forget to <b><u>brush</u></b> your teeth before bed.",
+      "contextSentenceVi": "Đừng quên đánh răng trước khi đi ngủ.",
+      "example": "She brushes her hair every morning.",
+      "exampleVi": "Cô ấy chải tóc mỗi sáng.",
+      "order": 6,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_007": {
+      "id": "flashcard_007",
+      "topicId": "topic_001",
+      "word": "commute",
+      "pronunciation": "/kəˈmjuːt/",
+      "meaning": "đi làm (đi lại)",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=800",
+      "contextSentence": "I <b><u>commute</u></b> to work by train every day.",
+      "contextSentenceVi": "Tôi đi làm bằng tàu hỏa mỗi ngày.",
+      "example": "His commute takes about 45 minutes.",
+      "exampleVi": "Hành trình đi làm của anh ấy mất khoảng 45 phút.",
+      "order": 7,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_008": {
+      "id": "flashcard_008",
+      "topicId": "topic_001",
+      "word": "prepare",
+      "pronunciation": "/prɪˈper/",
+      "meaning": "chuẩn bị",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800",
+      "contextSentence": "I <b><u>prepare</u></b> my lunch the night before.",
+      "contextSentenceVi": "Tôi chuẩn bị bữa trưa vào tối hôm trước.",
+      "example": "She is preparing for an important meeting.",
+      "exampleVi": "Cô ấy đang chuẩn bị cho một cuộc họp quan trọng.",
+      "order": 8,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_009": {
+      "id": "flashcard_009",
+      "topicId": "topic_001",
+      "word": "relax",
+      "pronunciation": "/rɪˈlæks/",
+      "meaning": "thư giãn",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800",
+      "contextSentence": "I like to <b><u>relax</u></b> by reading a book.",
+      "contextSentenceVi": "Tôi thích thư giãn bằng cách đọc sách.",
+      "example": "Take some time to relax after work.",
+      "exampleVi": "Hãy dành thời gian thư giãn sau giờ làm việc.",
+      "order": 9,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_010": {
+      "id": "flashcard_010",
+      "topicId": "topic_001",
+      "word": "wake up",
+      "pronunciation": "/weɪk ʌp/",
+      "meaning": "thức dậy",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=800",
+      "contextSentence": "I usually <b><u>wake up</u></b> at 6:30 AM.",
+      "contextSentenceVi": "Tôi thường thức dậy lúc 6:30 sáng.",
+      "example": "What time do you wake up on weekends?",
+      "exampleVi": "Bạn thức dậy lúc mấy giờ vào cuối tuần?",
+      "order": 10,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_011": {
+      "id": "flashcard_011",
+      "topicId": "topic_002",
+      "word": "delicious",
+      "pronunciation": "/dɪˈlɪʃ.əs/",
+      "meaning": "ngon",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
+      "contextSentence": "This pasta is absolutely <b><u>delicious</u></b>!",
+      "contextSentenceVi": "Món mì Ý này thực sự ngon!",
+      "example": "The cake smells delicious.",
+      "exampleVi": "Chiếc bánh có mùi thơm ngon.",
+      "order": 1,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_012": {
+      "id": "flashcard_012",
+      "topicId": "topic_002",
+      "word": "restaurant",
+      "pronunciation": "/ˈres.tər.ɑːnt/",
+      "meaning": "nhà hàng",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
+      "contextSentence": "Let's go to that new Italian <b><u>restaurant</u></b> downtown.",
+      "contextSentenceVi": "Hãy đến nhà hàng Ý mới ở trung tâm thành phố.",
+      "example": "The restaurant is famous for its seafood.",
+      "exampleVi": "Nhà hàng này nổi tiếng với các món hải sản.",
+      "order": 2,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_013": {
+      "id": "flashcard_013",
+      "topicId": "topic_002",
+      "word": "cook",
+      "pronunciation": "/kʊk/",
+      "meaning": "nấu ăn",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800",
+      "contextSentence": "My mom loves to <b><u>cook</u></b> traditional dishes.",
+      "contextSentenceVi": "Mẹ tôi thích nấu các món ăn truyền thống.",
+      "example": "I will cook dinner tonight.",
+      "exampleVi": "Tôi sẽ nấu bữa tối tối nay.",
+      "order": 3,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_014": {
+      "id": "flashcard_014",
+      "topicId": "topic_002",
+      "word": "hungry",
+      "pronunciation": "/ˈhʌŋ.ɡri/",
+      "meaning": "đói",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1619221882004-2f39b41b2dc2?w=800",
+      "contextSentence": "I'm so <b><u>hungry</u></b> that I could eat a horse!",
+      "contextSentenceVi": "Tôi đói đến nỗi có thể ăn cả con ngựa!",
+      "example": "Are you hungry? Let's grab some food.",
+      "exampleVi": "Bạn đói không? Hãy đi ăn gì đó.",
+      "order": 4,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_015": {
+      "id": "flashcard_015",
+      "topicId": "topic_002",
+      "word": "beverage",
+      "pronunciation": "/ˈbev.ər.ɪdʒ/",
+      "meaning": "đồ uống",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800",
+      "contextSentence": "What <b><u>beverage</u></b> would you like with your meal?",
+      "contextSentenceVi": "Bạn muốn dùng đồ uống gì với bữa ăn?",
+      "example": "This café serves a variety of hot beverages.",
+      "exampleVi": "Quán cà phê này phục vụ nhiều loại đồ uống nóng.",
+      "order": 5,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_016": {
+      "id": "flashcard_016",
+      "topicId": "topic_002",
+      "word": "fresh",
+      "pronunciation": "/freʃ/",
+      "meaning": "tươi",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800",
+      "contextSentence": "I buy <b><u>fresh</u></b> vegetables from the market every week.",
+      "contextSentenceVi": "Tôi mua rau tươi từ chợ mỗi tuần.",
+      "example": "Fresh fruit is good for your health.",
+      "exampleVi": "Trái cây tươi tốt cho sức khỏe của bạn.",
+      "order": 6,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_017": {
+      "id": "flashcard_017",
+      "topicId": "topic_002",
+      "word": "taste",
+      "pronunciation": "/teɪst/",
+      "meaning": "nếm, vị",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800",
+      "contextSentence": "Would you like to <b><u>taste</u></b> this soup?",
+      "contextSentenceVi": "Bạn có muốn nếm thử súp này không?",
+      "example": "This dish tastes amazing!",
+      "exampleVi": "Món này có vị tuyệt vời!",
+      "order": 7,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_018": {
+      "id": "flashcard_018",
+      "topicId": "topic_002",
+      "word": "spicy",
+      "pronunciation": "/ˈspaɪ.si/",
+      "meaning": "cay",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800",
+      "contextSentence": "I can't eat <b><u>spicy</u></b> food because it hurts my stomach.",
+      "contextSentenceVi": "Tôi không thể ăn đồ cay vì nó làm đau bụng tôi.",
+      "example": "Thai food is usually very spicy.",
+      "exampleVi": "Đồ ăn Thái thường rất cay.",
+      "order": 8,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_019": {
+      "id": "flashcard_019",
+      "topicId": "topic_002",
+      "word": "sweet",
+      "pronunciation": "/swiːt/",
+      "meaning": "ngọt",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800",
+      "contextSentence": "This cake is too <b><u>sweet</u></b> for me.",
+      "contextSentenceVi": "Chiếc bánh này quá ngọt đối với tôi.",
+      "example": "I prefer sweet drinks over bitter ones.",
+      "exampleVi": "Tôi thích đồ uống ngọt hơn là đắng.",
+      "order": 9,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_020": {
+      "id": "flashcard_020",
+      "topicId": "topic_002",
+      "word": "order",
+      "pronunciation": "/ˈɔːr.dər/",
+      "meaning": "gọi món, đặt hàng",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+      "contextSentence": "Are you ready to <b><u>order</u></b> your food?",
+      "contextSentenceVi": "Bạn đã sẵn sàng gọi món chưa?",
+      "example": "I'd like to order a pizza for delivery.",
+      "exampleVi": "Tôi muốn đặt một chiếc pizza giao về.",
+      "order": 10,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_021": {
+      "id": "flashcard_021",
+      "topicId": "topic_003",
+      "word": "airport",
+      "pronunciation": "/ˈer.pɔːrt/",
+      "meaning": "sân bay",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800",
+      "contextSentence": "We need to arrive at the <b><u>airport</u></b> two hours early.",
+      "contextSentenceVi": "Chúng ta cần đến sân bay sớm 2 tiếng.",
+      "example": "The airport is very busy during holidays.",
+      "exampleVi": "Sân bay rất đông vào các ngày lễ.",
+      "order": 1,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_022": {
+      "id": "flashcard_022",
+      "topicId": "topic_003",
+      "word": "ticket",
+      "pronunciation": "/ˈtɪk.ɪt/",
+      "meaning": "vé",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800",
+      "contextSentence": "I bought a <b><u>ticket</u></b> for the train to Hanoi.",
+      "contextSentenceVi": "Tôi đã mua vé tàu đi Hà Nội.",
+      "example": "Don't forget to show your ticket at the gate.",
+      "exampleVi": "Đừng quên xuất trình vé ở cổng.",
+      "order": 2,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_023": {
+      "id": "flashcard_023",
+      "topicId": "topic_003",
+      "word": "luggage",
+      "pronunciation": "/ˈlʌɡ.ɪdʒ/",
+      "meaning": "hành lý",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=800",
+      "contextSentence": "Please put your <b><u>luggage</u></b> in the overhead compartment.",
+      "contextSentenceVi": "Vui lòng để hành lý của bạn vào ngăn trên cao.",
+      "example": "My luggage is too heavy to carry.",
+      "exampleVi": "Hành lý của tôi quá nặng để mang.",
+      "order": 3,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_024": {
+      "id": "flashcard_024",
+      "topicId": "topic_003",
+      "word": "journey",
+      "pronunciation": "/ˈdʒɜː.ni/",
+      "meaning": "hành trình",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800",
+      "contextSentence": "Our <b><u>journey</u></b> across Europe was amazing.",
+      "contextSentenceVi": "Hành trình của chúng tôi xuyên châu Âu thật tuyệt vời.",
+      "example": "The journey takes about 3 hours by car.",
+      "exampleVi": "Hành trình mất khoảng 3 tiếng bằng xe hơi.",
+      "order": 4,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_025": {
+      "id": "flashcard_025",
+      "topicId": "topic_003",
+      "word": "destination",
+      "pronunciation": "/ˌdes.tɪˈneɪ.ʃən/",
+      "meaning": "điểm đến",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
+      "contextSentence": "Paris is our final <b><u>destination</u></b> on this trip.",
+      "contextSentenceVi": "Paris là điểm đến cuối cùng của chúng tôi trong chuyến đi này.",
+      "example": "What is your travel destination?",
+      "exampleVi": "Điểm đến du lịch của bạn là đâu?",
+      "order": 5,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_026": {
+      "id": "flashcard_026",
+      "topicId": "topic_003",
+      "word": "passenger",
+      "pronunciation": "/ˈpæs.ən.dʒər/",
+      "meaning": "hành khách",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800",
+      "contextSentence": "All <b><u>passengers</u></b> must fasten their seatbelts.",
+      "contextSentenceVi": "Tất cả hành khách phải thắt dây an toàn.",
+      "example": "The train can carry 500 passengers.",
+      "exampleVi": "Chuyến tàu có thể chở 500 hành khách.",
+      "order": 6,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_027": {
+      "id": "flashcard_027",
+      "topicId": "topic_003",
+      "word": "explore",
+      "pronunciation": "/ɪkˈsplɔːr/",
+      "meaning": "khám phá",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800",
+      "contextSentence": "I love to <b><u>explore</u></b> new cities when I travel.",
+      "contextSentenceVi": "Tôi thích khám phá những thành phố mới khi đi du lịch.",
+      "example": "Let's explore the old town tomorrow.",
+      "exampleVi": "Hãy khám phá khu phố cổ vào ngày mai.",
+      "order": 7,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    },
+    "flashcard_028": {
+      "id": "flashcard_028",
+      "topicId": "topic_003",
+      "word": "vacation",
+      "pronunciation": "/veɪˈkeɪ.ʃən/",
+      "meaning": "kỳ nghỉ",
+      "wordType": "noun",
+      "wordTypeVi": "danh từ",
+      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+      "contextSentence": "We're going on <b><u>vacation</u></b> to Thailand next month.",
+      "contextSentenceVi": "Chúng tôi sẽ đi nghỉ ở Thái Lan vào tháng tới.",
+      "example": "I need a vacation after working so hard.",
+      "exampleVi": "Tôi cần một kỳ nghỉ sau khi làm việc quá chăm chỉ.",
+      "order": 8,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_029": {
+      "id": "flashcard_029",
+      "topicId": "topic_003",
+      "word": "crowded",
+      "pronunciation": "/ˈkraʊ.dɪd/",
+      "meaning": "đông đúc",
+      "wordType": "adjective",
+      "wordTypeVi": "tính từ",
+      "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800",
+      "contextSentence": "The bus is always <b><u>crowded</u></b> during rush hour.",
+      "contextSentenceVi": "Xe buýt luôn đông đúc vào giờ cao điểm.",
+      "example": "The beach was too crowded, so we left.",
+      "exampleVi": "Bãi biển quá đông đúc, nên chúng tôi đã rời đi.",
+      "order": 9,
+      "difficulty": "easy",
+      "createdAt": 1699488000000
+    },
+    "flashcard_030": {
+      "id": "flashcard_030",
+      "topicId": "topic_003",
+      "word": "depart",
+      "pronunciation": "/dɪˈpɑːrt/",
+      "meaning": "khởi hành",
+      "wordType": "verb",
+      "wordTypeVi": "động từ",
+      "imageUrl": "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=800",
+      "contextSentence": "The flight will <b><u>depart</u></b> at 9 PM sharp.",
+      "contextSentenceVi": "Chuyến bay sẽ khởi hành lúc 9 giờ tối đúng.",
+      "example": "We depart for Tokyo tomorrow morning.",
+      "exampleVi": "Chúng tôi khởi hành đến Tokyo vào sáng mai.",
+      "order": 10,
+      "difficulty": "medium",
+      "createdAt": 1699488000000
+    }
+  },
+  "conversations": {
+    "conversation_001": {
+      "id": "conversation_001",
+      "title": "Morning Routine Discussion",
+      "titleVi": "Thảo luận về thói quen buổi sáng",
+      "imageUrl": "https://images.pexels.com/photos/296301/pexels-photo-296301.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "contextDescription": "Tom and Sarah are talking about their daily morning routines and habits.",
+      "contextDescriptionVi": "Tom và Sarah đang nói chuyện về thói quen và hoạt động buổi sáng hàng ngày của họ.",
+      "dialogue": [
+        {
+          "speaker": "Sarah",
+          "text": "Hey Tom, what time do you usually wake up in the morning?",
+          "textVi": "Này Tom, bạn thường thức dậy lúc mấy giờ vào buổi sáng?",
+          "order": 0,
+          "highlightedWords": [
+            "wake up"
+          ]
+        },
+        {
+          "speaker": "Tom",
+          "text": "I wake up at 6:30 AM every day. How about you?",
+          "textVi": "Tôi thức dậy lúc 6:30 sáng mỗi ngày. Còn bạn thì sao?",
+          "order": 1,
+          "highlightedWords": [
+            "wake up"
+          ]
+        },
+        {
+          "speaker": "Sarah",
+          "text": "I'm an early bird! I wake up at 5:30 to exercise before work.",
+          "textVi": "Tôi là người dậy sớm! Tôi thức dậy lúc 5:30 để tập thể dục trước khi đi làm.",
+          "order": 2,
+          "highlightedWords": [
+            "wake up",
+            "exercise"
+          ]
+        },
+        {
+          "speaker": "Tom",
+          "text": "Wow, that's impressive! I exercise in the evening because I'm too tired in the morning.",
+          "textVi": "Ồ, ấn tượng đấy! Tôi tập thể dục vào buổi tối vì buổi sáng tôi quá mệt.",
+          "order": 3,
+          "highlightedWords": [
+            "exercise",
+            "tired"
+          ]
+        },
+        {
+          "speaker": "Sarah",
+          "text": "What do you have for breakfast?",
+          "textVi": "Bạn ăn gì cho bữa sáng?",
+          "order": 4,
+          "highlightedWords": [
+            "breakfast"
+          ]
+        },
+        {
+          "speaker": "Tom",
+          "text": "I usually have breakfast at 7 AM. Just some toast and coffee.",
+          "textVi": "Tôi thường ăn sáng lúc 7 giờ. Chỉ bánh mì nướng và cà phê thôi.",
+          "order": 5,
+          "highlightedWords": [
+            "breakfast"
+          ]
+        },
+        {
+          "speaker": "Sarah",
+          "text": "After exercise, I take a quick shower and then have a healthy breakfast.",
+          "textVi": "Sau khi tập thể dục, tôi tắm nhanh rồi ăn một bữa sáng lành mạnh.",
+          "order": 6,
+          "highlightedWords": [
+            "shower",
+            "breakfast"
+          ]
+        },
+        {
+          "speaker": "Tom",
+          "text": "I also take a shower in the morning. It helps me wake up completely.",
+          "textVi": "Tôi cũng tắm vào buổi sáng. Nó giúp tôi thức dậy hoàn toàn.",
+          "order": 7,
+          "highlightedWords": [
+            "shower",
+            "wake up"
+          ]
+        },
+        {
+          "speaker": "Sarah",
+          "text": "Don't you feel tired after such an early morning routine?",
+          "textVi": "Bạn không cảm thấy mệt sau thói quen sáng sớm như vậy à?",
+          "order": 8,
+          "highlightedWords": [
+            "tired"
+          ]
+        },
+        {
+          "speaker": "Tom",
+          "text": "Sometimes I do feel tired, but coffee helps! What about you?",
+          "textVi": "Đôi khi tôi có cảm thấy mệt, nhưng cà phê giúp được! Còn bạn thì sao?",
+          "order": 9,
+          "highlightedWords": [
+            "tired"
+          ]
+        }
+      ],
+      "vocabularyWords": [
+        {
+          "word": "wake up",
+          "meaning": "thức dậy",
+          "pronunciation": "/weɪk ʌp/",
+          "wordType": "verb",
+          "wordTypeVi": "động từ"
+        },
+        {
+          "word": "exercise",
+          "meaning": "tập thể dục",
+          "pronunciation": "/ˈek.sə.saɪz/",
+          "wordType": "verb",
+          "wordTypeVi": "động từ"
+        },
+        {
+          "word": "tired",
+          "meaning": "mệt mỏi",
+          "pronunciation": "/taɪərd/",
+          "wordType": "adjective",
+          "wordTypeVi": "tính từ"
+        },
+        {
+          "word": "breakfast",
+          "meaning": "bữa sáng",
+          "pronunciation": "/ˈbrek.fəst/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        },
+        {
+          "word": "shower",
+          "meaning": "tắm vòi sen",
+          "pronunciation": "/ˈʃaʊ.ər/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        }
+      ],
+      "questions": [
+        {
+          "targetWord": "wake up",
+          "question": "What does 'wake up' mean?",
+          "questionVi": "'wake up' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "thức dậy",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "ngủ",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "nghỉ ngơi",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "ăn sáng",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "exercise",
+          "question": "What does 'exercise' mean?",
+          "questionVi": "'exercise' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "tập thể dục",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "đi làm",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "ăn uống",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "ngủ nghỉ",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "breakfast",
+          "question": "What does 'breakfast' mean?",
+          "questionVi": "'breakfast' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "bữa sáng",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "bữa trưa",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "bữa tối",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "bữa phụ",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "tired",
+          "question": "In the conversation, what does 'tired' describe?",
+          "questionVi": "Trong đoạn hội thoại, 'tired' mô tả điều gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "cảm giác mệt mỏi",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "cảm giác hạnh phúc",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "cảm giác đói",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "cảm giác khỏe mạnh",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "shower",
+          "question": "What does 'shower' mean?",
+          "questionVi": "'shower' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "tắm vòi sen",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "đánh răng",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "chải tóc",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "rửa mặt",
+              "isCorrect": false
+            }
+          ]
+        }
+      ],
+      "order": 1,
+      "createdAt": 1699488000000
+    },
+    "conversation_002": {
+      "id": "conversation_002",
+      "title": "At the Restaurant",
+      "titleVi": "Tại nhà hàng",
+      "imageUrl": "https://images.pexels.com/photos/3201921/pexels-photo-3201921.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "contextDescription": "Mike and Lisa are at a new Italian restaurant discussing the menu and their food preferences.",
+      "contextDescriptionVi": "Mike và Lisa đang ở một nhà hàng Ý mới thảo luận về thực đơn và sở thích ăn uống của họ.",
+      "dialogue": [
+        {
+          "speaker": "Waiter",
+          "text": "Welcome to our restaurant! Are you ready to order?",
+          "textVi": "Chào mừng đến nhà hàng của chúng tôi! Quý khách sẵn sàng gọi món chưa?",
+          "order": 0,
+          "highlightedWords": [
+            "restaurant",
+            "order"
+          ]
+        },
+        {
+          "speaker": "Mike",
+          "text": "Not yet. Can we see the menu first? I'm very hungry!",
+          "textVi": "Chưa ạ. Chúng tôi có thể xem thực đơn trước được không? Tôi rất đói!",
+          "order": 1,
+          "highlightedWords": [
+            "hungry"
+          ]
+        },
+        {
+          "speaker": "Lisa",
+          "text": "Me too! I heard this restaurant has delicious pasta.",
+          "textVi": "Tôi cũng vậy! Tôi nghe nói nhà hàng này có mì Ý ngon lắm.",
+          "order": 2,
+          "highlightedWords": [
+            "restaurant",
+            "delicious"
+          ]
+        },
+        {
+          "speaker": "Mike",
+          "text": "I want to try their pizza. Do you like spicy food?",
+          "textVi": "Tôi muốn thử pizza của họ. Bạn có thích đồ ăn cay không?",
+          "order": 3,
+          "highlightedWords": [
+            "spicy"
+          ]
+        },
+        {
+          "speaker": "Lisa",
+          "text": "Not really. I prefer something sweet, maybe a dessert after the main course.",
+          "textVi": "Không lắm. Tôi thích món gì ngọt hơn, có thể là món tráng miệng sau món chính.",
+          "order": 4,
+          "highlightedWords": [
+            "sweet"
+          ]
+        },
+        {
+          "speaker": "Waiter",
+          "text": "Our chef can cook the pasta mild or spicy, as you prefer.",
+          "textVi": "Đầu bếp của chúng tôi có thể nấu mì Ý nhẹ hoặc cay, tùy theo sở thích của quý khách.",
+          "order": 5,
+          "highlightedWords": [
+            "cook",
+            "spicy"
+          ]
+        },
+        {
+          "speaker": "Mike",
+          "text": "Perfect! I'm so hungry I could eat anything delicious right now.",
+          "textVi": "Hoàn hảo! Tôi đói đến nỗi có thể ăn bất cứ thứ gì ngon bây giờ.",
+          "order": 6,
+          "highlightedWords": [
+            "hungry",
+            "delicious"
+          ]
+        },
+        {
+          "speaker": "Lisa",
+          "text": "Let's order now! I'll have the carbonara pasta, and you can cook it mild, please.",
+          "textVi": "Chúng ta gọi món đi! Tôi sẽ gọi mì carbonara, và làm ơn nấu nhẹ nhé.",
+          "order": 7,
+          "highlightedWords": [
+            "order",
+            "cook"
+          ]
+        }
+      ],
+      "vocabularyWords": [
+        {
+          "word": "restaurant",
+          "meaning": "nhà hàng",
+          "pronunciation": "/ˈres.tər.ɑːnt/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        },
+        {
+          "word": "hungry",
+          "meaning": "đói",
+          "pronunciation": "/ˈhʌŋ.ɡri/",
+          "wordType": "adjective",
+          "wordTypeVi": "tính từ"
+        },
+        {
+          "word": "delicious",
+          "meaning": "ngon",
+          "pronunciation": "/dɪˈlɪʃ.əs/",
+          "wordType": "adjective",
+          "wordTypeVi": "tính từ"
+        },
+        {
+          "word": "spicy",
+          "meaning": "cay",
+          "pronunciation": "/ˈspaɪ.si/",
+          "wordType": "adjective",
+          "wordTypeVi": "tính từ"
+        },
+        {
+          "word": "sweet",
+          "meaning": "ngọt",
+          "pronunciation": "/swiːt/",
+          "wordType": "adjective",
+          "wordTypeVi": "tính từ"
+        }
+      ],
+      "questions": [
+        {
+          "targetWord": "restaurant",
+          "question": "What does 'restaurant' mean?",
+          "questionVi": "'restaurant' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "nhà hàng",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "khách sạn",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "siêu thị",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "quán cà phê",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "hungry",
+          "question": "If someone is 'hungry', how do they feel?",
+          "questionVi": "Nếu ai đó 'hungry', họ cảm thấy thế nào?",
+          "options": [
+            {
+              "id": "a",
+              "text": "đói bụng",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "no bụng",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "khát nước",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "buồn ngủ",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "delicious",
+          "question": "What does 'delicious' describe?",
+          "questionVi": "'delicious' mô tả điều gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "thức ăn ngon",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "thức ăn dở",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "thức ăn đắt",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "thức ăn rẻ",
+              "isCorrect": false
+            }
+          ]
+        }
+      ],
+      "order": 2,
+      "createdAt": 1699488000000
+    },
+    "conversation_003": {
+      "id": "conversation_003",
+      "title": "Travel Plans",
+      "titleVi": "Kế hoạch du lịch",
+      "imageUrl": "https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "contextDescription": "Emma and Jack are planning their upcoming vacation and discussing travel arrangements.",
+      "contextDescriptionVi": "Emma và Jack đang lên kế hoạch cho kỳ nghỉ sắp tới và thảo luận về việc sắp xếp du lịch.",
+      "dialogue": [
+        {
+          "speaker": "Emma",
+          "text": "I can't wait for our vacation next month! Where's our destination?",
+          "textVi": "Tôi không thể chờ đợi kỳ nghỉ tháng sau! Điểm đến của chúng ta là đâu?",
+          "order": 0,
+          "highlightedWords": [
+            "vacation",
+            "destination"
+          ]
+        },
+        {
+          "speaker": "Jack",
+          "text": "We're going to Bali! Our destination is one of the most beautiful islands in Indonesia.",
+          "textVi": "Chúng ta sẽ đi Bali! Điểm đến của chúng ta là một trong những hòn đảo đẹp nhất ở Indonesia.",
+          "order": 1,
+          "highlightedWords": [
+            "destination"
+          ]
+        },
+        {
+          "speaker": "Emma",
+          "text": "Amazing! Have you bought the tickets yet?",
+          "textVi": "Tuyệt vời! Bạn đã mua vé chưa?",
+          "order": 2,
+          "highlightedWords": [
+            "tickets"
+          ]
+        },
+        {
+          "speaker": "Jack",
+          "text": "Yes, I got the plane tickets yesterday. We depart at 8 AM on June 15th.",
+          "textVi": "Rồi, tôi đã mua vé máy bay hôm qua. Chúng ta khởi hành lúc 8 giờ sáng ngày 15 tháng 6.",
+          "order": 3,
+          "highlightedWords": [
+            "tickets",
+            "depart"
+          ]
+        },
+        {
+          "speaker": "Emma",
+          "text": "What time do we need to arrive at the airport?",
+          "textVi": "Chúng ta cần đến sân bay lúc mấy giờ?",
+          "order": 4,
+          "highlightedWords": [
+            "airport"
+          ]
+        },
+        {
+          "speaker": "Jack",
+          "text": "We should be at the airport by 6 AM. International flights depart early.",
+          "textVi": "Chúng ta nên có mặt tại sân bay lúc 6 giờ sáng. Các chuyến bay quốc tế khởi hành sớm.",
+          "order": 5,
+          "highlightedWords": [
+            "airport",
+            "depart"
+          ]
+        },
+        {
+          "speaker": "Emma",
+          "text": "How long is our vacation? One week or two?",
+          "textVi": "Kỳ nghỉ của chúng ta bao lâu? Một tuần hay hai tuần?",
+          "order": 6,
+          "highlightedWords": [
+            "vacation"
+          ]
+        },
+        {
+          "speaker": "Jack",
+          "text": "Our vacation is 10 days. Perfect time to explore the beaches and temples!",
+          "textVi": "Kỳ nghỉ của chúng ta là 10 ngày. Thời gian hoàn hảo để khám phá các bãi biển và đền thờ!",
+          "order": 7,
+          "highlightedWords": [
+            "vacation"
+          ]
+        }
+      ],
+      "vocabularyWords": [
+        {
+          "word": "vacation",
+          "meaning": "kỳ nghỉ",
+          "pronunciation": "/veɪˈkeɪ.ʃən/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        },
+        {
+          "word": "destination",
+          "meaning": "điểm đến",
+          "pronunciation": "/ˌdes.tɪˈneɪ.ʃən/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        },
+        {
+          "word": "ticket",
+          "meaning": "vé",
+          "pronunciation": "/ˈtɪk.ɪt/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        },
+        {
+          "word": "airport",
+          "meaning": "sân bay",
+          "pronunciation": "/ˈer.pɔːrt/",
+          "wordType": "noun",
+          "wordTypeVi": "danh từ"
+        },
+        {
+          "word": "depart",
+          "meaning": "khởi hành",
+          "pronunciation": "/dɪˈpɑːrt/",
+          "wordType": "verb",
+          "wordTypeVi": "động từ"
+        }
+      ],
+      "questions": [
+        {
+          "targetWord": "vacation",
+          "question": "What does 'vacation' mean?",
+          "questionVi": "'vacation' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "kỳ nghỉ",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "công việc",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "cuộc họp",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "bài học",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "destination",
+          "question": "What is a 'destination'?",
+          "questionVi": "'destination' là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "điểm đến của chuyến đi",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "điểm xuất phát",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "phương tiện di chuyển",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "hành lý",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "airport",
+          "question": "What is an 'airport'?",
+          "questionVi": "'airport' là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "sân bay",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "bến xe",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "ga tàu",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "bến cảng",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "targetWord": "depart",
+          "question": "What does 'depart' mean?",
+          "questionVi": "'depart' có nghĩa là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "khởi hành, rời đi",
+              "isCorrect": true
+            },
+            {
+              "id": "b",
+              "text": "đến nơi",
+              "isCorrect": false
+            },
+            {
+              "id": "c",
+              "text": "chờ đợi",
+              "isCorrect": false
+            },
+            {
+              "id": "d",
+              "text": "hủy bỏ",
+              "isCorrect": false
+            }
+          ]
+        }
+      ],
+      "order": 3,
+      "createdAt": 1699488000000
+    }
+  },
+  "userProgress": {
+    "user_sample": {
+      "userId": "user_sample",
+      "displayName": "Sample User",
+      "email": "user@example.com",
+      "totalPoints": 0,
+      "level": 1,
+      "streak": 0,
+      "lastStudyDate": null,
+      "createdAt": 1699488000000,
+      "topicProgress": {
+        "topic_001": {
+          "topicId": "topic_001",
+          "completedFlashcards": 0,
+          "completedConversations": 0,
+          "totalFlashcards": 10,
+          "totalConversations": 10,
+          "progress": 0,
+          "lastStudyDate": null
+        },
+        "topic_002": {
+          "topicId": "topic_002",
+          "completedFlashcards": 0,
+          "completedConversations": 0,
+          "totalFlashcards": 10,
+          "totalConversations": 10,
+          "progress": 0,
+          "lastStudyDate": null
+        },
+        "topic_003": {
+          "topicId": "topic_003",
+          "completedFlashcards": 0,
+          "completedConversations": 0,
+          "totalFlashcards": 10,
+          "totalConversations": 10,
+          "progress": 0,
+          "lastStudyDate": null
+        }
+      },
+      "flashcardResults": {
+        "flashcard_001": {
+          "flashcardId": "flashcard_001",
+          "learned": false,
+          "reviewCount": 0,
+          "lastReviewDate": null,
+          "nextReviewDate": null,
+          "confidence": 0
+        }
+      },
+      "conversationResults": {
+        "conversation_001": {
+          "conversationId": "conversation_001",
+          "completed": false,
+          "attempts": 0,
+          "correctAnswers": 0,
+          "lastAttemptDate": null
+        }
+      }
+    }
+  },
+  "settings": {
+    "app": {
+      "version": "1.0.0",
+      "minSupportedVersion": "1.0.0",
+      "maintenanceMode": false,
+      "dailyGoal": 10,
+      "reminderEnabled": true,
+      "reminderTime": "20:00",
+      "soundEnabled": true,
+      "autoPlayAudio": true
+    }
+  }
+}
