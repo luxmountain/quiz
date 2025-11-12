@@ -32,7 +32,8 @@ fun MainScreen(
     viewModel: MainViewModel , // <-- 1. Thêm ViewModel
     onBoardClick: () -> Unit = {},
     onTopicClick: (String) -> Unit = {}, // <-- 2. Đảm bảo là (String)
-    onReviewClick: () -> Unit = {}
+    onReviewClick: () -> Unit = {},
+    onConversationClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -73,6 +74,9 @@ fun MainScreen(
                     }
                     if (itemId == "Review") {
                         onReviewClick()
+                    }
+                    if (itemId=="Chat"){
+                        onConversationClick()
                     }
                 }
             )

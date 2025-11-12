@@ -71,24 +71,40 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
 
     fun checkWrittenAnswer(userAnswer: String) {
         val correctWord = _uiState.value.currentCard?.word ?: return
+
         if (userAnswer.equals(correctWord, ignoreCase = true)) {
+            // NẾU ĐÚNG: Chỉ set trạng thái, KHÔNG tự động chuyển
             _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
-            viewModelScope.launch {
-                delay(1000)
-                goToNextCard()
-            }
         } else {
+            // NẾU SAI: Chỉ set trạng thái
             _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
         }
     }
+    fun onQuizContinue() {
+        val currentState = _uiState.value
 
+        // Sau khi xem kết quả (Dù Đúng hay Sai), chuyển sang bước tiếp theo
+        // (Trong ví dụ này, ta chuyển sang MULTIPLE_CHOICE)
+        if (currentState.currentStudyMode == StudyMode.WRITE_WORD) {
+            _uiState.update {
+                it.copy(
+                    currentStudyMode = StudyMode.MULTIPLE_CHOICE,
+                    checkResult = CheckResult.NEUTRAL // Reset
+                )
+            }
+        }
+        // (Nếu đang ở MULTIPLE_CHOICE thì gọi goToNextWord())
+        else if (currentState.currentStudyMode == StudyMode.MULTIPLE_CHOICE) {
+            goToNextCard()
+        }
+    }
     fun clearCheckResult() {
         if (_uiState.value.checkResult == CheckResult.INCORRECT) {
             _uiState.update { it.copy(checkResult = CheckResult.NEUTRAL) }
         }
     }
 
-    private fun goToNextCard() {
+    fun goToNextCard() {
         val currentState = _uiState.value
         if (currentState.currentCardIndex < currentState.flashcards.size - 1) {
             _uiState.update {

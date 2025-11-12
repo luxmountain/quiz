@@ -1,24 +1,33 @@
 package com.uilover.project247.LearningActivity.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-// TODO: Đảm bảo đường dẫn import data class VocabularyWord là đúng
+// SỬA IMPORT: Lấy ViewModel và các enum từ package `Model`
 import com.uilover.project247.LearningActivity.Model.LearningViewModel
 import com.uilover.project247.LearningActivity.Model.StudyMode
+import com.uilover.project247.LearningActivity.Model.CheckResult // <-- THÊM IMPORT
+// SỬA IMPORT: Lấy component từ package `components`
 import com.uilover.project247.LearningActivity.components.FlashcardView
-import com.uilover.project247.LearningActivity.components.MultipleChoiceView
+// import com.uilover.project247.LearningActivity.components.MultipleChoiceView // (Tạm)
 import com.uilover.project247.LearningActivity.components.WriteWordView
+// SỬA IMPORT: Thay ProgressBar bằng AnimatedProgressBar (nếu bạn muốn AnimatedProgressBar)
+import com.uilover.project247.LearningActivity.components.ProgressBar // <-- ĐÃ SỬA: Thay thế ProgressBar bằng AnimatedProgressBar
+// THÊM IMPORT: Cho các component bottom bar/popup
+import com.uilover.project247.LearningActivity.components.AnswerFeedbackPopup
+import com.uilover.project247.LearningActivity.components.CheckButtonBottomBar
+import com.uilover.project247.R // THÊM IMPORT
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,21 +35,25 @@ fun LearningScreen(
     viewModel: LearningViewModel,
     onNavigateBack: () -> Unit
 ) {
-    // Lắng nghe `uiState` từ ViewModel.
-    // Mỗi khi state thay đổi, Composable này sẽ tự động vẽ lại.
     val uiState by viewModel.uiState.collectAsState()
     val backgroundColor=Color(0xFFF7F7F7)
 
+    // --- 1. State cho TextField (phải dời lên đây) ---
+    var userAnswer by rememberSaveable { mutableStateOf("") }
+
+    // 2. Reset userAnswer khi card thay đổi
+    LaunchedEffect(uiState.currentCard) {
+        userAnswer = ""
+    }
 
     Scaffold(
         topBar = {
-            // Thanh TopAppBar với nút X và thanh tiến trình
             CenterAlignedTopAppBar(
                 title = {
-                    // Thanh tiến trình (placeholder)
-                    LinearProgressIndicator(
-                        progress = {uiState.progress}, // TODO: Lấy tiến trình từ ViewModel
-                        modifier = Modifier.fillMaxWidth(0.6f).clip(CircleShape)
+                    // SỬA: Dùng AnimatedProgressBar (đã tạo)
+                    ProgressBar( // <-- ĐÃ SỬA: Thay thế ProgressBar bằng AnimatedProgressBar
+                        progress = uiState.progress,
+                        iconResId = R.drawable.ic_kitty // Icon của bạn
                     )
                 },
                 navigationIcon = {
@@ -49,11 +62,12 @@ fun LearningScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = backgroundColor // Đồng màu nền
+                    containerColor = backgroundColor
                 )
             )
         },
-        containerColor = backgroundColor // Set màu nền cho toàn màn hình
+        containerColor = backgroundColor,
+        // --- XÓA: bottomBar ở đây vì popup sẽ nằm giữa màn hình ---
     ) { paddingValues ->
 
         Box(
@@ -63,47 +77,97 @@ fun LearningScreen(
             contentAlignment = Alignment.Center
         ) {
             when {
-                uiState.isLoading -> CircularProgressIndicator()
+                uiState.isLoading -> CircularProgressIndicator() // (Hoặc LoadingScreen())
                 uiState.isTopicComplete -> CompletionView(onNavigateBack)
                 uiState.currentCard != null -> {
                     val card = uiState.currentCard!!
 
-                    when (uiState.currentStudyMode) {
-                        // GỌI COMPONENT FLASHCARDVIEW MỚI
-                        StudyMode.FLASHCARD -> FlashcardView(
-                            card = card,
-                            onComplete = { viewModel.onActionCompleted() },
-                            onKnowWord = {
-                                // TODO: Gọi 1 hàm khác trong ViewModel, ví dụ: viewModel.markAsKnown()
-                                viewModel.onActionCompleted() // Tạm thời dùng onComplete
+                    Column( // Bao bọc các chế độ học vào một Column
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceBetween // Đẩy các phần lên xuống
+                    ) {
+                        when (uiState.currentStudyMode) {
+                            StudyMode.FLASHCARD -> FlashcardView(
+                                card = card,
+                                onComplete = { viewModel.onActionCompleted() },
+                                onKnowWord = {
+                                    viewModel.goToNextCard()
+                                }
+                            )
+
+                            // --- 4. SỬA CÁCH GỌI WRITEWORDVIEW ---
+                            StudyMode.WRITE_WORD -> {
+                                WriteWordView(
+                                    card = card,
+                                    userAnswer = userAnswer,
+                                    onUserAnswerChange = {
+                                        userAnswer = it
+                                        viewModel.clearCheckResult()
+                                    },
+                                    onCheckFromKeyboard = {
+                                        viewModel.checkWrittenAnswer(userAnswer)
+                                    },
+                                    isChecking = uiState.checkResult != CheckResult.NEUTRAL
+                                )
+                                Spacer(modifier = Modifier.height(16.dp)) // Tạo khoảng cách cho nút kiểm tra
                             }
-                        )
-                        StudyMode.WRITE_WORD -> WriteWordView(
-                            card = card,
-                            checkResult = uiState.checkResult, // (1) Trạng thái
-                            onCheck = { userAnswer -> // (2) Hàm kiểm tra
-                                viewModel.checkWrittenAnswer(userAnswer)
-                            },
-                            onClearResult = { // (3) Hàm xóa trạng thái
-                                viewModel.clearCheckResult()
+
+                            StudyMode.MULTIPLE_CHOICE -> {
+                                // (Tạm thời giữ placeholder)
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("Màn hình MultipleChoice (chưa làm)")
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(onClick = { viewModel.onActionCompleted() }) {
+                                        Text("Bấm để qua (tạm thời)")
+                                    }
+                                }
                             }
-                        )
-                        StudyMode.MULTIPLE_CHOICE -> MultipleChoiceView(card, { viewModel.onActionCompleted() })
+                        }
+
+                        // --- 5. NÚT KIỂM TRA CHO WRITE_WORD (Nếu không có popup) ---
+                        // Vẫn giữ nút Kiểm tra ở đây cho chế độ WRITE_WORD khi không có popup
+                        if (uiState.currentStudyMode == StudyMode.WRITE_WORD && uiState.checkResult == CheckResult.NEUTRAL) {
+                            CheckButtonBottomBar(
+                                isEnabled = userAnswer.isNotBlank(),
+                                onClick = {
+                                    viewModel.checkWrittenAnswer(userAnswer)
+                                }
+                            )
+                        }
                     }
                 }
                 else -> Text("Không có từ vựng cho chủ đề này.")
+            }
+        }
+
+        // --- 6. HIỂN THỊ POPUP Ở GIỮA MÀN HÌNH (ĐÃ SỬA) ---
+        if (uiState.currentStudyMode == StudyMode.WRITE_WORD && uiState.currentCard != null && uiState.checkResult != CheckResult.NEUTRAL) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Không cho dismiss khi bấm ra ngoài để ép người dùng bấm "Tiếp tục"
+                },
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false) // Không dùng chiều rộng mặc định của dialog
+            ) {
+                // Bọc nội dung popup vào một Box để có thể áp dụng modifier
+                Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                    AnswerFeedbackPopup(
+                        card = uiState.currentCard!!,
+                        checkResult = uiState.checkResult,
+                        onContinue = {
+                            viewModel.onQuizContinue()
+                        }
+                    )
+                }
             }
         }
     }
 }
 
 
-
-
-
-
 @Composable
 fun CompletionView(onNavigateBack: () -> Unit) {
+    // (Composable này giữ nguyên, không thay đổi)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

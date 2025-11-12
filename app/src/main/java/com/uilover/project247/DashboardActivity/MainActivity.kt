@@ -6,8 +6,8 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import com.uilover.project247.ConversationActivity.ConversationListActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
-import com.uilover.project247.LeaderActivity.LeaderActivity
 import com.uilover.project247.LearningActivity.LearningActivity
 import com.uilover.project247.ReviewActivity.ReviewActivity
 import com.uilover.project247.ui.theme.Project247Theme
@@ -39,6 +39,11 @@ class MainActivity : ComponentActivity() {
 
                     onReviewClick = {
                         val intent = Intent(this, ReviewActivity::class.java)
+                        startActivity(intent)
+                    },
+
+                    onConversationClick = {
+                        val intent = Intent(this, ConversationListActivity::class.java)
                         startActivity(intent)
                     }
                 )
