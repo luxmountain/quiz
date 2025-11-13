@@ -1,0 +1,309 @@
+# Android English Learning App - Project Rules
+
+## Project Overview
+English vocabulary learning mobile application built with **Kotlin** and **Jetpack Compose**.
+Package: `com.uilover.project247`
+
+## Tech Stack
+- **Language**: Kotlin 2.0
+- **UI Framework**: Jetpack Compose (Material3)
+- **Architecture**: MVVM (Model-View-ViewModel)
+- **Min SDK**: 24, **Target SDK**: 36
+- **Backend**: Firebase Realtime Database
+- **Image Loading**: Coil 2.5.0
+- **API**: 
+  - Free Dictionary API (https://api.dictionaryapi.dev/)
+  - Unsplash for images
+- **Networking**: Retrofit 2.9.0 + Gson
+- **Build System**: Gradle (Kotlin DSL)
+
+## Project Structure
+
+```
+app/src/main/java/com/uilover/project247/
+├── data/
+│   ├── models/          # Data classes (Firebase models, Dictionary models)
+│   │   ├── FirebaseModels.kt    # Topic, Flashcard, Conversation
+│   │   └── DictionaryModels.kt  # DictionaryEntry, Meaning, Definition
+│   ├── repository/      # Data access layer
+│   │   └── FirebaseRepository.kt
+│   └── api/             # API services
+│       └── DictionaryApiService.kt
+│
+├── utils/               # Utility functions
+│   ├── Helper.kt        # parseHtmlToAnnotatedString, getWordTypeAbbreviation
+│   └── TextToSpeechManager.kt
+│
+├── DashboardActivity/   # Main screen - Topic list
+│   ├── MainActivity.kt
+│   ├── screens/
+│   │   └── MainScreen.kt
+│   ├── components/
+│   │   ├── TopicItem.kt
+│   │   ├── BottomNavigationBarStub.kt
+│   │   └── DictionaryScreenContent.kt
+│   └── Model/
+│       └── MainViewModel.kt
+│
+├── LearningActivity/    # Learning screen - Flashcards
+│   ├── LearningActivity.kt
+│   ├── LearningScreen.kt
+│   ├── components/
+│   │   ├── FlashcardView.kt
+│   │   ├── WriteWordView.kt
+│   │   └── MultipleChoiceView.kt
+│   └── Model/
+│       ├── LearningViewModel.kt
+│       └── LearningUiState.kt
+│
+├── ReviewActivity/      # Review screen
+│   ├── ReviewActivity.kt
+│   └── Model/
+│       └── ReviewViewModel.kt
+│
+├── DictionaryActivity/  # Dictionary lookup screen
+│   ├── DictionaryActivity.kt
+│   ├── screens/
+│   │   └── DictionaryScreen.kt
+│   └── Model/
+│       └── DictionaryViewModel.kt
+│
+└── ui/theme/           # Theme configuration
+    └── Theme.kt
+```
+
+## Architecture Patterns
+
+### MVVM Pattern
+- **Model**: Data classes in `data/models/`
+- **View**: Composable functions in `screens/` and `components/`
+- **ViewModel**: Business logic in `Model/` folders
+  - Use `StateFlow` for state management
+  - Inject repositories for data access
+
+### Data Flow
+```
+Firebase/API → Repository → ViewModel → UI State → Composable UI
+```
+
+### State Management
+- Use `StateFlow<UiState>` in ViewModels
+- Collect state with `collectAsState()` in Composables
+- Update state with `_uiState.update { ... }`
+
+## Coding Conventions
+
+### File Naming
+- **Activities**: `[Feature]Activity.kt` (e.g., `LearningActivity.kt`)
+- **Screens**: `[Feature]Screen.kt` (e.g., `MainScreen.kt`)
+- **Components**: Descriptive names (e.g., `FlashcardView.kt`, `TopicItem.kt`)
+- **ViewModels**: `[Feature]ViewModel.kt`
+- **UI States**: `[Feature]UiState.kt`
+
+### Composable Functions
+```kotlin
+@Composable
+fun FeatureName(
+    viewModel: FeatureViewModel,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    // UI implementation
+}
+```
+
+### ViewModel Pattern
+```kotlin
+class FeatureViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(FeatureUiState())
+    val uiState: StateFlow<FeatureUiState> = _uiState.asStateFlow()
+    
+    fun updateState() {
+        _uiState.update { it.copy(/* changes */) }
+    }
+}
+```
+
+### Color Scheme
+- **Primary Purple**: `#6200EA`
+- **Light Purple**: `#EDE7F6`
+- **Blue**: `#1976D2`
+- **Green**: `#4CAF50`
+- **Background**: `#F5F5F5`
+- Use `MaterialTheme.colorScheme` when possible
+
+### Spacing & Sizes
+- **Card padding**: 16-20dp
+- **Item spacing**: 8-16dp
+- **Corner radius**: 12-16dp
+- **Icon sizes**: 20-28dp
+- **Button height**: 48-56dp
+
+## Key Features
+
+### 1. Topic Learning
+- Display topics from Firebase
+- Each topic has flashcards and conversations
+- Click topic → Navigate to LearningActivity
+
+### 2. Flashcard Learning
+- **Front side**: Image + HTML context sentence (with `<b><u>` tags)
+- **Back side**: word + pronunciation + meaning + (word type abbreviation)
+- Flip animation with 3D rotation
+- Audio playback for pronunciation
+- Parse HTML with `parseHtmlToAnnotatedString()`
+
+### 3. Dictionary Lookup
+- Search English words via Free Dictionary API
+- Display: phonetics, definitions, examples, synonyms, antonyms, origin
+- Recent search history (last 10 searches)
+- Integrated in bottom navigation tab
+
+### 4. Progress Tracking
+- User progress stored in Firebase
+- Track learned words, scores, timestamps
+
+## Firebase Structure
+
+```json
+{
+  "topics": {
+    "topic1": {
+      "id": "topic1",
+      "name": "Daily Routine",
+      "nameVi": "Hoạt động hàng ngày",
+      "description": "...",
+      "imageUrl": "https://...",
+      "order": 1,
+      "totalWords": 10
+    }
+  },
+  "flashcards": {
+    "flashcard1": {
+      "id": "flashcard1",
+      "topicId": "topic1",
+      "word": "breakfast",
+      "pronunciation": "/ˈbrekfəst/",
+      "meaning": "bữa sáng",
+      "wordType": "noun",
+      "contextSentence": "I usually have <b><u>breakfast</u></b> at 7 AM",
+      "imageUrl": "https://..."
+    }
+  }
+}
+```
+
+## Important Rules
+
+### When Creating New Features
+1. Follow MVVM architecture
+2. Create ViewModel with StateFlow
+3. Use Composables for UI
+4. Add navigation in MainActivity or parent activity
+5. Update bottom navigation if needed
+
+### When Modifying UI
+1. Use Material3 components
+2. Follow existing color scheme
+3. Use `Modifier` for layouts
+4. Keep composables small and reusable
+5. Use `LazyColumn` for scrollable lists
+
+### When Working with Data
+1. Define data classes in `data/models/`
+2. Use `@Parcelize` for Parcelable classes
+3. Create repository for data access
+4. Use Retrofit for API calls
+5. Use Firebase Realtime Database SDK
+
+### When Handling State
+1. Never mutate state directly
+2. Use `_uiState.update { }` to change state
+3. Collect state with `collectAsState()` in Composables
+4. Handle loading, success, error states
+
+### HTML Content
+- Context sentences may contain HTML tags: `<b>`, `<u>`, `<i>`, `<strike>`
+- Use `parseHtmlToAnnotatedString()` from `utils/Helper.kt`
+- Never display raw HTML, always parse first
+
+### Navigation
+- Use `Intent` for Activity navigation
+- Pass data via `intent.putExtra()`
+- Bottom navigation tabs: "Tra từ", "Học từ vựng", "Ôn tập", "Hội thoại", "MochiHub"
+- Main tab is "Học từ vựng" (index 1)
+
+## Dependencies
+
+### Core
+```kotlin
+implementation(libs.androidx.core.ktx)
+implementation(libs.androidx.activity.compose)
+implementation(platform(libs.androidx.compose.bom))
+implementation(libs.androidx.material3)
+```
+
+### Firebase
+```kotlin
+implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+implementation("com.google.firebase:firebase-database-ktx")
+```
+
+### Networking
+```kotlin
+implementation("com.squareup.retrofit2:retrofit:2.9.0")
+implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+```
+
+### Image Loading
+```kotlin
+implementation("io.coil-kt:coil-compose:2.5.0")
+```
+
+## Testing Workflow
+1. Build with: `./gradlew clean build`
+2. Run on emulator or device
+3. Test navigation flows
+4. Verify Firebase connection
+5. Check API calls (Dictionary API)
+
+## Common Pitfalls to Avoid
+- ❌ Don't use `crossAxisAlignment` in Row (use `verticalAlignment`)
+- ❌ Don't use `crossAxisAlignment` in Column (use `horizontalAlignment`)
+- ❌ Don't forget to add activities to AndroidManifest.xml
+- ❌ Don't mutate StateFlow directly, use `.update { }`
+- ❌ Don't forget INTERNET permission for API calls
+- ❌ Don't use deprecated APIs (check warnings)
+- ❌ Don't create multiple instances of Repository
+
+## Vietnamese Language Context
+This app is for Vietnamese users learning English:
+- UI labels are in Vietnamese
+- Word meanings are in Vietnamese
+- Keep Vietnamese in UI, English in data models
+- Examples: "Tra từ" (Dictionary), "Học từ vựng" (Learn Vocabulary)
+
+## AI Assistant Guidelines
+When helping with this project:
+1. Always follow MVVM pattern
+2. Use Jetpack Compose (no XML layouts)
+3. Keep code consistent with existing style
+4. Suggest Material3 components
+5. Consider Vietnamese UI context
+6. Check for proper state management
+7. Ensure proper navigation setup
+8. Follow the project structure strictly
+9. Use helper functions from `utils/` package
+10. Parse HTML content when displaying
+
+## Current Development Status
+✅ Firebase integration complete
+✅ Dictionary API integration complete
+✅ Flashcard learning with flip animation
+✅ Bottom navigation with 5 tabs
+✅ HTML parsing for rich text
+✅ Recent search history
+🔄 Text-to-Speech integration (TODO)
+🔄 Conversation practice (TODO)
+🔄 Progress tracking UI (TODO)

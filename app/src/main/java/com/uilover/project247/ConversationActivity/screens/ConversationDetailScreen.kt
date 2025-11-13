@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -49,6 +50,8 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.text.withStyle
 import com.uilover.project247.ConversationActivity.components.DialogueBubble
 import com.uilover.project247.ConversationActivity.components.QuizButton
+import com.uilover.project247.LearningActivity.components.ProgressBar
+import com.uilover.project247.R
 
 @Composable
 fun createStyledDialogueText(text: String, target: String): AnnotatedString {
@@ -89,13 +92,12 @@ fun ConversationDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val conversation = uiState.conversation
-    val scrollState = rememberScrollState() // <-- THÊM MỚI: Để cuộn Column
+    val scrollState = rememberScrollState()
 
-    // --- 1. Thiết lập TextToSpeechManager ---
     val context = LocalContext.current
     val ttsManager = remember { TextToSpeechManager(context) }
 
-    // --- 2. Quản lý vòng đời (Lifecycle) của TTS ---
+    // Quản lý vòng đời của TTS
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -104,104 +106,120 @@ fun ConversationDetailScreen(
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        // Khi Composable bị hủy
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             ttsManager.shutdown()
         }
     }
 
-    // --- 3. "ĐỘNG CƠ" TỰ ĐỘNG ĐỌC ---
-    // LaunchedEffect sẽ chạy lại mỗi khi `currentSpokenText` thay đổi
+    // Tự động đọc
     LaunchedEffect(uiState.currentSpokenText) {
         val textToSpeak = uiState.currentSpokenText
         if (!textToSpeak.isNullOrBlank()) {
             ttsManager.speakWithCallback(textToSpeak) {
-                // Khi đọc xong, báo cho ViewModel
                 viewModel.onSpeechFinished()
             }
         }
     }
 
-    // --- 4. "ĐỘNG CƠ" TỰ ĐỘNG CUỘN ---
-    // Chạy lại mỗi khi số lượng hội thoại tăng hoặc phase thay đổi
+    // Tự động cuộn
     LaunchedEffect(uiState.visibleDialogueLines.size, uiState.currentPhase) {
-        delay(100) // Chờ UI vẽ xong
-        scrollState.animateScrollTo(scrollState.maxValue) // Cuộn xuống dưới cùng
+        delay(100)
+        scrollState.animateScrollTo(scrollState.maxValue)
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    LinearProgressIndicator(
-                        progress = { 0.5f }, // TODO: Lấy tiến trình từ ViewModel
-                        modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .clip(CircleShape)
+                    // ✅ Dùng ProgressBar component riêng của bạn
+                    ProgressBar(
+                        progress =0.3f,
+                        iconResId = R.drawable.ic_kitty
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.Close, "Đóng")
+                        Icon(Icons.Default.Close, contentDescription = "Đóng")
                     }
                 }
             )
         }
     ) { paddingValues ->
         if (uiState.isLoading || conversation == null) {
-
-            // (Bạn có thể dùng LoadingScreen() ở đây)
+            // TODO: Loading UI nếu cần
         } else {
             val firstSpeakerName = conversation.dialogue
                 .sortedBy { it.order }
                 .firstOrNull()
                 ?.speaker ?: ""
-            // --- 5. THAY THẾ LazyColumn BẰNG Column + verticalScroll ---
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp) // Áp dụng padding ở đây
-                    .verticalScroll(scrollState) // <-- THÊM MỚI
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(scrollState)
             ) {
-                // 1. Ảnh ngữ cảnh (Luôn hiển thị)
+                // ✅ 1. Context ở đầu trang + nút loa
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    IconButton(
+                        onClick = { ttsManager.speak(conversation.contextDescription) },
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                    ) {
+                        Icon(
+                            painter = painterResource( R.drawable.ic_loudspeaker),
+                            contentDescription = "Đọc ngữ cảnh",
+                            tint = Color.Unspecified // Giữ nguyên màu icon
+                        )
+                    }
+                    Text(
+                        text = conversation.contextDescription,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                }
+
+                // ✅ 2. Ảnh minh họa bo tròn
                 AsyncImage(
                     model = conversation.imageUrl,
-                    contentDescription = "Context",
+                    contentDescription = "Context Image",
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(12.dp))
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 2. Ngữ cảnh (Chỉ hiển thị khi > CONTEXT)
-                if (uiState.currentPhase >= ConversationPhase.CONTEXT) {
-                    // TODO: Bạn có thể tạo "ContextBubble" riêng
-                    Text(
-                        text = conversation.contextDescription,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
-                }
-                // 3. Các câu thoại (Chỉ hiển thị các câu trong `visibleDialogueLines`)
+                // ✅ 3. Các câu hội thoại
                 uiState.visibleDialogueLines.forEach { dialogue ->
                     val isUser = dialogue.speaker != firstSpeakerName
 
                     DialogueBubble(
                         dialogue = dialogue,
                         isUser = isUser,
-                        targetWord = conversation.targetWord, // <-- Truyền targetWord
+                        targetWord = conversation.targetWord,
                         onSpeakClick = {
-                            // Bấm nút loa -> chỉ đọc, không kích hoạt luồng
                             ttsManager.speak(dialogue.text)
                         }
                     )
                 }
 
-                // 4. Phần Quiz (Chỉ hiển thị khi >= QUESTION)
+                // ✅ 4. Phần câu hỏi Quiz
                 if (uiState.currentPhase >= ConversationPhase.QUESTION) {
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(
@@ -223,10 +241,8 @@ fun ConversationDetailScreen(
                     }
                 }
 
-                // Thêm một khoảng đệm ở dưới cùng để cuộn
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }
 }
-
