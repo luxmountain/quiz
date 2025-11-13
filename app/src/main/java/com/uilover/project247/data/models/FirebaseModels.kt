@@ -155,15 +155,75 @@ data class TopicProgress(
     }
 }
 
+/**
+ * Trạng thái của flashcard trong hệ thống Anki SRS
+ */
+enum class CardState {
+    NEW,        // Chưa học lần nào
+    LEARNING,   // Đang trong giai đoạn học (< 24h)
+    REVIEW,     // Đang ôn tập định kỳ
+    RELEARNING  // Học lại sau khi quên
+}
+
+/**
+ * Mức độ nhớ khi review flashcard
+ */
+enum class ReviewQuality {
+    AGAIN,  // 0 - Quên hoàn toàn, cần học lại
+    HARD,   // 1 - Nhớ khó khăn
+    GOOD,   // 2 - Nhớ được bình thường
+    EASY    // 3 - Nhớ rất dễ dàng
+}
+
 @Parcelize
 data class FlashcardResult(
     val flashcardId: String = "",
     val learned: Boolean = false,
+    
+    // Anki SRS Algorithm fields
+    val state: String = CardState.NEW.name,  // NEW, LEARNING, REVIEW, RELEARNING
+    val easeFactor: Float = 2.5f,            // 1.3 - 2.5+ (độ dễ nhớ)
+    val intervalDays: Float = 0f,            // Khoảng cách ngày cho lần review tiếp (hỗ trợ < 1 ngày)
+    val currentStep: Int = 0,                // Bước hiện tại trong learning steps (0-based)
+    val lapses: Int = 0,                     // Số lần quên (để giảm ease factor)
+    
     val reviewCount: Int = 0,
     val lastReviewDate: Long? = null,
     val nextReviewDate: Long? = null,
-    val confidence: Int = 0 // 0-100
-) : Parcelable
+    val confidence: Int = 0 // 0-100 (deprecated, dùng easeFactor thay thế)
+) : Parcelable {
+    
+    /**
+     * Get CardState enum from string
+     */
+    fun getCardState(): CardState {
+        return try {
+            CardState.valueOf(state)
+        } catch (e: Exception) {
+            CardState.NEW
+        }
+    }
+    
+    /**
+     * Check if card is due for review
+     */
+    fun isDue(currentTime: Long = System.currentTimeMillis()): Boolean {
+        return nextReviewDate?.let { it <= currentTime } ?: true
+    }
+    
+    /**
+     * Check if card is new (never studied)
+     */
+    fun isNew(): Boolean = getCardState() == CardState.NEW
+    
+    /**
+     * Check if card is in learning phase
+     */
+    fun isLearning(): Boolean {
+        val cardState = getCardState()
+        return cardState == CardState.LEARNING || cardState == CardState.RELEARNING
+    }
+}
 
 @Parcelize
 data class ConversationResult(

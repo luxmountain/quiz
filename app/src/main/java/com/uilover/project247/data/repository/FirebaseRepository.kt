@@ -9,6 +9,8 @@ import com.uilover.project247.data.models.Topic
 import com.uilover.project247.data.models.Flashcard
 import com.uilover.project247.data.models.Conversation
 import com.uilover.project247.data.models.FirebasePaths
+import com.uilover.project247.data.models.UserProgress
+import com.uilover.project247.data.models.FlashcardResult
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -213,6 +215,111 @@ class FirebaseRepository {
         } catch (e: Exception) {
             Log.e(TAG, "Error loading conversation $conversationId", e)
             null
+        }
+    }
+    
+    // ==================== USER PROGRESS ====================
+    
+    /**
+     * Lấy user progress theo userId
+     */
+    suspend fun getUserProgress(userId: String): UserProgress? {
+        return try {
+            val snapshot = database.getReference(FirebasePaths.userProgress(userId))
+                .get()
+                .await()
+            
+            snapshot.getValue(UserProgress::class.java)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading user progress for $userId", e)
+            null
+        }
+    }
+    
+    /**
+     * Lưu hoặc cập nhật user progress
+     */
+    suspend fun saveUserProgress(userProgress: UserProgress): Boolean {
+        return try {
+            database.getReference(FirebasePaths.userProgress(userProgress.userId))
+                .setValue(userProgress)
+                .await()
+            Log.d(TAG, "Saved user progress for ${userProgress.userId}")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving user progress", e)
+            false
+        }
+    }
+    
+    /**
+     * Cập nhật flashcard result cho user
+     */
+    suspend fun updateFlashcardResult(
+        userId: String, 
+        flashcardId: String, 
+        result: FlashcardResult
+    ): Boolean {
+        return try {
+            database.getReference(FirebasePaths.userFlashcardResults(userId))
+                .child(flashcardId)
+                .setValue(result)
+                .await()
+            Log.d(TAG, "Updated flashcard result: $flashcardId for user $userId")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating flashcard result", e)
+            false
+        }
+    }
+    
+    /**
+     * Lấy tất cả flashcard results của user
+     */
+    suspend fun getFlashcardResults(userId: String): Map<String, FlashcardResult> {
+        return try {
+            val snapshot = database.getReference(FirebasePaths.userFlashcardResults(userId))
+                .get()
+                .await()
+            
+            val results = mutableMapOf<String, FlashcardResult>()
+            snapshot.children.forEach { child ->
+                try {
+                    val result = child.getValue(FlashcardResult::class.java)
+                    if (result != null) {
+                        results[child.key ?: ""] = result
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing flashcard result: ${child.key}", e)
+                }
+            }
+            
+            Log.d(TAG, "Loaded ${results.size} flashcard results for user $userId")
+            results
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading flashcard results for $userId", e)
+            emptyMap()
+        }
+    }
+    
+    /**
+     * Lấy flashcard results theo topic
+     */
+    suspend fun getFlashcardResultsByTopic(
+        userId: String, 
+        topicId: String
+    ): Map<String, FlashcardResult> {
+        return try {
+            // Lấy tất cả flashcards của topic
+            val flashcards = getFlashcardsByTopic(topicId)
+            val flashcardIds = flashcards.map { it.id }.toSet()
+            
+            // Lấy results và filter theo flashcardIds
+            val allResults = getFlashcardResults(userId)
+            allResults.filter { it.value.flashcardId in flashcardIds }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading flashcard results by topic", e)
+            emptyMap()
         }
     }
     
