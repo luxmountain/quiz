@@ -10,9 +10,11 @@ import com.uilover.project247.ConversationActivity.screens.ConversationDetailScr
 import com.uilover.project247.ConversationActivity.viewmodels.ConversationDetailViewModel
 import com.uilover.project247.ConversationActivity.viewmodels.ConversationDetailViewModelFactory
 import com.uilover.project247.ui.theme.Project247Theme
+import com.uilover.project247.data.repository.FirebaseRepository
+import kotlin.getValue
 
 class ConversationDetailActivity : ComponentActivity() {
-
+    private val firebaseRepository by lazy { FirebaseRepository() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,7 +30,7 @@ class ConversationDetailActivity : ComponentActivity() {
 
         // 3. Khởi tạo ViewModel bằng Factory (để truyền `conversationId` vào)
         val viewModel: ConversationDetailViewModel by viewModels {
-            ConversationDetailViewModelFactory(conversationId)
+            ConversationDetailViewModelFactory(conversationId,firebaseRepository)
         }
 
         setContent {

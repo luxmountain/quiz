@@ -75,38 +75,42 @@ data class Flashcard(
     }
 }
 
+@Parcelize
+data class VocabularyWordInfo(
+    val word: String = "",
+    val meaning: String = "",
+    val pronunciation: String = "",
+    val wordType: String = "",
+    val wordTypeVi: String = ""
+): Parcelable
+
 // ==================== CONVERSATION MODELS ====================
 
 @Parcelize
 data class Conversation(
     val id: String = "",
-    val topicId: String = "",
-    val flashcardId: String = "",
     val title: String = "",
     val titleVi: String = "",
     val imageUrl: String = "",
     val contextDescription: String = "",
     val contextDescriptionVi: String = "",
-    val dialogue: List<DialogueLine> = emptyList(),
-    val targetWord: String = "",
-    val question: String = "",
-    val questionVi: String = "",
-    val options: List<QuizOption> = emptyList(),
+    val dialogue: List<DialogueLine> = emptyList(), // Danh sách các câu thoại (đã chứa quiz)
+    val vocabularyWords: List<VocabularyWordInfo> = emptyList(), // Danh sách từ vựng
     val order: Int = 0,
     val createdAt: Long = 0
 ) : Parcelable {
-
-    fun getCorrectOption(): QuizOption? {
-        return options.find { it.isCorrect }
-    }
 }
 
 @Parcelize
 data class DialogueLine(
     val speaker: String = "",
     val text: String = "",
-    val textVi: String = "",
-    val order: Int = 0
+    val textVi: String = "", // Giữ lại textVi để hỗ trợ nút Dịch
+    val order: Int = 0,
+    val vocabularyWord: String = "", // Từ vựng mục tiêu của câu này
+    val question: String = "",
+    val questionVi: String = "",
+    val options: List<QuizOption> = emptyList()
 ) : Parcelable
 
 @Parcelize

@@ -7,6 +7,7 @@ import com.uilover.project247.LearningActivity.Model.CheckResult
 import com.uilover.project247.data.models.Conversation
 import com.uilover.project247.data.models.DialogueLine
 import com.uilover.project247.data.models.QuizOption
+import com.uilover.project247.data.models.VocabularyWordInfo
 import com.uilover.project247.data.repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,33 +15,48 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class ConversationPhase {
-    LOADING,          // Đang tải
-    CONTEXT,          // Đang ở phần giới thiệu ngữ cảnh
-    DIALOGUE,         // Đang ở phần hội thoại
-    QUESTION,         // Đang ở phần câu hỏi
-    FINISHED          // Đã trả lời xong
+enum class ConversationStep {
+    LOADING,
+    CONTEXT,          // Đang đọc ngữ cảnh
+    SHOWING_DIALOGUE, // Đang đọc 1 câu thoại
+    QUIZ_CHOICE,      // Đang làm quiz 1 (Chọn nghĩa)
+    QUIZ_WRITE,       // Đang làm quiz 2 (Viết từ)
+    FINISHED          // Hoàn thành
 }
 data class ConversationDetailUiState(
     val isLoading: Boolean = true,
     val conversation: Conversation? = null,
-    val errorMessage: String? = null, // <-- Thêm trường lỗi
-    // --- THAY ĐỔI: Quản lý trạng thái chi tiết ---
-    val currentPhase: ConversationPhase = ConversationPhase.LOADING,
-    val visibleDialogueLines: List<DialogueLine> = emptyList(), // Các dòng chat đã hiện
-    val currentSpokenText: String? = null, // Văn bản cần đọc
-    // -------------------------------------------
+    val errorMessage: String? = null,
 
-    // Trạng thái Quiz (giữ nguyên)
+    val currentStep: ConversationStep = ConversationStep.LOADING,
+    val currentDialogueIndex: Int = 0, // Theo dõi đang ở câu thoại thứ mấy
+    val visibleDialogueLines: List<DialogueLine> = emptyList(),
+    val currentSpokenText: String? = null,
+
     val checkResult: CheckResult = CheckResult.NEUTRAL,
     val selectedOptionId: String? = null
-)
+){
+    val currentDialogue: DialogueLine?
+        get() = conversation?.dialogue?.getOrNull(currentDialogueIndex)
 
-class ConversationDetailViewModel(private val conversationId: String) : ViewModel() {
+    // Helper lấy thông tin từ vựng đầy đủ
+    val currentWordInfo: VocabularyWordInfo?
+        get() = conversation?.vocabularyWords
+            ?.find { it.word == currentDialogue?.vocabularyWord }
+
+    // Helper tính tiến trình
+    val progress: Float
+        get() = if (conversation == null || conversation.dialogue.isEmpty()) 0f
+        else (currentDialogueIndex + 1) / conversation.dialogue.size.toFloat()
+}
+
+class ConversationDetailViewModel(
+    private val conversationId: String,
+    private val repository: FirebaseRepository // Nhận Repository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ConversationDetailUiState())
     val uiState: StateFlow<ConversationDetailUiState> = _uiState.asStateFlow()
-    private val firebaseRepository = FirebaseRepository()
 
     init {
         loadConversation()
@@ -48,105 +64,55 @@ class ConversationDetailViewModel(private val conversationId: String) : ViewMode
 
     private fun loadConversation() {
         viewModelScope.launch {
-            // 1. Bắt đầu tải, reset lỗi
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                // 2. Lấy dữ liệu từ Firebase
-                // (Tôi đang giả lập `firebaseRepository`, bạn hãy thay thế bằng code thật)
-                val conversation= firebaseRepository.getConversation(conversationId)
-
+                val conversation = repository.getConversation(conversationId)
                 if (conversation != null) {
-                    // 3. THÀNH CÔNG: Cập nhật state VÀ bắt đầu luồng hội thoại
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             conversation = conversation,
-                            // Bắt đầu bằng bước CONTEXT
-                            currentPhase = ConversationPhase.CONTEXT,
-                            // Yêu cầu đọc `contextDescriptionVi`
-                            currentSpokenText = conversation.contextDescription
+                            currentStep = ConversationStep.CONTEXT,
+                            currentSpokenText = conversation.contextDescription // Đọc Context (tiếng Anh)
                         )
                     }
-                    Log.d("ConvDetailViewModel", "Loaded conversation: ${conversation.id}")
                 } else {
-                    // 4. KHÔNG TÌM THẤY: Báo lỗi
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = "Không tìm thấy dữ liệu hội thoại.")
-                    }
-                    Log.w("ConvDetailViewModel", "Conversation with id $conversationId not found")
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Không tìm thấy hội thoại.") }
                 }
             } catch (e: Exception) {
-                // 5. LỖI KẾT NỐI: Báo lỗi
-                Log.e("ConvDetailViewModel", "Error loading conversation $conversationId", e)
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Lỗi kết nối: ${e.message}")
-                }
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Lỗi: ${e.message}") }
             }
         }
     }
     fun onSpeechFinished() {
         val currentState = _uiState.value
-        val conversation = currentState.conversation ?: return
+        when (currentState.currentStep) {
 
-        when (currentState.currentPhase) {
+            // 1. Đọc xong Context -> Chuyển sang câu thoại đầu tiên
+            ConversationStep.CONTEXT -> {
+                goToDialogueStep(0)
+            }
 
-            // Nếu vừa đọc xong CONTEXT
-            ConversationPhase.CONTEXT -> {
-                // Chuyển sang DIALOGUE (câu đầu tiên)
-                val firstDialogue = conversation.dialogue.sortedBy { it.order }.firstOrNull()
-                if (firstDialogue != null) {
-                    _uiState.update {
-                        it.copy(
-                            currentPhase = ConversationPhase.DIALOGUE,
-                            visibleDialogueLines = listOf(firstDialogue), // Hiển thị câu đầu tiên
-                            currentSpokenText = firstDialogue.text // Yêu cầu đọc câu đầu tiên
-                        )
-                    }
-                } else {
-                    goToQuestionPhase()
+            // 2. Đọc xong câu thoại -> Chuyển sang Quiz 1 (Chọn nghĩa)
+            ConversationStep.SHOWING_DIALOGUE -> {
+                _uiState.update {
+                    it.copy(
+                        currentStep = ConversationStep.QUIZ_CHOICE,
+                        currentSpokenText = it.currentDialogue?.question, // Đọc câu hỏi
+                        checkResult = CheckResult.NEUTRAL,
+                        selectedOptionId = null
+                    )
                 }
             }
 
-            // Nếu vừa đọc xong một câu DIALOGUE
-            ConversationPhase.DIALOGUE -> {
-                val currentOrder = currentState.visibleDialogueLines.last().order
-                val nextDialogue = conversation.dialogue.sortedBy { it.order }
-                    .find { it.order == currentOrder + 1 } // Tìm câu tiếp theo
-
-                if (nextDialogue != null) {
-                    // Nếu còn câu tiếp theo
-                    _uiState.update {
-                        it.copy(
-                            visibleDialogueLines = it.visibleDialogueLines + nextDialogue,
-                            currentSpokenText = nextDialogue.text // Yêu cầu đọc câu tiếp theo
-                        )
-                    }
-                } else {
-                    // Hết hội thoại -> Chuyển sang QUESTION
-                    goToQuestionPhase()
-                }
-            }
-
-            // Nếu vừa đọc xong QUESTION
-            ConversationPhase.QUESTION -> {
-                _uiState.update { it.copy(currentSpokenText = null) } // Dừng lại, chờ trả lời
-            }
-
-            else -> {
+            // 3. Đọc xong câu hỏi -> Dừng lại, chờ người dùng
+            ConversationStep.QUIZ_CHOICE, ConversationStep.QUIZ_WRITE -> {
                 _uiState.update { it.copy(currentSpokenText = null) }
             }
+            else -> {}
         }
     }
-
-    private fun goToQuestionPhase() {
-        _uiState.update {
-            it.copy(
-                currentPhase = ConversationPhase.QUESTION,
-                currentSpokenText = it.conversation?.question // Đọc câu hỏi
-            )
-        }
-    }
-    fun checkAnswer(selectedOption: QuizOption) {
+    fun checkChoiceAnswer(selectedOption: QuizOption) {
         if (_uiState.value.checkResult != CheckResult.NEUTRAL) return
 
         if (selectedOption.isCorrect) {
@@ -166,23 +132,70 @@ class ConversationDetailViewModel(private val conversationId: String) : ViewMode
             }
         }
     }
+    fun checkWriteAnswer(userAnswer: String) {
+        if (_uiState.value.checkResult != CheckResult.NEUTRAL) return
+        val correctWord = _uiState.value.currentDialogue?.vocabularyWord
+
+        if (userAnswer.equals(correctWord, ignoreCase = true)) {
+            _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
+        } else {
+            _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
+        }
+    }
+
+    fun clearCheckResult() {
+        if (_uiState.value.checkResult == CheckResult.INCORRECT) {
+            _uiState.update { it.copy(checkResult = CheckResult.NEUTRAL) }
+        }
+    }
     fun retry() {
         loadConversation()
     }
     fun onQuizContinue() {
         val currentState = _uiState.value
+        if (currentState.checkResult == CheckResult.INCORRECT) {
+            // Nếu Sai -> Thử lại
+            _uiState.update { it.copy(checkResult = CheckResult.NEUTRAL, selectedOptionId = null) }
+            return
+        }
 
-        if(currentState.checkResult == CheckResult.CORRECT) {
-            // Nếu đúng -> Kết thúc
-            _uiState.update { it.copy(currentPhase = ConversationPhase.FINISHED) }
-        } else {
-            // Nếu sai -> Reset lại, cho trả lời lại
+        // Nếu Đúng:
+        when (currentState.currentStep) {
+            // 4. Đúng Quiz 1 -> Chuyển sang Quiz 2 (Viết)
+            ConversationStep.QUIZ_CHOICE -> {
+                _uiState.update {
+                    it.copy(
+                        currentStep = ConversationStep.QUIZ_WRITE,
+                        checkResult = CheckResult.NEUTRAL,
+                        selectedOptionId = null,
+                    )
+                }
+            }
+            // 5. Đúng Quiz 2 -> Chuyển sang câu thoại tiếp theo
+            ConversationStep.QUIZ_WRITE -> {
+                goToDialogueStep(currentState.currentDialogueIndex + 1)
+            }
+            else -> {}
+        }
+    }
+    private fun goToDialogueStep(index: Int) {
+        val conversation = _uiState.value.conversation ?: return
+        val nextDialogue = conversation.dialogue.getOrNull(index)
+
+        if (nextDialogue != null) {
+            // Nếu còn hội thoại
             _uiState.update {
                 it.copy(
-                    checkResult = CheckResult.NEUTRAL,
-                    selectedOptionId = null
+                    currentStep = ConversationStep.SHOWING_DIALOGUE,
+                    currentDialogueIndex = index,
+                    visibleDialogueLines = it.visibleDialogueLines + nextDialogue,
+                    currentSpokenText = nextDialogue.text, // Đọc câu thoại mới
+                    checkResult = CheckResult.NEUTRAL
                 )
             }
+        } else {
+            // Hết hội thoại
+            _uiState.update { it.copy(currentStep = ConversationStep.FINISHED) }
         }
     }
 }
@@ -190,6 +203,5 @@ class ConversationDetailViewModel(private val conversationId: String) : ViewMode
 
 
 
-    // (Bạn có thể thêm hàm next() hoặc onComplete() ở đây)
 
 

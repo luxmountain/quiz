@@ -1,5 +1,6 @@
 package com.uilover.project247.ConversationActivity.components
 
+import androidx.compose.foundation.Image // <-- Thêm
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,21 +12,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn // <-- Thêm
+import androidx.compose.foundation.shape.CircleShape // <-- Thêm
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.filled.VolumeUp // <-- Sửa
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip // <-- Thêm
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration // <-- Thêm
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.uilover.project247.ConversationActivity.screens.createStyledDialogueText
@@ -37,97 +38,94 @@ fun DialogueBubble(
     dialogue: DialogueLine,
     isUser: Boolean,
     targetWord: String,
-    onSpeakClick: () -> Unit // Callback khi bấm nút loa
+    onSpeakClick: () -> Unit,
+    onTranslateClick: () -> Unit,
+    isTranslationVisible: Boolean,
+    showBlank: Boolean
 ) {
     val bubbleColor = if (isUser) Color(0xFFFFF8E1) else Color(0xFFF3F3F3)
     val shape = RoundedCornerShape(16.dp)
 
-    // --- SỬA 2: Thêm State để ẩn/hiện bản dịch ---
-    var isTranslationVisible by remember { mutableStateOf(false) }
+    // Lấy chiều rộng màn hình để giới hạn kích thước bong bóng
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
 
+        // 1. Avatar (Bên trái, nếu không phải user)
         if (!isUser) {
             AvatarIcon(isUser = false)
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        // --- SỬA 3: Sửa lại cấu trúc bên trong Box ---
+        // 2. Bong bóng chat (Tự co giãn)
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.85f)
+                // SỬA: Dùng `widthIn` để bong bóng "nhỏ hơn",
+                // thay vì fillMaxWidth(0.85f)
+                .widthIn(min = 80.dp, max = screenWidth * 0.7f)
                 .background(bubbleColor, shape)
         ) {
-            // Dùng Row để chứa (Cột Nội dung) và (Nút Dịch)
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.Top // Căn nút dịch lên trên
+            // Cột chứa (Tiếng Anh) và (Tiếng Việt)
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
-                // CỘT 1: Chứa Tiếng Anh và Tiếng Việt
-                Column(
-                    modifier = Modifier.weight(1f) // Chiếm hết không gian
-                ) {
-                    // Hàng Tiếng Anh (Loa + Text)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
-                            onClick = onSpeakClick,
+                // Hàng Tiếng Anh (Loa + Text)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onSpeakClick,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_loudspeaker),
+                            "Phát âm",
+                            tint = Color.Unspecified,
                             modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_loudspeaker),
-                                contentDescription = "Phát âm thanh",
-                                tint = Color.Unspecified
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = createStyledDialogueText(
-                                text = dialogue.text, // Tiếng Anh
-                                target = targetWord
-                            ),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    } // Hết Hàng Tiếng Anh
-
-                    // --- SỬA 4: Thêm Text Tiếng Việt (có điều kiện) ---
-                    if (isTranslationVisible) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = dialogue.textVi, // Tiếng Việt
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray, // "in nhạt hơn"
-                            // Căn lề cho khớp với text Tiếng Anh
-                            modifier = Modifier.padding(start = 32.dp)
                         )
                     }
-                } // Hết Cột 1
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = createStyledDialogueText(
+                            text = dialogue.text,
+                            target = targetWord,
+                            showBlank = showBlank
+                        ),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                } // Hết Hàng Tiếng Anh
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // CỘT 2: Nút Dịch (G-Translate)
-                IconButton(
-                    onClick = { isTranslationVisible = !isTranslationVisible },
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        // TODO: Đảm bảo bạn có icon tên `ic_g_translate` trong `drawable`
-                        painter = painterResource(id = R.drawable.ic_translation),
-                        contentDescription = "Dịch",
-                        tint = Color.Gray
+                // Hàng Tiếng Việt (nếu hiển thị)
+                if (isTranslationVisible) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        dialogue.textVi,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 32.dp) // Thụt lề
                     )
                 }
-            } // Hết Row (Nội dung + Dịch)
-        } // Hết Box (Bong bóng)
+            } // Hết Cột nội dung
+        } // Hết Box (Bubble)
 
+        // 3. Nút Dịch (Bên ngoài, nếu không phải user)
+        if (!isUser) {
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = onTranslateClick, modifier = Modifier.size(24.dp)) {
+                Icon(
+                    painterResource(id = R.drawable.ic_translation),
+                    "Dịch",
+                    tint = Color.Unspecified // Giữ màu gốc
+                )
+            }
+        }
+
+        // 4. Avatar (Bên phải, nếu là user)
         if (isUser) {
             Spacer(modifier = Modifier.width(8.dp))
             AvatarIcon(isUser = true)
         }
-    } // Hết Row (Avatar + Bong bóng)
+    }
 }
