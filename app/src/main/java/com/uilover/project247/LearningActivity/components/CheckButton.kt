@@ -18,30 +18,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CheckButtonBottomBar(
+fun CheckButton(
     isEnabled: Boolean,
     onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface) // Màu trắng
+            // --- SỬA LỖI: XÓA DÒNG NÀY ĐI ---
+            // .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
             onClick = onClick,
-            enabled = isEnabled, // <-- Nút bị vô hiệu hóa khi chưa nhập
+            enabled = isEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
-                // Màu xám khi disabled, màu xanh lá khi enabled
+                // Màu khi BẬT (xanh lá)
                 containerColor = Color(0xFF76C81A),
                 contentColor = Color.White,
-                disabledContainerColor = Color.LightGray.copy(alpha = 0.5f),
-                disabledContentColor = Color.DarkGray
+
+                // --- SỬA LẠI MÀU KHI TẮT (GIỐNG ẢNH) ---
+                disabledContainerColor = Color(0xFFE8E8E8), // Màu xám nhạt
+                disabledContentColor = Color.Gray // Chữ màu xám
             )
         ) {
             Text(

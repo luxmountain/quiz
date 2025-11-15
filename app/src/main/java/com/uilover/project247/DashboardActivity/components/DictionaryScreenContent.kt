@@ -102,7 +102,7 @@ fun SearchBarSection(
                 Icon(
                     Icons.Default.Search, 
                     contentDescription = "Tìm kiếm",
-                    tint = Color(0xFF6200EA)
+                    tint = Color(0xFF2196F3)
                 )
             },
             trailingIcon = {
@@ -121,7 +121,7 @@ fun SearchBarSection(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
-                focusedBorderColor = Color(0xFF6200EA),
+                focusedBorderColor = Color(0xFF2196F3),
                 unfocusedBorderColor = Color(0xFFE0E0E0)
             ),
             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
@@ -138,7 +138,7 @@ fun SearchBarSection(
             modifier = Modifier.height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF6200EA),
+                containerColor = Color(0xFF2196F3),
                 contentColor = Color.White
             ),
             elevation = ButtonDefaults.buttonElevation(
@@ -225,7 +225,7 @@ fun RecentSearchesSection(
                         Icons.Default.Search,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = Color(0xFF6200EA)
+                        tint = Color(0xFF2196F3)
                     )
                 }
                 Text(
@@ -254,7 +254,7 @@ fun RecentSearchesSection(
                     Icon(
                         Icons.Default.Search,
                         contentDescription = null,
-                        tint = Color(0xFF6200EA),
+                        tint = Color(0xFF2196F3),
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -295,7 +295,7 @@ fun RecentSearchesSection(
                             Icon(
                                 Icons.Default.Search,
                                 contentDescription = null,
-                                tint = Color(0xFF6200EA),
+                                tint = Color(0xFF2196F3),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -357,7 +357,7 @@ fun DictionaryEntryCard(entry: DictionaryEntry) {
                         text = entry.word,
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6200EA)
+                        color = Color(0xFF2196F3)
                     )
                     
                     val phoneticText = entry.phonetic 
@@ -367,7 +367,7 @@ fun DictionaryEntryCard(entry: DictionaryEntry) {
                         Text(
                             text = phoneticText,
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color(0xFF512DA8),
+                            color = Color(0xFF2196F3),
                             fontStyle = FontStyle.Italic,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -383,7 +383,7 @@ fun DictionaryEntryCard(entry: DictionaryEntry) {
                         },
                         modifier = Modifier.size(56.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = Color(0xFF6200EA),
+                            containerColor = Color(0xFF2196F3),
                             contentColor = Color.White
                         )
                     ) {
@@ -559,7 +559,7 @@ fun DefinitionItem(definition: Definition, number: Int) {
                     modifier = Modifier
                         .size(28.dp)
                         .background(
-                            color = Color(0xFF6200EA),
+                            color = Color(0xFF2196F3),
                             shape = RoundedCornerShape(14.dp)
                         ),
                     contentAlignment = Alignment.Center

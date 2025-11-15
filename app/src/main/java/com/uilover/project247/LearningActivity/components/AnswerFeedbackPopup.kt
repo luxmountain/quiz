@@ -1,28 +1,16 @@
 package com.uilover.project247.LearningActivity.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.* // Import tất cả layout
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+// SỬA 1: Dùng icon AutoMirrored (hỗ trợ RTL tốt hơn)
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clip // SỬA 2: Thêm import
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,10 +30,13 @@ fun AnswerFeedbackPopup(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(backgroundColor)
-            // Cong 2 góc trên
+            // SỬA 3: Giữ bo góc (đã có)
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .padding(24.dp),
+            .background(backgroundColor)
+            // SỬA 4: Thêm padding cho thanh điều hướng (Home/Back)
+            .navigationBarsPadding()
+            // SỬA 5: Tăng padding dọc (vertical) cho thoáng hơn
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 1. Tiêu đề (Chính xác! / Đáp án đúng là:)
@@ -55,7 +46,8 @@ fun AnswerFeedbackPopup(
             fontWeight = FontWeight.Bold,
             color = Color.White
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        // SỬA 6: Tăng khoảng cách
+        Spacer(modifier = Modifier.height(24.dp))
 
         // 2. Nội dung đáp án
         Row(
@@ -64,9 +56,16 @@ fun AnswerFeedbackPopup(
         ) {
             // Nút loa
             IconButton(onClick = { /* TODO: TTS Speak */ }) {
-                Icon(Icons.Default.VolumeUp, "Phát âm", tint = Color.White)
+                Icon(
+                    Icons.AutoMirrored.Filled.VolumeUp, // Dùng icon AutoMirrored
+                    contentDescription = "Phát âm",
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp) // Cho icon to hơn 1 chút
+                )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            // SỬA 7: Tăng khoảng cách
+            Spacer(modifier = Modifier.width(12.dp))
+
             // Từ vựng và phiên âm
             Column {
                 Text(
@@ -86,7 +85,11 @@ fun AnswerFeedbackPopup(
 
         // 3. Nghĩa và câu ví dụ
         Column(
-            modifier = Modifier.fillMaxWidth().padding(start = 48.dp) // Căn lề
+            modifier = Modifier
+                .fillMaxWidth()
+                // SỬA 8: Căn lề (padding) chính xác
+                // Kích thước IconButton (48dp) + Spacer (12dp) = 60dp
+                .padding(start = 60.dp)
         ) {
             Text(
                 text = card.meaning,
@@ -96,14 +99,15 @@ fun AnswerFeedbackPopup(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = card.contextSentence, // (Nên dùng parseHtmlToAnnotatedString)
+                text = card.contextSentence,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.9f)
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        // SỬA 9: Tăng khoảng cách
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // 4. Nút "Tiếp tục"
+        // 4. Nút "Tiếp tục" (Giữ nguyên)
         Button(
             onClick = onContinue,
             shape = RoundedCornerShape(28.dp),

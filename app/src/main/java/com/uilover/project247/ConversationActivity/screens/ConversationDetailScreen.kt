@@ -1,5 +1,6 @@
 package com.uilover.project247.ConversationActivity.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -151,7 +152,7 @@ fun ConversationDetailScreen(
                 title = {
                     // ✅ Dùng ProgressBar component riêng của bạn
                     ProgressBar(
-                        progress =0.3f,
+                        progress =uiState.progress,
                         iconResId = R.drawable.ic_kitty
                     )
                 },
@@ -227,17 +228,18 @@ fun ConversationDetailScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Padding từ Scaffold
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(0.dp))
                 // (Context, Image giữ nguyên)
                 if (uiState.currentStep >= ConversationStep.CONTEXT) {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                            .fillMaxWidth().padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { ttsManager.speak(conversation.contextDescription) }, modifier = Modifier.size(24.dp)) {
@@ -257,11 +259,9 @@ fun ConversationDetailScreen(
                     contentDescription = "Context",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp) // Padding riêng
                         .aspectRatio(16 / 9f)
                         .clip(RoundedCornerShape(16.dp))
                 )
-                Spacer(modifier = Modifier.height(16.dp))
 
                 // Các câu thoại
                 uiState.visibleDialogueLines.forEach { dialogue ->
@@ -287,18 +287,48 @@ fun ConversationDetailScreen(
                     )
                 }
 
-                // --- 5. HIỂN THỊ PROMPT "ĐIỀN VÀO CHỖ TRỐNG" ---
-                if (uiState.currentStep == ConversationStep.QUIZ_WRITE) {
-                    // Đây là bong bóng của Mochi
+                if (uiState.currentStep == ConversationStep.QUIZ_CHOICE) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.Start
+                            .padding(horizontal = 8.dp, vertical = 4.dp), // Padding chuẩn
+                        verticalAlignment = Alignment.Bottom, // Căn avatar xuống dưới
+                        horizontalArrangement = Arrangement.Start // Căn trái
                     ) {
-                        // TODO: Dùng Avatar của Mochi
-                        AvatarIcon(isUser = false)
+                        Image(
+                            painter = painterResource(id = R.drawable.question),
+                            contentDescription = "Quiz prompt",
+                            modifier = Modifier.size(56.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFFF3F3F3), RoundedCornerShape(16.dp))
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Chọn nghĩa đúng của từ gạch chân",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // --- 5. SỬA LẠI PROMPT "ĐIỀN TỪ" ---
+                if (uiState.currentStep == ConversationStep.QUIZ_WRITE) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp), // Padding chuẩn
+                        verticalAlignment = Alignment.Bottom, // Căn avatar xuống dưới
+                        horizontalArrangement = Arrangement.Start // Căn trái
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.question),
+                            contentDescription = "Quiz prompt",
+                            modifier = Modifier.size(56.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
@@ -313,7 +343,6 @@ fun ConversationDetailScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }

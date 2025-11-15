@@ -1,6 +1,5 @@
 package com.uilover.project247.ConversationActivity.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,7 +16,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 
 @Composable
-public fun ChatInputBottomBar(
+fun ChatInputBottomBar(
     text: String,
     onTextChange: (String) -> Unit,
     onSend: () -> Unit,
@@ -38,10 +37,15 @@ public fun ChatInputBottomBar(
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("Nhập câu trả lời của bạn") },
                 shape = RoundedCornerShape(24.dp),
+
+                // --- SỬA LỖI 1: SỬA MÀU VIỀN ---
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Gray,
+                    // Đổi thành màu Primary (thường là xanh dương)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = Color.LightGray
                 ),
+                // -----------------------------
+
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send, capitalization = KeyboardCapitalization.None),
                 keyboardActions = KeyboardActions(onSend = {
                     if (isEnabled) {
@@ -49,6 +53,7 @@ public fun ChatInputBottomBar(
                         keyboardController?.hide()
                     }
                 }),
+                // `isEnabled` được truyền từ ngoài vào đã đúng
                 enabled = isEnabled
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -59,13 +64,20 @@ public fun ChatInputBottomBar(
                         keyboardController?.hide()
                     }
                 },
-                enabled = isEnabled,
+                enabled = isEnabled, // `isEnabled` được truyền từ ngoài vào đã đúng
                 modifier = Modifier.size(48.dp),
+
+                // --- SỬA LỖI 2: SỬA MÀU NÚT ---
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color(0xFFB0B0B0), // Màu xám như trong ảnh
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = Color(0xFFE0E0E0)
+                    // Màu khi BẬT (isEnabled = true)
+                    containerColor = MaterialTheme.colorScheme.primary, // Màu xanh
+                    contentColor = MaterialTheme.colorScheme.onPrimary,  // Màu trắng
+
+                    // Màu khi TẮT (isEnabled = false)
+                    disabledContainerColor = Color(0xFFE0E0E0),
+                    disabledContentColor = Color(0xFFB0B0B0)
                 )
+                // -----------------------------
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Gửi")
             }

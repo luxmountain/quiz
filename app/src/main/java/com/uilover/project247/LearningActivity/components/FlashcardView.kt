@@ -238,7 +238,7 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF76C81A), // Màu xanh lá
+                    containerColor = Color(0xFF2196F3),
                     contentColor = Color.White // Chữ màu trắng
                 )
             ) {

@@ -1,5 +1,7 @@
 package com.uilover.project247.LearningActivity.screens
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -15,6 +17,8 @@ import com.uilover.project247.LearningActivity.Model.StudyMode
 import com.uilover.project247.LearningActivity.Model.CheckResult
 import com.uilover.project247.LearningActivity.components.*
 import com.uilover.project247.R
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +30,7 @@ fun LearningScreen(
     val backgroundColor = Color(0xFFF7F7F7)
     var userAnswer by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(uiState.currentCard) {
+    LaunchedEffect(uiState.currentCard, uiState.currentStudyMode) {
         userAnswer = ""
     }
 
@@ -49,31 +53,42 @@ fun LearningScreen(
                 )
             )
         },
-        containerColor = backgroundColor,
+        containerColor = backgroundColor
     ) { paddingValues ->
+
         Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
+
             when {
                 uiState.isLoading -> CircularProgressIndicator()
+
                 uiState.isTopicComplete -> CompletionView(onNavigateBack)
+
                 uiState.currentCard != null -> {
                     val card = uiState.currentCard!!
+
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .imePadding()                 // <-- quan trọng
+                            .navigationBarsPadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        when (uiState.currentStudyMode) {
-                            StudyMode.FLASHCARD -> FlashcardView(
-                                card = card,
-                                onComplete = { viewModel.onActionCompleted() },
-                                onKnowWord = { viewModel.goToNextCard() }
-                            )
+                        // PHẦN HIỂN THỊ BÀI HỌC
+                        Box(modifier = Modifier.weight(1f, fill = false)) {
+                            when (uiState.currentStudyMode) {
+                                StudyMode.FLASHCARD -> FlashcardView(
+                                    card = card,
+                                    onComplete = { viewModel.onActionCompleted() },
+                                    onKnowWord = { viewModel.goToNextCard() }
+                                )
 
-                            StudyMode.WRITE_WORD -> {
-                                WriteWordView(
+                                StudyMode.WRITE_WORD -> WriteWordView(
                                     card = card,
                                     userAnswer = userAnswer,
                                     onUserAnswerChange = {
@@ -85,35 +100,60 @@ fun LearningScreen(
                                     },
                                     isChecking = uiState.checkResult != CheckResult.NEUTRAL
                                 )
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
 
-                            StudyMode.MULTIPLE_CHOICE -> {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("Màn hình MultipleChoice (chưa làm)")
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Button(onClick = { viewModel.onActionCompleted() }) {
-                                        Text("Bấm để qua (tạm thời)")
-                                    }
+                                StudyMode.LISTEN_AND_WRITE -> ListenWriteView(
+                                    card = card,
+                                    userAnswer = userAnswer,
+                                    onUserAnswerChange = {
+                                        userAnswer = it
+                                        viewModel.clearCheckResult()
+                                    },
+                                    onCheckFromKeyboard = {
+                                        viewModel.checkListenAnswer(userAnswer)
+                                    },
+                                    isChecking = uiState.checkResult != CheckResult.NEUTRAL
+                                )
+
+                                StudyMode.MULTIPLE_CHOICE -> {
+                                    // TODO
                                 }
                             }
                         }
 
-                        if (uiState.currentStudyMode == StudyMode.WRITE_WORD &&
-                            uiState.checkResult == CheckResult.NEUTRAL
+                        // NÚT KIỂM TRA — TRƯỢT LÊN/XUỐNG
+                        AnimatedVisibility(
+                            visible = (
+                                    (uiState.currentStudyMode == StudyMode.WRITE_WORD ||
+                                            uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE)
+                                            && uiState.checkResult == CheckResult.NEUTRAL
+                                    ),
+                            enter = slideInVertically(
+                                initialOffsetY = { it },  // từ dưới lên
+                                animationSpec = tween(280)
+                            ) + fadeIn(),
+                            exit = slideOutVertically(
+                                targetOffsetY = { it },    // trượt xuống đáy
+                                animationSpec = tween(240)
+                            ) + fadeOut()
                         ) {
-                            CheckButtonBottomBar(
+                            CheckButton(
                                 isEnabled = userAnswer.isNotBlank(),
-                                onClick = { viewModel.checkWrittenAnswer(userAnswer) }
+                                onClick = {
+                                    if (uiState.currentStudyMode == StudyMode.WRITE_WORD)
+                                        viewModel.checkWrittenAnswer(userAnswer)
+                                    else viewModel.checkListenAnswer(userAnswer)
+                                }
                             )
                         }
                     }
                 }
+
                 else -> Text("Không có từ vựng cho chủ đề này.")
             }
         }
 
-        if (uiState.currentStudyMode == StudyMode.WRITE_WORD &&
+        if ((uiState.currentStudyMode == StudyMode.WRITE_WORD ||
+                    uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE) &&
             uiState.currentCard != null &&
             uiState.checkResult != CheckResult.NEUTRAL
         ) {
@@ -123,7 +163,11 @@ fun LearningScreen(
                     usePlatformDefaultWidth = false
                 )
             ) {
-                Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                ) {
                     AnswerFeedbackPopup(
                         card = uiState.currentCard!!,
                         checkResult = uiState.checkResult,
@@ -143,8 +187,13 @@ fun CompletionView(onNavigateBack: () -> Unit) {
             style = MaterialTheme.typography.headlineLarge,
             color = Color(0xFF00C853)
         )
-        Text("Bạn đã hoàn thành chủ đề này.", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Bạn đã hoàn thành chủ đề này.",
+            style = MaterialTheme.typography.titleMedium
+        )
         Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = onNavigateBack) { Text("Quay về") }
+        Button(onClick = onNavigateBack) {
+            Text("Quay về")
+        }
     }
 }

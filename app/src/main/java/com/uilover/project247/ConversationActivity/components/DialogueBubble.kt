@@ -33,6 +33,8 @@ import com.uilover.project247.ConversationActivity.screens.createStyledDialogueT
 import com.uilover.project247.data.models.DialogueLine
 import com.uilover.project247.R
 
+
+// --- BONG BÓNG CHAT (ĐÃ SỬA LOGIC CĂN CHỈNH) ---
 @Composable
 fun DialogueBubble(
     dialogue: DialogueLine,
@@ -43,89 +45,105 @@ fun DialogueBubble(
     isTranslationVisible: Boolean,
     showBlank: Boolean
 ) {
-    val bubbleColor = if (isUser) Color(0xFFFFF8E1) else Color(0xFFF3F3F3)
-    val shape = RoundedCornerShape(16.dp)
-
-    // Lấy chiều rộng màn hình để giới hạn kích thước bong bóng
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-
+    // `Row` chính: Căn chỉnh toàn bộ khối sang trái hoặc phải
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-
-        // 1. Avatar (Bên trái, nếu không phải user)
-        if (!isUser) {
-            AvatarIcon(isUser = false)
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        // 2. Bong bóng chat (Tự co giãn)
-        Box(
-            modifier = Modifier
-                // SỬA: Dùng `widthIn` để bong bóng "nhỏ hơn",
-                // thay vì fillMaxWidth(0.85f)
-                .widthIn(min = 80.dp, max = screenWidth * 0.7f)
-                .background(bubbleColor, shape)
+        // `Row` con: Chứa các phần tử (Avatar, Bong bóng, Nút Dịch)
+        Row(
+            verticalAlignment = Alignment.Bottom
         ) {
-            // Cột chứa (Tiếng Anh) và (Tiếng Việt)
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                // Hàng Tiếng Anh (Loa + Text)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onSpeakClick,
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            painterResource(id = R.drawable.ic_loudspeaker),
-                            "Phát âm",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = createStyledDialogueText(
-                            text = dialogue.text,
-                            target = targetWord,
-                            showBlank = showBlank
-                        ),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                } // Hết Hàng Tiếng Anh
-
-                // Hàng Tiếng Việt (nếu hiển thị)
-                if (isTranslationVisible) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        dialogue.textVi,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(start = 32.dp) // Thụt lề
-                    )
-                }
-            } // Hết Cột nội dung
-        } // Hết Box (Bubble)
-
-        // 3. Nút Dịch (Bên ngoài, nếu không phải user)
-        if (!isUser) {
-            Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = onTranslateClick, modifier = Modifier.size(24.dp)) {
-                Icon(
-                    painterResource(id = R.drawable.ic_translation),
-                    "Dịch",
-                    tint = Color.Unspecified // Giữ màu gốc
-                )
+            // --- SỬA LOGIC BỐ CỤC Ở ĐÂY ---
+            if (isUser) {
+                // LÀ USER (Bên phải): [Dịch] [Bong bóng] [Avatar]
+                TranslateButton(onTranslateClick)
+                Spacer(modifier = Modifier.width(8.dp))
+                BubbleContent(dialogue, targetWord, onSpeakClick, isTranslationVisible, showBlank, true)
+                Spacer(modifier = Modifier.width(8.dp))
+                AvatarIcon(isUser = true)
+            } else {
+                // KHÔNG PHẢI USER (Bên trái): [Avatar] [Bong bóng] [Dịch]
+                AvatarIcon(isUser = false)
+                Spacer(modifier = Modifier.width(8.dp))
+                BubbleContent(dialogue, targetWord, onSpeakClick, isTranslationVisible, showBlank, false)
+                Spacer(modifier = Modifier.width(8.dp))
+                TranslateButton(onTranslateClick)
             }
-        }
-
-        // 4. Avatar (Bên phải, nếu là user)
-        if (isUser) {
-            Spacer(modifier = Modifier.width(8.dp))
-            AvatarIcon(isUser = true)
+            // --- KẾT THÚC SỬA LOGIC ---
         }
     }
+}
+
+// --- COMPONENT CON: Nút Dịch (Tách ra cho sạch) ---
+@Composable
+private fun TranslateButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(24.dp)) {
+        Icon(
+            painterResource(id = R.drawable.ic_translation), // (Giả sử bạn đã đổi tên icon)
+            "Dịch",
+            tint = Color.Unspecified // Giữ màu gốc
+        )
+    }
+}
+
+// --- COMPONENT CON: Nội dung Bong bóng (Tách ra cho sạch) ---
+@Composable
+private fun BubbleContent(
+    dialogue: DialogueLine,
+    targetWord: String,
+    onSpeakClick: () -> Unit,
+    isTranslationVisible: Boolean,
+    showBlank: Boolean,
+    isUser: Boolean
+) {
+    val bubbleColor = if (isUser) Color(0xFFFFF8E1) else Color(0xFFF3F3F3)
+    val shape = RoundedCornerShape(16.dp)
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+    Box(
+        modifier = Modifier
+            .widthIn(min = 80.dp, max = screenWidth * 0.7f)
+            .background(bubbleColor, shape)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Hàng Tiếng Anh (Loa + Text)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = onSpeakClick,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        painterResource(id = R.drawable.ic_loudspeaker),
+                        "Phát âm",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = createStyledDialogueText(
+                        text = dialogue.text,
+                        target = targetWord,
+                        showBlank = showBlank
+                    ),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            } // Hết Hàng Tiếng Anh
+
+            // Hàng Tiếng Việt (nếu hiển thị)
+            if (isTranslationVisible) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    dialogue.textVi,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(start = 32.dp) // Thụt lề
+                )
+            }
+        } // Hết Cột nội dung
+    } // Hết Box (Bubble)
 }
