@@ -6,6 +6,7 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.uilover.project247.ConversationActivity.ConversationDetailActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
 import com.uilover.project247.LearningActivity.LearningActivity

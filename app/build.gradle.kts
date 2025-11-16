@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.airbnb.android:lottie-compose:6.3.0")
     implementation("androidx.compose.material:material-icons-extended-android:1.6.7")
     implementation(libs.androidx.core.ktx)
