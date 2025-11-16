@@ -1,8 +1,8 @@
 package com.uilover.project247.data.models
 
 import android.os.Parcelable
+import com.google.firebase.database.PropertyName
 import kotlinx.parcelize.Parcelize
-
 /**
  * Firebase Realtime Database Models
  * Định nghĩa schema cho toàn bộ dữ liệu trong Firebase
@@ -44,7 +44,7 @@ data class Flashcard(
     val difficulty: String = "easy", // "easy", "medium", "hard"
     val createdAt: Long = 0
 ) : Parcelable {
-    
+
     enum class WordType(val english: String, val vietnamese: String) {
         NOUN("noun", "danh từ"),
         VERB("verb", "động từ"),
@@ -52,17 +52,17 @@ data class Flashcard(
         ADVERB("adverb", "trạng từ"),
         PREPOSITION("preposition", "giới từ"),
         CONJUNCTION("conjunction", "liên từ");
-        
+
         companion object {
             fun fromString(value: String): WordType {
                 return values().find { it.english == value } ?: NOUN
             }
         }
     }
-    
+
     enum class Difficulty {
         EASY, MEDIUM, HARD;
-        
+
         companion object {
             fun fromString(value: String): Difficulty {
                 return try {
@@ -75,44 +75,49 @@ data class Flashcard(
     }
 }
 
+@Parcelize
+data class VocabularyWordInfo(
+    val word: String = "",
+    val meaning: String = "",
+    val pronunciation: String = "",
+    val wordType: String = "",
+    val wordTypeVi: String = ""
+): Parcelable
+
 // ==================== CONVERSATION MODELS ====================
 
 @Parcelize
 data class Conversation(
     val id: String = "",
-    val topicId: String = "",
-    val flashcardId: String = "",
     val title: String = "",
     val titleVi: String = "",
     val imageUrl: String = "",
     val contextDescription: String = "",
     val contextDescriptionVi: String = "",
-    val dialogue: List<DialogueLine> = emptyList(),
-    val targetWord: String = "",
-    val question: String = "",
-    val questionVi: String = "",
-    val options: List<QuizOption> = emptyList(),
+    val dialogue: List<DialogueLine> = emptyList(), // Danh sách các câu thoại (đã chứa quiz)
+    val vocabularyWords: List<VocabularyWordInfo> = emptyList(), // Danh sách từ vựng
     val order: Int = 0,
     val createdAt: Long = 0
 ) : Parcelable {
-    
-    fun getCorrectOption(): QuizOption? {
-        return options.find { it.isCorrect }
-    }
 }
 
 @Parcelize
 data class DialogueLine(
     val speaker: String = "",
     val text: String = "",
-    val textVi: String = "",
-    val order: Int = 0
+    val textVi: String = "", // Giữ lại textVi để hỗ trợ nút Dịch
+    val order: Int = 0,
+    val vocabularyWord: String = "", // Từ vựng mục tiêu của câu này
+    val question: String = "",
+    val questionVi: String = "",
+    val options: List<QuizOption> = emptyList()
 ) : Parcelable
 
 @Parcelize
 data class QuizOption(
     val id: String = "",
     val text: String = "",
+    @get:PropertyName("isCorrect")
     val isCorrect: Boolean = false
 ) : Parcelable
 
@@ -143,7 +148,7 @@ data class TopicProgress(
     val progress: Float = 0f,
     val lastStudyDate: Long? = null
 ) : Parcelable {
-    
+
     /**
      * Tính phần trăm hoàn thành
      */
@@ -173,7 +178,7 @@ data class ConversationResult(
     val correctAnswers: Int = 0,
     val lastAttemptDate: Long? = null
 ) : Parcelable {
-    
+
     /**
      * Tính tỷ lệ trả lời đúng
      */
@@ -226,18 +231,18 @@ object FirebasePaths {
     const val USER_PROGRESS = "userProgress"
     const val SETTINGS = "settings"
     const val APP_SETTINGS = "settings/app"
-    
+
     // User specific paths
     fun userProgress(userId: String) = "$USER_PROGRESS/$userId"
     fun userTopicProgress(userId: String) = "${userProgress(userId)}/topicProgress"
     fun userFlashcardResults(userId: String) = "${userProgress(userId)}/flashcardResults"
     fun userConversationResults(userId: String) = "${userProgress(userId)}/conversationResults"
-    
+
     // Topic specific paths
     fun topic(topicId: String) = "$TOPICS/$topicId"
     fun flashcardsForTopic(topicId: String) = FLASHCARDS // Query with .orderByChild("topicId").equalTo(topicId)
     fun conversationsForTopic(topicId: String) = CONVERSATIONS // Query with .orderByChild("topicId").equalTo(topicId)
-    
+
     // Specific item paths
     fun flashcard(flashcardId: String) = "$FLASHCARDS/$flashcardId"
     fun conversation(conversationId: String) = "$CONVERSATIONS/$conversationId"

@@ -23,6 +23,7 @@ class QuestionViewModel(private val topicId: String) : ViewModel(){
     private fun loadQuizzesForTopic() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            delay(2000L)
 
             val words= MockData.wordsByTopicId[topicId] ?:emptyList()
             val  allQuizzes= words.flatMap { it.quizzes }

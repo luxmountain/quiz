@@ -51,44 +51,72 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
         }
     }
 
-    // (Toàn bộ các hàm bên dưới đã chính xác, giữ nguyên)
 
+    // Dùng cho Flashcard
     fun onActionCompleted() {
         val currentState = _uiState.value
-        when (currentState.currentStudyMode) {
-            StudyMode.FLASHCARD -> {
-                _uiState.update { it.copy(
-                    currentStudyMode = StudyMode.WRITE_WORD,
-                    checkResult = CheckResult.NEUTRAL
-                ) }
-            }
-            StudyMode.WRITE_WORD -> { /* Chờ checkWrittenAnswer */ }
-            StudyMode.MULTIPLE_CHOICE -> {
-                goToNextCard()
-            }
+        if (currentState.currentStudyMode == StudyMode.FLASHCARD) {
+            _uiState.update { it.copy(
+                currentStudyMode = StudyMode.WRITE_WORD, // 1. Chuyển sang Điền từ
+                checkResult = CheckResult.NEUTRAL
+            ) }
         }
     }
 
     fun checkWrittenAnswer(userAnswer: String) {
         val correctWord = _uiState.value.currentCard?.word ?: return
+
+        if (userAnswer.equals(correctWord, ignoreCase = true)) {
+            // NẾU ĐÚNG: Chỉ set trạng thái, KHÔNG tự động chuyển
+            _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
+        } else {
+            // NẾU SAI: Chỉ set trạng thái
+            _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
+        }
+    }
+    fun checkListenAnswer(userAnswer: String) {
+        val correctWord = _uiState.value.currentCard?.word ?: return
         if (userAnswer.equals(correctWord, ignoreCase = true)) {
             _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
-            viewModelScope.launch {
-                delay(1000)
-                goToNextCard()
-            }
         } else {
             _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
         }
     }
 
+    // --- 3. SỬA LẠI LOGIC "TIẾP TỤC" ---
+    fun onQuizContinue() {
+        val currentState = _uiState.value
+        if (currentState.checkResult == CheckResult.INCORRECT) {
+            // Nếu sai, cho thử lại
+            _uiState.update { it.copy(checkResult = CheckResult.NEUTRAL) }
+            return
+        }
+
+        // Nếu đúng:
+        when (currentState.currentStudyMode) {
+            // 2. Nếu xong WRITE_WORD -> Chuyển sang LISTEN_AND_WRITE
+            StudyMode.WRITE_WORD -> {
+                _uiState.update {
+                    it.copy(
+                        currentStudyMode = StudyMode.LISTEN_AND_WRITE,
+                        checkResult = CheckResult.NEUTRAL
+                    )
+                }
+            }
+            // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo
+            StudyMode.LISTEN_AND_WRITE -> {
+                goToNextCard()
+            }
+            else -> {}
+        }
+    }
     fun clearCheckResult() {
         if (_uiState.value.checkResult == CheckResult.INCORRECT) {
             _uiState.update { it.copy(checkResult = CheckResult.NEUTRAL) }
         }
     }
 
-    private fun goToNextCard() {
+    fun goToNextCard() {
         val currentState = _uiState.value
         if (currentState.currentCardIndex < currentState.flashcards.size - 1) {
             _uiState.update {

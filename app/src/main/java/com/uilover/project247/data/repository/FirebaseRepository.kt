@@ -169,6 +169,34 @@ class FirebaseRepository {
     // ==================== CONVERSATIONS ====================
     
     /**
+     * Lấy tất cả conversations (không real-time)
+     */
+    suspend fun getAllConversations(): List<Conversation> {
+        return try {
+            val snapshot = database.getReference(FirebasePaths.CONVERSATIONS)
+                .get()
+                .await()
+            val conversations = mutableListOf<Conversation>()
+            snapshot.children.forEach { conversationSnapshot ->
+                try {
+                    val conversation = conversationSnapshot.getValue(Conversation::class.java)
+                    if (conversation != null) {
+                        conversations.add(conversation)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing conversation: ${conversationSnapshot.key}", e)
+                }
+            }
+            conversations.sortBy { it.order }
+            Log.d(TAG, "Loaded ${conversations.size} conversations from Firebase")
+            conversations
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading all conversations", e)
+            emptyList()
+        }
+    }
+
+    /**
      * Lấy conversations theo topic ID
      */
     suspend fun getConversationsByTopic(topicId: String): List<Conversation> {

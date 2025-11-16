@@ -16,7 +16,7 @@ class ScoreActivity : AppCompatActivity() {
         window.statusBarColor = ContextCompat.getColor(this, R.color.grey)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
-        val score = intent.getIntExtra("Score", 0)
+        val score = intent.getIntExtra("finalScore", 0)
 
         setContent {
             ScoreScreen(score = score) {

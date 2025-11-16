@@ -20,8 +20,6 @@ class QuestionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // *** SỬA LỖI Ở ĐÂY ***
-        // Đổi key từ "topicId" thành "TOPIC_ID" để khớp với ReviewActivity
         val topicId = intent.getStringExtra("TOPIC_ID")
 
         if (topicId==null){
@@ -45,12 +43,8 @@ class QuestionActivity : ComponentActivity() {
                     onNavigateToScore={ finalScore->
                         val intent= Intent(this, ScoreActivity::class.java)
 
-                        // *** LỖI TIỀM ẨN THỨ 2 ***
-                        // Key ở đây là "finalScore".
-                        // Hãy chắc chắn rằng ScoreActivity của bạn đang đọc key "finalScore"
-                        // chứ không phải "Score" (như trong code cũ của bạn).
-                        intent.putExtra("finalScore", finalScore)
 
+                        intent.putExtra("finalScore", finalScore)
                         startActivity(intent)
                         finish()
                     }
