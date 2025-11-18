@@ -50,9 +50,10 @@ fun BottomNavigationBarStub(
                 label = {
                     Text(
                         text = item.first,
-                        fontSize = 15.sp, // 👈 giảm kích thước chữ
+                        fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                        color = if (isSelected) Color(0xFF2196F3) else Color.Gray
+                        color = if (isSelected) Color(0xFF2196F3) else Color.Gray,
+                        maxLines = 1
                     )
                 },
                 alwaysShowLabel = true // vẫn hiển thị nhãn
