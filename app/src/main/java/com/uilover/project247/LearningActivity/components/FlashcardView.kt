@@ -6,10 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -26,22 +24,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+// THÊM:
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.uilover.project247.data.models.Flashcard
+import com.uilover.project247.utils.TextToSpeechManager
 import com.uilover.project247.utils.parseHtmlToAnnotatedString
 import com.uilover.project247.utils.getWordTypeAbbreviation
-
+import com.uilover.project247.R
 
 @Composable
 fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Unit) {
 
-    // --- BƯỚC 1: Thêm State để biết thẻ lật hay chưa ---
-    var isFlipped by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val ttsManager = remember { TextToSpeechManager(context) }
 
-    // --- BƯỚC 2: Thêm Animation cho góc quay ---
+    DisposableEffect(Unit) {
+        onDispose {
+            ttsManager.shutdown()
+        }
+    }
+
+    var isFlipped by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(durationMillis = 600), // Tốc độ lật
+        animationSpec = tween(durationMillis = 600),
         label = "flipAnimation"
     )
 
@@ -53,72 +60,89 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
-        // Cụm 1: Nút Âm thanh & Tốc độ (Giảm kích thước)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            val buttonColor = Color(0xFFFFEB3B)
-            FilledTonalIconButton(
-                onClick = { /* TODO: Play audio */ },
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = Color.White,
-                    contentColor = buttonColor
-                )
-            ) {
-                Icon(Icons.Default.VolumeUp, "Phát âm thanh", modifier = Modifier.size(28.dp))
-            }
-            FilledTonalIconButton(
-                onClick = { /* TODO: Play slow audio */ },
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = Color.White,
-                    contentColor = buttonColor
-                )
-            ) {
-                Icon(Icons.Default.AccessTime, "Phát chậm", modifier = Modifier.size(28.dp))
-            }
-        }
-
-        // Cụm 2: Thẻ từ vựng (Card - Tăng kích thước)
+        // --- BỐ CỤC MỚI (Cụm 1 và 2 gộp làm 1) ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f) // Chiếm hết không gian giữa
                 .padding(vertical = 16.dp, horizontal = 8.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopCenter // Căn chỉnh nút Loa lên trên cùng
         ) {
+
+            // LỚP 1: CÁC NÚT (LOA, ỐC SÊN)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .zIndex(1f)
+                    .offset(y = 28.dp)
+            ) {
+                val buttonColor = Color(0xFFFFEB3B)
+                FilledTonalIconButton(
+                    onClick = { ttsManager.speak(card.word) },
+                    modifier = Modifier.size(56.dp),
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = Color.White,
+                        contentColor = buttonColor
+                    )
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_loudspeaker),
+                        contentDescription = "Phát âm thanh",
+                        modifier = Modifier.size(28.dp),
+                        tint = Color.Unspecified // <-- SỬA LỖI: Thêm dòng này
+                    )
+                }
+                FilledTonalIconButton(
+                    onClick = {
+                        ttsManager.setSpeechRate(0.5f)
+                        ttsManager.speak(card.word)
+                    },
+                    modifier = Modifier.size(56.dp),
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = Color.White,
+                        contentColor = buttonColor
+                    )
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_snail),
+                        contentDescription = "Phát chậm",
+                        modifier = Modifier.size(28.dp),
+                        tint = Color.Unspecified // <-- SỬA LỖI: Thêm dòng này
+                    )
+                }
+            }
+
+            // LỚP 2: THẺ FLASHCARD
             Card(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(top = 56.dp)
                     .clickable { isFlipped = !isFlipped },
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
+                // (Toàn bộ logic lật thẻ bên trong Card giữ nguyên)
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(20.dp)
                         .graphicsLayer {
                             rotationY = rotation
-                            // Thêm "chiều sâu" 3D cho đẹp
                             cameraDistance = 12 * density
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    // 4b: Logic hiển thị 2 mặt
-                    // Nếu chưa lật quá 90 độ, hiện MẶT TRƯỚC (Câu ví dụ)
                     if (rotation < 90f) {
+                        // Mặt trước (Câu ví dụ)
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            // Show image if available
                             card.imageUrl.let { imageUrl ->
                                 AsyncImage(
                                     model = imageUrl,
@@ -132,8 +156,6 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                                 )
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
-                            
-                            // Hiển thị câu ví dụ với HTML formatting (từ in đậm, gạch chân)
                             Text(
                                 text = parseHtmlToAnnotatedString(card.contextSentence),
                                 style = MaterialTheme.typography.bodyLarge,
@@ -143,37 +165,31 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                             )
                         }
                     } else {
-                        // Nếu đã lật > 90 độ, hiện MẶT SAU (Word + Pronunciation + Meaning + Type)
-                        // (Phải xoay 180 độ để nó không bị ngược)
+                        // Mặt sau (Từ vựng)
                         Column(
-                            modifier = Modifier.fillMaxSize().graphicsLayer {
-                                rotationY = 180f // <-- Quay mặt sau lại
-                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    rotationY = 180f
+                                },
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            // Word (từ vựng)
                             Text(
                                 text = card.word,
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                color = Color(0xFF00C853) // Màu xanh
+                                color = Color(0xFF00C853)
                             )
-                            
                             Spacer(modifier = Modifier.height(8.dp))
-                            
-                            // Pronunciation (phát âm)
                             Text(
                                 text = card.pronunciation,
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center,
                                 color = Color.Gray
                             )
-                            
                             Spacer(modifier = Modifier.height(16.dp))
-                            
-                            // Meaning (nghĩa)
                             Text(
                                 text = card.meaning,
                                 style = MaterialTheme.typography.headlineMedium,
@@ -181,10 +197,7 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                                 textAlign = TextAlign.Center,
                                 color = Color.Black
                             )
-                            
                             Spacer(modifier = Modifier.height(8.dp))
-                            
-                            // Word Type (loại từ - viết tắt trong ngoặc tròn)
                             Text(
                                 text = "(${getWordTypeAbbreviation(card.wordType)})",
                                 style = MaterialTheme.typography.titleSmall,
@@ -197,24 +210,25 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                 }
             }
 
-            // Icon bàn tay (Giữ nguyên)
-            // (Nó sẽ biến mất khi thẻ lật vì logic 'rotation < 90f')
-            if (rotation < 90f) { // <-- THAY ĐỔI: Chỉ hiện khi chưa lật
+            // Icon bàn tay
+            if (rotation < 90f) {
                 Icon(
-                    imageVector = Icons.Default.TouchApp,
+                    painter = painterResource(id = R.drawable.ic_left_click),
                     contentDescription = "Tap hint",
-                    tint = Color(0xFFFFEB3B).copy(alpha = 0.7f),
+                    tint = Color.Unspecified,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(32.dp)
                         .size(48.dp)
                 )
             }
-        }
+        } // --- Hết Box (Cụm gộp 1 & 2) ---
 
         // Cụm 3: Nút hành động (Giữ nguyên)
         Column(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
@@ -224,8 +238,8 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.LightGray.copy(alpha = 0.5f),
-                    contentColor = Color.DarkGray
+                    containerColor = Color(0xFF2196F3),
+                    contentColor = Color.White // Chữ màu trắng
                 )
             ) {
                 Text(
