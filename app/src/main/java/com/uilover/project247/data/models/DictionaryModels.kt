@@ -66,6 +66,17 @@ data class Definition(
 )
 
 /**
+ * Lịch sử tra cứu từ điển
+ */
+data class SearchHistoryItem(
+    val word: String,
+    val phonetic: String,
+    val meaning: String, // Nghĩa đầu tiên
+    val partOfSpeech: String, // Từ loại (noun, verb, etc.)
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+/**
  * UI State cho Dictionary Screen
  */
 data class DictionaryUiState(
@@ -73,5 +84,16 @@ data class DictionaryUiState(
     val searchQuery: String = "",
     val entries: List<DictionaryEntry> = emptyList(),
     val errorMessage: String? = null,
-    val recentSearches: List<String> = emptyList()
-)
+    val recentSearches: List<SearchHistoryItem> = emptyList(),
+    val isInputFocused: Boolean = false
+) {
+    // Lọc lịch sử theo từ khóa
+    val filteredRecentSearches: List<SearchHistoryItem>
+        get() = if (searchQuery.isBlank()) {
+            recentSearches
+        } else {
+            recentSearches.filter { 
+                it.word.contains(searchQuery, ignoreCase = true)
+            }
+        }
+}

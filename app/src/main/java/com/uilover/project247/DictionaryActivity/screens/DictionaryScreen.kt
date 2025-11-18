@@ -15,9 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
@@ -25,6 +28,7 @@ import com.uilover.project247.data.models.Definition
 import com.uilover.project247.data.models.DictionaryEntry
 import com.uilover.project247.data.models.Meaning
 import com.uilover.project247.data.models.Phonetic
+import com.uilover.project247.data.models.SearchHistoryItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,47 +54,62 @@ fun DictionaryScreen(
         },
         containerColor = Color(0xFFF5F5F5)
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search Bar
-            SearchBarSection(
-                searchQuery = uiState.searchQuery,
-                onQueryChange = { viewModel.updateSearchQuery(it) },
-                onSearch = { viewModel.searchWord(uiState.searchQuery) },
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Content - hiển thị trước SearchBar để dropdown nằm trên
+                when {
+                    uiState.isLoading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    
+                    uiState.errorMessage != null -> {
+                        ErrorSection(
+                            message = uiState.errorMessage ?: "",
+                            onDismiss = { viewModel.clearError() }
+                        )
+                    }
+                    
+                    uiState.entries.isNotEmpty() -> {
+                        DictionaryResultsSection(entries = uiState.entries)
+                    }
+                    
+                    else -> {
+                        EmptyStateSection()
+                    }
+                }
+            }
+            
+            // Search Bar với Dropdown - nằm trên cùng
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            )
-            
-            // Content
-            when {
-                uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
+            ) {
+                SearchBarSection(
+                    searchQuery = uiState.searchQuery,
+                    onQueryChange = { viewModel.updateSearchQuery(it) },
+                    onSearch = { viewModel.searchWord(uiState.searchQuery) },
+                    onFocusChange = { viewModel.updateInputFocus(it) },
+                    modifier = Modifier.fillMaxWidth()
+                )
                 
-                uiState.errorMessage != null -> {
-                    ErrorSection(
-                        message = uiState.errorMessage ?: "",
-                        onDismiss = { viewModel.clearError() }
-                    )
-                }
-                
-                uiState.entries.isNotEmpty() -> {
-                    DictionaryResultsSection(entries = uiState.entries)
-                }
-                
-                else -> {
-                    RecentSearchesSection(
-                        recentSearches = uiState.recentSearches,
-                        onSearchClick = { word -> viewModel.selectRecentSearch(word) }
+                // Dropdown lịch sử
+                if (uiState.isInputFocused && uiState.filteredRecentSearches.isNotEmpty()) {
+                    SearchHistoryDropdown(
+                        items = uiState.filteredRecentSearches,
+                        onItemClick = { word -> 
+                            viewModel.selectRecentSearch(word)
+                            viewModel.updateInputFocus(false)
+                        }
                     )
                 }
             }
@@ -103,12 +122,15 @@ fun SearchBarSection(
     searchQuery: String,
     onQueryChange: (String) -> Unit,
     onSearch: () -> Unit,
+    onFocusChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = searchQuery,
         onValueChange = onQueryChange,
-        modifier = modifier,
+        modifier = modifier.onFocusChanged { focusState ->
+            onFocusChange(focusState.isFocused)
+        },
         placeholder = { Text("Nhập từ cần tra...") },
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = "Tìm kiếm")
@@ -169,61 +191,192 @@ fun ErrorSection(
 }
 
 @Composable
-fun RecentSearchesSection(
-    recentSearches: List<String>,
-    onSearchClick: (String) -> Unit
-) {
-    if (recentSearches.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+fun EmptyStateSection() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = Color.Gray
-                )
-                Text(
-                    "Nhập từ để bắt đầu tra cứu",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
-    } else {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                "Tìm kiếm gần đây",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
+            Icon(
+                Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = Color.Gray
             )
-            
-            recentSearches.forEach { word ->
-                Card(
+            Text(
+                "Nhập từ để bắt đầu tra cứu",
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
+fun SearchHistoryDropdown(
+    items: List<SearchHistoryItem>,
+    onItemClick: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp)
+            .shadow(8.dp, RoundedCornerShape(12.dp)),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 300.dp) // Giới hạn chiều cao
+        ) {
+            items.forEachIndexed { index, item ->
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable { onSearchClick(word) },
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                        .clickable { onItemClick(item.word) }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        tint = Color(0xFF6200EA),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = item.word,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121)
+                            )
+                            if (item.partOfSpeech.isNotEmpty()) {
+                                Text(
+                                    text = item.partOfSpeech,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF757575),
+                                    fontStyle = FontStyle.Italic
+                                )
+                            }
+                        }
+                        
+                        if (item.phonetic.isNotEmpty()) {
+                            Text(
+                                text = item.phonetic,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF757575),
+                                fontStyle = FontStyle.Italic
+                            )
+                        }
+                        
+                        if (item.meaning.isNotEmpty()) {
+                            Text(
+                                text = item.meaning,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF616161),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+                
+                if (index < items.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = Color(0xFFE0E0E0)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentSearchesSection(
+    recentSearches: List<SearchHistoryItem>,
+    onSearchClick: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            "Lịch sử tra cứu",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        
+        recentSearches.forEach { item ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+                    .clickable { onSearchClick(item.word) },
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Từ và phát âm
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            tint = Color.Gray,
-                            modifier = Modifier.size(20.dp)
+                        Text(
+                            text = item.word,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF6200EA)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(word, style = MaterialTheme.typography.bodyLarge)
+                        if (item.partOfSpeech.isNotEmpty()) {
+                            Text(
+                                text = item.partOfSpeech,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                fontStyle = FontStyle.Italic
+                            )
+                        }
+                    }
+                    
+                    // Phát âm
+                    if (item.phonetic.isNotEmpty()) {
+                        Text(
+                            text = item.phonetic,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF666666),
+                            fontStyle = FontStyle.Italic
+                        )
+                    }
+                    
+                    // Nghĩa
+                    if (item.meaning.isNotEmpty()) {
+                        Text(
+                            text = item.meaning,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF333333),
+                            maxLines = 2,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
                 }
             }
