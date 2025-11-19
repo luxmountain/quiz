@@ -3,7 +3,10 @@ package com.uilover.project247.LearningActivity.Model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.uilover.project247.data.models.ReviewQuality
+import com.uilover.project247.data.models.FlashcardResult
 import com.uilover.project247.data.repository.FirebaseRepository
+import com.uilover.project247.utils.AnkiScheduler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,12 +15,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class LearningViewModel(private val topicId: String) : ViewModel() {
+class LearningViewModel(
+    private val topicId: String,
+    private val userId: String = "demo_user" // TODO: Lấy từ Firebase Auth
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LearningUiState())
     val uiState: StateFlow<LearningUiState> = _uiState.asStateFlow()
     
     private val firebaseRepository = FirebaseRepository()
+    private val ankiScheduler = AnkiScheduler()
 
     init {
         loadFlashcardsForTopic()
@@ -129,5 +136,49 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
         } else {
             _uiState.update { it.copy(isTopicComplete = true) }
         }
+    }
+    
+    /**
+     * Lưu kết quả học với Anki SRS
+     * Gọi sau khi user hoàn thành MULTIPLE_CHOICE
+     */
+    fun saveStudyResult(quality: ReviewQuality) {
+        viewModelScope.launch {
+            try {
+                val currentCard = _uiState.value.currentCard ?: return@launch
+                
+                // Lấy result hiện tại hoặc tạo mới
+                val currentResult = firebaseRepository.getFlashcardResults(userId)[currentCard.id]
+                    ?: FlashcardResult(flashcardId = currentCard.id)
+                
+                // Tính toán schedule tiếp theo bằng Anki Algorithm
+                val newResult = ankiScheduler.scheduleCard(currentResult, quality)
+                
+                // Lưu vào Firebase
+                val success = firebaseRepository.updateFlashcardResult(
+                    userId = userId,
+                    flashcardId = currentCard.id,
+                    result = newResult
+                )
+                
+                if (success) {
+                    Log.d("LearningViewModel", "Saved study result for ${currentCard.word}: ${quality.name}")
+                    Log.d("LearningViewModel", "Next review: ${ankiScheduler.formatInterval(newResult.intervalDays)}")
+                } else {
+                    Log.e("LearningViewModel", "Failed to save study result")
+                }
+                
+            } catch (e: Exception) {
+                Log.e("LearningViewModel", "Error saving study result", e)
+            }
+        }
+    }
+    
+    /**
+     * Tự động save khi user trả lời đúng (GOOD quality)
+     * Có thể gọi từ UI để save với quality khác
+     */
+    private fun autoSaveGoodResult() {
+        saveStudyResult(ReviewQuality.GOOD)
     }
 }
