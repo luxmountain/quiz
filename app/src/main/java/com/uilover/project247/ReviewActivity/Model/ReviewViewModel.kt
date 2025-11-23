@@ -33,8 +33,15 @@ class ReviewViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             try {
-                // Lấy topics từ Firebase
-                val allTopics = firebaseRepository.getTopics()
+                // Lấy topics từ tất cả levels
+                val allLevels = firebaseRepository.getLevels()
+                val allTopics = mutableListOf<Topic>()
+                
+                // Collect topics from all levels
+                allLevels.forEach { level ->
+                    val topics = firebaseRepository.getTopicsByLevel(level.id)
+                    allTopics.addAll(topics)
+                }
 
                 // --- DỮ LIỆU GIẢ (STUB) CHO TIẾN ĐỘ ---
                 // TODO: Thay thế bằng logic tải từ Firebase UserProgress
