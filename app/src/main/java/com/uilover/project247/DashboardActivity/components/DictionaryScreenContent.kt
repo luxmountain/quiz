@@ -470,7 +470,7 @@ fun RecentSearchesSection(
 fun DictionaryResultsSection(entries: List<DictionaryEntry>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(top = 80.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(entries) { entry ->

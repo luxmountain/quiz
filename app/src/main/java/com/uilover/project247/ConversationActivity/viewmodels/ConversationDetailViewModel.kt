@@ -87,6 +87,13 @@ class ConversationDetailViewModel(
                             currentSpokenText = conversation.contextDescription
                         )
                     }
+                    
+                    // ✅ THÊM: Tự động bắt đầu hội thoại sau khi đọc xong context
+                    // Nếu TTS không hoạt động, sẽ tự động chuyển sau 3 giây
+                    kotlinx.coroutines.delay(3000)
+                    if (_uiState.value.currentStep == ConversationStep.CONTEXT) {
+                        goToDialogueStep(0)
+                    }
                 } else {
                     _uiState.update { it.copy(isLoading = false, errorMessage = "Không tìm thấy hội thoại.") }
                 }
