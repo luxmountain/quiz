@@ -80,84 +80,11 @@ class FirebaseRepository {
     // ==================== TOPICS ====================
     
     /**
-     * Lấy tất cả topics dưới dạng Flow (real-time updates)
-     */
-    fun getTopicsFlow(): Flow<List<Topic>> = callbackFlow {
-        val topicsRef = database.getReference(FirebasePaths.TOPICS)
-        
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val topics = mutableListOf<Topic>()
-                
-                snapshot.children.forEach { topicSnapshot ->
-                    try {
-                        val topic = topicSnapshot.getValue(Topic::class.java)
-                        if (topic != null) {
-                            topics.add(topic)
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error parsing topic: ${topicSnapshot.key}", e)
-                    }
-                }
-                
-                // Sắp xếp theo order
-                topics.sortBy { it.order }
-                
-                trySend(topics)
-                Log.d(TAG, "Loaded ${topics.size} topics from Firebase")
-            }
-            
-            override fun onCancelled(error: DatabaseError) {
-                Log.e(TAG, "Error loading topics: ${error.message}")
-                close(error.toException())
-            }
-        }
-        
-        topicsRef.addValueEventListener(listener)
-        
-        awaitClose {
-            topicsRef.removeEventListener(listener)
-        }
-    }
-    
-    /**
-     * Lấy tất cả topics một lần (không real-time)
-     */
-    suspend fun getTopics(): List<Topic> {
-        return try {
-            val snapshot = database.getReference(FirebasePaths.TOPICS)
-                .get()
-                .await()
-            
-            val topics = mutableListOf<Topic>()
-            snapshot.children.forEach { topicSnapshot ->
-                try {
-                    val topic = topicSnapshot.getValue(Topic::class.java)
-                    if (topic != null) {
-                        topics.add(topic)
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing topic: ${topicSnapshot.key}", e)
-                }
-            }
-            
-            topics.sortBy { it.order }
-            Log.d(TAG, "Loaded ${topics.size} topics from Firebase")
-            topics
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading topics", e)
-            emptyList()
-        }
-    }
-    
-    /**
      * Lấy topics theo level ID
      */
     suspend fun getTopicsByLevel(levelId: String): List<Topic> {
         return try {
-            val snapshot = database.getReference(FirebasePaths.TOPICS)
-                .orderByChild("levelId")
-                .equalTo(levelId)
+            val snapshot = database.getReference(FirebasePaths.levelTopics(levelId))
                 .get()
                 .await()
             
@@ -183,17 +110,17 @@ class FirebaseRepository {
     }
     
     /**
-     * Lấy một topic theo ID (bao gồm flashcards và conversations)
+     * Lấy một topic theo ID (bao gồm flashcards)
      */
-    suspend fun getTopic(topicId: String): Topic? {
+    suspend fun getTopic(levelId: String, topicId: String): Topic? {
         return try {
-            val snapshot = database.getReference(FirebasePaths.topic(topicId))
+            val snapshot = database.getReference(FirebasePaths.levelTopic(levelId, topicId))
                 .get()
                 .await()
             
             snapshot.getValue(Topic::class.java)
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading topic $topicId", e)
+            Log.e(TAG, "Error loading topic $topicId in level $levelId", e)
             null
         }
     }
@@ -271,39 +198,45 @@ class FirebaseRepository {
     // ==================== CONVERSATIONS ====================
     
     /**
-     * Lấy tất cả conversations từ tất cả topics
+     * Lấy tất cả conversations từ node standalone
      */
     suspend fun getAllConversations(): List<Conversation> {
         return try {
-            val topics = getTopics()
+            val snapshot = database.getReference(FirebasePaths.CONVERSATIONS)
+                .get()
+                .await()
+            
             val conversations = mutableListOf<Conversation>()
-            topics.forEach { topic ->
-                conversations.addAll(topic.conversations)
+            snapshot.children.forEach { conversationSnapshot ->
+                try {
+                    val conversation = conversationSnapshot.getValue(Conversation::class.java)
+                    if (conversation != null) {
+                        conversations.add(conversation)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing conversation: ${conversationSnapshot.key}", e)
+                }
             }
+            
             conversations.sortBy { it.order }
-            Log.d(TAG, "Loaded ${conversations.size} conversations from all topics")
+            Log.d(TAG, "Loaded ${conversations.size} conversations from Firebase")
             conversations
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading all conversations", e)
+            Log.e(TAG, "Error loading conversations", e)
             emptyList()
         }
     }
     
     /**
-     * Lấy một conversation theo ID (tìm trong tất cả topics)
+     * Lấy một conversation theo ID
      */
     suspend fun getConversation(conversationId: String): Conversation? {
         return try {
-            val topics = getTopics()
-            topics.forEach { topic ->
-                topic.conversations.forEach { conversation ->
-                    if (conversation.id == conversationId) {
-                        return conversation
-                    }
-                }
-            }
-            Log.w(TAG, "Conversation $conversationId not found")
-            null
+            val snapshot = database.getReference(FirebasePaths.conversation(conversationId))
+                .get()
+                .await()
+            
+            snapshot.getValue(Conversation::class.java)
         } catch (e: Exception) {
             Log.e(TAG, "Error loading conversation $conversationId", e)
             null

@@ -16,19 +16,20 @@ class LearningActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Lấy `topicId` từ Intent mà MainActivity đã gửi
+        // 1. Lấy `levelId` và `topicId` từ Intent
+        val levelId = intent.getStringExtra("LEVEL_ID")
         val topicId = intent.getStringExtra("TOPIC_ID")
 
-        // 2. Rất quan trọng: Kiểm tra nếu topicId bị null
-        if (topicId == null) {
+        // 2. Rất quan trọng: Kiểm tra nếu levelId hoặc topicId bị null
+        if (levelId == null || topicId == null) {
             // Nếu không có ID, không thể tải dữ liệu -> đóng Activity
             finish()
             return
         }
 
-        // 3. Khởi tạo ViewModel bằng Factory (để truyền `topicId` vào)
+        // 3. Khởi tạo ViewModel bằng Factory (để truyền `levelId` và `topicId` vào)
         val viewModel: LearningViewModel by viewModels {
-            LearningViewModelFactory(topicId)
+            LearningViewModelFactory(levelId, topicId)
         }
 
         setContent {

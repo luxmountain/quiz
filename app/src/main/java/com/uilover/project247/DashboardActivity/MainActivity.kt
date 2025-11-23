@@ -9,7 +9,7 @@ import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.uilover.project247.ConversationActivity.ConversationDetailActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
-import com.uilover.project247.LearningActivity.LearningActivity
+import com.uilover.project247.TopicListActivity.TopicListActivity
 import com.uilover.project247.ui.theme.Project247Theme
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.QuestionActivity.QuestionActivity
@@ -30,9 +30,14 @@ class MainActivity : ComponentActivity() {
                         // Stay on Board tab - do nothing
                     },
 
-                    onTopicClick = { topicId ->
-                        val intent = Intent(this, LearningActivity::class.java)
-                        intent.putExtra("TOPIC_ID", topicId)
+                    onLevelClick = { levelId ->
+                        // Navigate to TopicListActivity to show topics in this level
+                        val uiState = viewModel.uiState.value
+                        val level = uiState.levels.find { it.id == levelId }
+                        val intent = Intent(this, TopicListActivity::class.java).apply {
+                            putExtra("LEVEL_ID", levelId)
+                            putExtra("LEVEL_NAME", level?.nameVi ?: level?.name ?: "Topics")
+                        }
                         startActivity(intent)
                     },
 

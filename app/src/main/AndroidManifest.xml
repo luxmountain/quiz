@@ -18,6 +18,9 @@
             android:name=".DictionaryActivity.DictionaryActivity"
             android:exported="false" />
         <activity
+            android:name=".TopicListActivity.TopicListActivity"
+            android:exported="false" />
+        <activity
             android:name=".LearningActivity.LearningActivity"
             android:exported="false" />
         <activity

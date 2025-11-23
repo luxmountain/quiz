@@ -25,10 +25,10 @@ import com.uilover.project247.ConversationActivity.viewmodels.ConversationListVi
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
 import com.uilover.project247.DashboardActivity.components.ConversationListScreenContent
-import com.uilover.project247.DashboardActivity.components.TopicItem
+import com.uilover.project247.DashboardActivity.components.LevelItem
 import com.uilover.project247.DashboardActivity.components.DictionaryScreenContent
 import com.uilover.project247.DashboardActivity.components.ReviewScreenContent
-import com.uilover.project247.data.models.Topic
+import com.uilover.project247.data.models.Level
 import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
 import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
 
@@ -38,7 +38,7 @@ import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
 fun MainScreen(
     viewModel: MainViewModel,
     onBoardClick: () -> Unit = {},
-    onTopicClick: (String) -> Unit = {},
+    onLevelClick: (String) -> Unit = {},
     onTopicReviewClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onConversationClick: (String) -> Unit = {}
@@ -168,7 +168,7 @@ fun MainScreen(
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodyLarge
                             )
-                            Button(onClick = { viewModel.retryLoadTopics() }) {
+                            Button(onClick = { viewModel.retryLoadLevels() }) {
                                 Text("Thử lại")
                             }
                         }
@@ -180,10 +180,10 @@ fun MainScreen(
                             .padding(paddingValues),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        items(uiState.topics) { topic ->
-                            TopicItem(
-                                topic = topic,
-                                onClick = { onTopicClick(topic.id) }
+                        items(uiState.levels) { level ->
+                            LevelItem(
+                                level = level,
+                                onClick = { onLevelClick(level.id) }
                             )
                         }
                     }

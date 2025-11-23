@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class LearningViewModel(private val topicId: String) : ViewModel() {
+class LearningViewModel(private val levelId: String, private val topicId: String) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LearningUiState())
     val uiState: StateFlow<LearningUiState> = _uiState.asStateFlow()
@@ -28,8 +28,9 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
             _uiState.update { it.copy(isLoading = true) }
 
             try {
-                // Load flashcards từ Firebase theo topicId
-                val flashcards = firebaseRepository.getFlashcardsByTopic(topicId)
+                // Load topic từ Firebase theo levelId và topicId
+                val topic = firebaseRepository.getTopic(levelId, topicId)
+                val flashcards = topic?.flashcards ?: emptyList()
                 
                 _uiState.update {
                     it.copy(
@@ -38,9 +39,9 @@ class LearningViewModel(private val topicId: String) : ViewModel() {
                     )
                 }
                 
-                Log.d("LearningViewModel", "Loaded ${flashcards.size} flashcards for topic $topicId")
+                Log.d("LearningViewModel", "Loaded ${flashcards.size} flashcards for topic $topicId in level $levelId")
             } catch (e: Exception) {
-                Log.e("LearningViewModel", "Error loading flashcards for topic $topicId", e)
+                Log.e("LearningViewModel", "Error loading flashcards for topic $topicId in level $levelId", e)
                 _uiState.update {
                     it.copy(
                         flashcards = emptyList(),

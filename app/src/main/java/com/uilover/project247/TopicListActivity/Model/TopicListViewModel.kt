@@ -1,9 +1,9 @@
-package com.uilover.project247.DashboardActivity.Model
+package com.uilover.project247.TopicListActivity.Model
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uilover.project247.data.models.Level
+import com.uilover.project247.data.models.Topic
 import com.uilover.project247.data.repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,42 +11,42 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class MainUiState(
+data class TopicListUiState(
     val isLoading: Boolean = true,
-    val levels: List<Level> = emptyList(),
+    val topics: List<Topic> = emptyList(),
     val errorMessage: String? = null
 )
 
-class MainViewModel : ViewModel() {
+class TopicListViewModel(private val levelId: String) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MainUiState())
-    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(TopicListUiState())
+    val uiState: StateFlow<TopicListUiState> = _uiState.asStateFlow()
     
     private val firebaseRepository = FirebaseRepository()
 
     init {
-        loadLevels()
+        loadTopics()
     }
 
-    private fun loadLevels() {
+    private fun loadTopics() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             try {
-                // Lấy levels từ Firebase Realtime Database
-                val levels = firebaseRepository.getLevels()
+                // Lấy topics theo levelId từ Firebase
+                val topics = firebaseRepository.getTopicsByLevel(levelId)
                 
                 _uiState.update {
                     it.copy(
                         isLoading = false, 
-                        levels = levels,
-                        errorMessage = if (levels.isEmpty()) "Không có dữ liệu levels" else null
+                        topics = topics,
+                        errorMessage = if (topics.isEmpty()) "Không có chủ đề nào" else null
                     )
                 }
                 
-                Log.d("MainViewModel", "Loaded ${levels.size} levels from Firebase")
+                Log.d("TopicListViewModel", "Loaded ${topics.size} topics for level $levelId")
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error loading levels", e)
+                Log.e("TopicListViewModel", "Error loading topics for level $levelId", e)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -57,7 +57,7 @@ class MainViewModel : ViewModel() {
         }
     }
     
-    fun retryLoadLevels() {
-        loadLevels()
+    fun retryLoadTopics() {
+        loadTopics()
     }
 }

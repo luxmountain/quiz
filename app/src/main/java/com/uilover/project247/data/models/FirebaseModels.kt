@@ -27,7 +27,6 @@ data class Level(
 @Parcelize
 data class Topic(
     val id: String = "",
-    val levelId: String = "",
     val name: String = "",
     val nameVi: String = "",
     val description: String = "",
@@ -37,13 +36,8 @@ data class Topic(
     val totalWords: Int = 0,
     val createdAt: Long = 0,
     val updatedAt: Long = 0,
-    val flashcards: List<Flashcard> = emptyList(),
-    val conversations: List<Conversation> = emptyList()
-) : Parcelable {
-    fun isCompleted(completedTopics: Map<String, TopicCompletion>): Boolean {
-        return completedTopics[id]?.completed == true
-    }
-}
+    val flashcards: List<Flashcard> = emptyList()
+) : Parcelable
 
 // ==================== FLASHCARD MODELS ====================
 
@@ -256,7 +250,7 @@ data class Settings(
  */
 object FirebasePaths {
     const val LEVELS = "levels"
-    const val TOPICS = "topics"
+    const val CONVERSATIONS = "conversations"
     const val USER_PROGRESS = "userProgress"
     const val SETTINGS = "settings"
     const val APP_SETTINGS = "settings/app"
@@ -270,9 +264,12 @@ object FirebasePaths {
 
     // Level specific paths
     fun level(levelId: String) = "$LEVELS/$levelId"
+    fun levelTopics(levelId: String) = "$LEVELS/$levelId/topics"
     
-    // Topic specific paths
-    fun topic(topicId: String) = "$TOPICS/$topicId"
-    fun topicFlashcards(topicId: String) = "${topic(topicId)}/flashcards"
-    fun topicConversations(topicId: String) = "${topic(topicId)}/conversations"
+    // Topic specific paths (nested in levels)
+    fun levelTopic(levelId: String, topicId: String) = "$LEVELS/$levelId/topics/$topicId"
+    fun levelTopicFlashcards(levelId: String, topicId: String) = "${levelTopic(levelId, topicId)}/flashcards"
+    
+    // Conversation paths (standalone)
+    fun conversation(conversationId: String) = "$CONVERSATIONS/$conversationId"
 }
