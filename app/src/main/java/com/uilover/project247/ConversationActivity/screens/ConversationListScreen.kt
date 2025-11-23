@@ -72,7 +72,7 @@ fun ConversationListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Hội thoại") })
+            CenterAlignedTopAppBar(title = { Text("Hội thoại") })
         }
     ) { paddingValues ->
         if (uiState.isLoading) {

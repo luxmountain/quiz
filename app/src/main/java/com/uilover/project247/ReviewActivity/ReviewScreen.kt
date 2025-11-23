@@ -28,7 +28,7 @@ fun ReviewScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text("Ôn tập") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {

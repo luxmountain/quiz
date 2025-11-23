@@ -54,7 +54,7 @@ fun MainScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     when (selectedTab) {
                         "Search" -> Text(
@@ -88,12 +88,7 @@ fun MainScreen(
                         }
                     }
                 },
-                navigationIcon = {
-                    IconButton(onClick = { /* TODO: mở Drawer nếu có */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )

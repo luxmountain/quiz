@@ -8,11 +8,26 @@ import kotlinx.parcelize.Parcelize
  * Định nghĩa schema cho toàn bộ dữ liệu trong Firebase
  */
 
+// ==================== LEVEL MODELS ====================
+
+@Parcelize
+data class Level(
+    val id: String = "",
+    val name: String = "",
+    val nameVi: String = "",
+    val description: String = "",
+    val descriptionVi: String = "",
+    val order: Int = 0,
+    val totalTopics: Int = 0,
+    val imageUrl: String = ""
+) : Parcelable
+
 // ==================== TOPIC MODELS ====================
 
 @Parcelize
 data class Topic(
     val id: String = "",
+    val levelId: String = "",
     val name: String = "",
     val nameVi: String = "",
     val description: String = "",
@@ -21,15 +36,20 @@ data class Topic(
     val order: Int = 0,
     val totalWords: Int = 0,
     val createdAt: Long = 0,
-    val updatedAt: Long = 0
-) : Parcelable
+    val updatedAt: Long = 0,
+    val flashcards: List<Flashcard> = emptyList(),
+    val conversations: List<Conversation> = emptyList()
+) : Parcelable {
+    fun isCompleted(completedTopics: Map<String, TopicCompletion>): Boolean {
+        return completedTopics[id]?.completed == true
+    }
+}
 
 // ==================== FLASHCARD MODELS ====================
 
 @Parcelize
 data class Flashcard(
     val id: String = "",
-    val topicId: String = "",
     val word: String = "",
     val pronunciation: String = "",
     val meaning: String = "",
@@ -42,7 +62,6 @@ data class Flashcard(
     val exampleVi: String = "",
     val order: Int = 0,
     val difficulty: String = "easy", // "easy", "medium", "hard"
-    val createdAt: Long = 0
 ) : Parcelable {
 
     enum class WordType(val english: String, val vietnamese: String) {
@@ -133,9 +152,21 @@ data class UserProgress(
     val streak: Int = 0,
     val lastStudyDate: Long? = null,
     val createdAt: Long = 0,
+    val completedTopics: Map<String, TopicCompletion> = emptyMap(),
     val topicProgress: Map<String, TopicProgress> = emptyMap(),
     val flashcardResults: Map<String, FlashcardResult> = emptyMap(),
     val conversationResults: Map<String, ConversationResult> = emptyMap()
+) : Parcelable
+
+@Parcelize
+data class TopicCompletion(
+    val topicId: String = "",
+    val completed: Boolean = false,
+    val completionDate: Long? = null,
+    val totalFlashcardsLearned: Int = 0,
+    val totalConversationsCompleted: Int = 0,
+    val totalTimeSpent: Long = 0, // milliseconds
+    val accuracy: Float = 0f // 0-100
 ) : Parcelable
 
 @Parcelize
@@ -208,9 +239,8 @@ data class AppSettings(
  * Root structure của Firebase Realtime Database
  */
 data class FirebaseDatabase(
+    val levels: Map<String, Level> = emptyMap(),
     val topics: Map<String, Topic> = emptyMap(),
-    val flashcards: Map<String, Flashcard> = emptyMap(),
-    val conversations: Map<String, Conversation> = emptyMap(),
     val userProgress: Map<String, UserProgress> = emptyMap(),
     val settings: Settings = Settings()
 )
@@ -225,25 +255,24 @@ data class Settings(
  * Constants định nghĩa các path trong Firebase Realtime Database
  */
 object FirebasePaths {
+    const val LEVELS = "levels"
     const val TOPICS = "topics"
-    const val FLASHCARDS = "flashcards"
-    const val CONVERSATIONS = "conversations"
     const val USER_PROGRESS = "userProgress"
     const val SETTINGS = "settings"
     const val APP_SETTINGS = "settings/app"
 
     // User specific paths
     fun userProgress(userId: String) = "$USER_PROGRESS/$userId"
+    fun userCompletedTopics(userId: String) = "${userProgress(userId)}/completedTopics"
     fun userTopicProgress(userId: String) = "${userProgress(userId)}/topicProgress"
     fun userFlashcardResults(userId: String) = "${userProgress(userId)}/flashcardResults"
     fun userConversationResults(userId: String) = "${userProgress(userId)}/conversationResults"
 
+    // Level specific paths
+    fun level(levelId: String) = "$LEVELS/$levelId"
+    
     // Topic specific paths
     fun topic(topicId: String) = "$TOPICS/$topicId"
-    fun flashcardsForTopic(topicId: String) = FLASHCARDS // Query with .orderByChild("topicId").equalTo(topicId)
-    fun conversationsForTopic(topicId: String) = CONVERSATIONS // Query with .orderByChild("topicId").equalTo(topicId)
-
-    // Specific item paths
-    fun flashcard(flashcardId: String) = "$FLASHCARDS/$flashcardId"
-    fun conversation(conversationId: String) = "$CONVERSATIONS/$conversationId"
+    fun topicFlashcards(topicId: String) = "${topic(topicId)}/flashcards"
+    fun topicConversations(topicId: String) = "${topic(topicId)}/conversations"
 }
