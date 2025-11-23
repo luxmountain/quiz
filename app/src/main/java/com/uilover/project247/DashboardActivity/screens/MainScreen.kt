@@ -25,7 +25,7 @@ import com.uilover.project247.ConversationActivity.viewmodels.ConversationListVi
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
 import com.uilover.project247.DashboardActivity.components.ConversationListScreenContent
-import com.uilover.project247.DashboardActivity.components.LevelItem
+import com.uilover.project247.DashboardActivity.components.TopicItem
 import com.uilover.project247.DashboardActivity.components.DictionaryScreenContent
 import com.uilover.project247.DashboardActivity.components.ReviewScreenContent
 import com.uilover.project247.data.models.Level
@@ -38,7 +38,7 @@ import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
 fun MainScreen(
     viewModel: MainViewModel,
     onBoardClick: () -> Unit = {},
-    onLevelClick: (String) -> Unit = {},
+    onTopicClick: (levelId: String, topicId: String) -> Unit = { _, _ -> },
     onTopicReviewClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onConversationClick: (String) -> Unit = {}
@@ -72,19 +72,42 @@ fun MainScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        else -> Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { /* TODO: Mở DropdownMenu */ }
-                        ) {
-                            Text(
-                                text = "1000 Từ cơ bản",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            )
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Chọn bộ từ"
-                            )
+                        else -> {
+                            // Level selector in title area
+                            var expanded by remember { mutableStateOf(false) }
+
+                            val selectedLevel = uiState.levels.find { it.id == uiState.selectedLevelId }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clickable { expanded = true }
+                            ) {
+                                Text(
+                                    text = selectedLevel?.nameVi ?: "Chọn level",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = "Chọn level"
+                                )
+
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    uiState.levels.forEach { level ->
+                                        DropdownMenuItem(
+                                            text = { Text(level.nameVi) },
+                                            onClick = {
+                                                expanded = false
+                                                viewModel.loadTopicsByLevel(level.id)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -142,7 +165,7 @@ fun MainScreen(
             }
 
             else -> {
-                // 👉 Màn hình chính (Board)
+                // 👉 Màn hình chính (Board) - Hiển thị danh sách topics của level đã chọn
                 if (uiState.isLoading) {
                     Box(
                         modifier = Modifier
@@ -180,10 +203,14 @@ fun MainScreen(
                             .padding(paddingValues),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        items(uiState.levels) { level ->
-                            LevelItem(
-                                level = level,
-                                onClick = { onLevelClick(level.id) }
+                        items(uiState.topics) { topic ->
+                            TopicItem(
+                                topic = topic,
+                                onClick = { 
+                                    uiState.selectedLevelId?.let { levelId ->
+                                        onTopicClick(levelId, topic.id)
+                                    }
+                                }
                             )
                         }
                     }
