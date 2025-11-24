@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.uilover.project247.ConversationActivity.ConversationDetailActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
 import com.uilover.project247.LearningActivity.LearningActivity
@@ -15,7 +17,14 @@ import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.QuestionActivity.QuestionActivity
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return MainViewModel(application) as T
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -1,11 +1,13 @@
 package com.uilover.project247.DashboardActivity.Model
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.data.models.Topic
 import com.uilover.project247.data.repository.FirebaseRepository
+import com.uilover.project247.data.repository.UserProgressManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,15 +22,20 @@ data class MainUiState(
     val errorMessage: String? = null
 )
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
     
     private val firebaseRepository = FirebaseRepository()
+    private val progressManager = UserProgressManager(application)
 
     init {
         loadLevels()
+    }
+
+    fun isTopicCompleted(topicId: String): Boolean {
+        return progressManager.isTopicCompleted(topicId)
     }
 
     private fun loadLevels() {
@@ -36,10 +43,7 @@ class MainViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             try {
-                // Lấy levels từ Firebase Realtime Database
                 val levels = firebaseRepository.getLevels()
-                
-                // Auto-select default level (Beginner or first)
                 val defaultLevel = levels.find { it.name == "Beginner" } ?: levels.firstOrNull()
                 
                 _uiState.update {
@@ -53,7 +57,6 @@ class MainViewModel : ViewModel() {
                 
                 Log.d("MainViewModel", "Loaded ${levels.size} levels from Firebase")
                 
-                // Load topics for default level
                 if (defaultLevel != null) {
                     loadTopicsByLevel(defaultLevel.id)
                 }
@@ -95,7 +98,7 @@ class MainViewModel : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Lỗi kết nối Firebase: ${e.message}"
+                        errorMessage = "Lỗi khi tải topics: ${e.message}"
                     )
                 }
             }

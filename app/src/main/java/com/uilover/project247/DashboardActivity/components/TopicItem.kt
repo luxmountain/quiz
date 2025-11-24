@@ -29,50 +29,75 @@ import com.uilover.project247.data.models.Topic
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopicItem(topic: Topic, onClick: () -> Unit){
+fun TopicItem(
+    topic: Topic, 
+    onClick: () -> Unit,
+    isCompleted: Boolean = false
+){
     Card (
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = if (isCompleted) 
+                Color(0xFFE8F5E9) // Light green cho topic đã học
+            else 
+                MaterialTheme.colorScheme.surface
         ),
         onClick = onClick
     ){
         Row (
             modifier = Modifier
-                .padding(16.dp) // Padding 16dp bên trong Card
+                .padding(16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ){
 
-            // Load image from Firebase imageUrl using Coil
-            AsyncImage(
-                model = topic.imageUrl,
-                contentDescription = topic.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape),
-                placeholder = null,
-                error = null,
-                fallback = null
-            )
+            Box(modifier = Modifier.size(56.dp)) {
+                AsyncImage(
+                    model = topic.imageUrl,
+                    contentDescription = topic.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape),
+                    placeholder = null,
+                    error = null,
+                    fallback = null
+                )
+                
+                if (isCompleted) {
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.BottomEnd)
+                            .clip(CircleShape)
+                            .background(Color(0xFF4CAF50)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "✓",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
 
-            // Thêm một khoảng cách giữa ảnh và chữ
             Spacer(modifier = Modifier.width(16.dp))
 
             Column (
-                modifier = Modifier.weight(1f) // Bỏ padding(start = 16.dp) vì đã có Spacer
+                modifier = Modifier.weight(1f)
             ){
                 Text(
-                    text = topic.name, // Thay đổi từ title -> name
+                    text = topic.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = topic.nameVi, // Thay đổi từ subtitle -> nameVi
+                    text = topic.nameVi,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 4.dp)

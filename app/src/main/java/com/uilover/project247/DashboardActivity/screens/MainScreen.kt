@@ -206,6 +206,7 @@ fun MainScreen(
                         items(uiState.topics) { topic ->
                             TopicItem(
                                 topic = topic,
+                                isCompleted = viewModel.isTopicCompleted(topic.id),
                                 onClick = { 
                                     uiState.selectedLevelId?.let { levelId ->
                                         onTopicClick(levelId, topic.id)
