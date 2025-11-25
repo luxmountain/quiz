@@ -228,9 +228,8 @@ fun ConversationDetailScreen(
                         }
                     }
 
-                    // Các bước khác (LOADING, CONTEXT, DIALOGUE) -> không có bottom bar
                     else -> {
-                        Box(modifier = Modifier.height(0.dp)) // Empty
+                        Box(modifier = Modifier.height(0.dp))
                     }
                 }
             }
@@ -304,20 +303,7 @@ fun ConversationDetailScreen(
                 }
 
                 if (uiState.currentStep == ConversationStep.QUIZ_CHOICE) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp), // Padding chuẩn
-                        verticalAlignment = Alignment.Bottom, // Căn avatar xuống dưới
-                        horizontalArrangement = Arrangement.Start // Căn trái
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.question),
-                            contentDescription = "Quiz prompt",
-                            modifier = Modifier.size(56.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
+
                 }
 
                 // --- 5. SỬA LẠI PROMPT "ĐIỀN TỪ" ---
