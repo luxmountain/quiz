@@ -28,6 +28,8 @@ import com.uilover.project247.DashboardActivity.components.ConversationListScree
 import com.uilover.project247.DashboardActivity.components.TopicItem
 import com.uilover.project247.DashboardActivity.components.DictionaryScreenContent
 import com.uilover.project247.DashboardActivity.components.ReviewScreenContent
+import com.uilover.project247.DashboardActivity.components.AIAssistantScreenContent
+import com.uilover.project247.AIAssistantActivity.Model.AIAssistantViewModel
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
 import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
@@ -49,6 +51,7 @@ fun MainScreen(
     val dictionaryViewModel = remember { DictionaryViewModel(context) }
     val conversationViewModel = remember { ConversationListViewModel(context.applicationContext as android.app.Application) }
     val reviewViewModel = remember { ReviewViewModel() }
+    val aiAssistantViewModel = remember { AIAssistantViewModel(context.applicationContext as android.app.Application) }
 
 
 
@@ -69,6 +72,11 @@ fun MainScreen(
                         )
                         "Chat" -> Text(
                             text = "Hội thoại mẫu",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        "MochiHub" -> Text(
+                            text = "AI Study Assistant 🤖",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -156,10 +164,21 @@ fun MainScreen(
             "Chat" -> {
                 // Conversation Screen
                 ConversationListScreenContent(
-                    viewModel = conversationViewModel, // cần có ConversationListViewModel trong MainViewModel
+                    viewModel = conversationViewModel,
                     modifier = Modifier.padding(paddingValues),
                     onConversationClick = { conversationId ->
                         onConversationClick(conversationId)
+                    }
+                )
+            }
+
+            "MochiHub" -> {
+                // AI Study Assistant Screen
+                AIAssistantScreenContent(
+                    viewModel = aiAssistantViewModel,
+                    modifier = Modifier.padding(paddingValues),
+                    onReviewTopicClick = { topicId ->
+                        onTopicReviewClick(topicId)
                     }
                 )
             }

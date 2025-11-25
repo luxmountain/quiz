@@ -1,0 +1,16 @@
+# ============================================
+# AI Study Assistant - API Key Configuration
+# ============================================
+
+# Gemini API Key
+# Get your free API key at: https://makersuite.google.com/app/apikey
+# Uncomment and add your key below:
+# GEMINI_API_KEY=your_api_key_here
+
+# Example:
+# GEMINI_API_KEY=AIzaSyBx1234567890abcdefghijklmnopqrs
+
+# ============================================
+# Build Configuration (DO NOT MODIFY)
+# ============================================
+sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\sdk

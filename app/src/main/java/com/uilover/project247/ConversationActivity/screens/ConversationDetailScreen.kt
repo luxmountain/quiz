@@ -189,7 +189,7 @@ fun ConversationDetailScreen(
                         if (uiState.checkResult == CheckResult.NEUTRAL) {
                             // Hiển thị các nút chọn
                             QuizSection(
-                                question = currentDialogue.questionVi,
+                                question = "Chọn nghĩa đúng của từ gạch chân",
                                 options = currentDialogue.options,
                                 onAnswerSelected = { viewModel.checkChoiceAnswer(it) }
                             )
@@ -317,17 +317,6 @@ fun ConversationDetailScreen(
                             modifier = Modifier.size(56.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFFF3F3F3), RoundedCornerShape(16.dp))
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Chọn nghĩa đúng của từ gạch chân",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
                     }
                 }
 
