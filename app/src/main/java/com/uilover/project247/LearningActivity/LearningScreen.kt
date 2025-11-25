@@ -22,6 +22,7 @@ import com.uilover.project247.R
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearningScreen(
@@ -155,34 +156,39 @@ fun LearningScreen(
 
                 else -> Text("Không có từ vựng cho chủ đề này.")
             }
-        }
+
 
         if ((uiState.currentStudyMode == StudyMode.WRITE_WORD ||
                     uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE) &&
             uiState.currentCard != null &&
             uiState.checkResult != CheckResult.NEUTRAL
         ) {
-            AlertDialog(
-                onDismissRequest = {},
-                properties = androidx.compose.ui.window.DialogProperties(
-                    usePlatformDefaultWidth = false
-                )
+            AnimatedVisibility(
+                visible = (uiState.currentStudyMode == StudyMode.WRITE_WORD ||
+                        uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE) &&
+                        uiState.currentCard != null &&
+                        uiState.checkResult != CheckResult.NEUTRAL,
+
+                // Hiệu ứng xuất hiện: Trượt từ dưới lên + Mờ dần vào
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+
+                // Hiệu ứng biến mất: Trượt xuống dưới + Mờ dần đi
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                ) {
-                    AnswerFeedbackPopup(
-                        card = uiState.currentCard!!,
-                        checkResult = uiState.checkResult,
-                        onContinue = { viewModel.onQuizContinue() }
-                    )
-                }
+                // Gọi component Popup của bạn
+                AnswerFeedbackPopup(
+                    card = uiState.currentCard!!,
+                    checkResult = uiState.checkResult,
+                    onContinue = { viewModel.onQuizContinue() }
+                )
             }
+        }
         }
     }
 }
+
 
 @Composable
 fun CompletionView(

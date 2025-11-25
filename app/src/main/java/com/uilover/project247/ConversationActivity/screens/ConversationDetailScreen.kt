@@ -228,9 +228,8 @@ fun ConversationDetailScreen(
                         }
                     }
 
-                    // Các bước khác (LOADING, CONTEXT, DIALOGUE) -> không có bottom bar
                     else -> {
-                        Box(modifier = Modifier.height(0.dp)) // Empty
+                        Box(modifier = Modifier.height(0.dp))
                     }
                 }
             }

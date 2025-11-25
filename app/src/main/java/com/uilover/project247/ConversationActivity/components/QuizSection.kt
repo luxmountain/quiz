@@ -25,20 +25,6 @@ fun QuizSection(
         modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.question),
-                contentDescription = "Quiz prompt",
-                modifier = Modifier.size(56.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(question, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
         options.forEach { option ->
             QuizButton(
                 option = option,
