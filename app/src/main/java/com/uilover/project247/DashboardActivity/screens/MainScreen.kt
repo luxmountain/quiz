@@ -47,7 +47,7 @@ fun MainScreen(
     var selectedTab by remember { mutableStateOf("Board") }
     val context = LocalContext.current
     val dictionaryViewModel = remember { DictionaryViewModel(context) }
-    val conversationViewModel = remember { ConversationListViewModel() }
+    val conversationViewModel = remember { ConversationListViewModel(context.applicationContext as android.app.Application) }
     val reviewViewModel = remember { ReviewViewModel() }
 
 
@@ -203,10 +203,17 @@ fun MainScreen(
                             .padding(paddingValues),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        items(uiState.topics) { topic ->
+                        items(
+                            items = uiState.topics,
+                            key = { topic -> topic.id }
+                        ) { topic ->
+                            val isCompleted = remember(uiState.completedTopics) {
+                                uiState.completedTopics.contains(topic.id)
+                            }
+                            
                             TopicItem(
                                 topic = topic,
-                                isCompleted = viewModel.isTopicCompleted(topic.id),
+                                isCompleted = isCompleted,
                                 onClick = { 
                                     uiState.selectedLevelId?.let { levelId ->
                                         onTopicClick(levelId, topic.id)

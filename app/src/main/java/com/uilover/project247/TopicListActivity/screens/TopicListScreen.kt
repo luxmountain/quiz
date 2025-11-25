@@ -91,6 +91,7 @@ fun TopicListScreen(
                 items(uiState.topics) { topic ->
                     TopicItem(
                         topic = topic,
+                        isCompleted = uiState.completedTopicIds.contains(topic.id),
                         onClick = { onTopicClick(topic.id) }
                     )
                 }

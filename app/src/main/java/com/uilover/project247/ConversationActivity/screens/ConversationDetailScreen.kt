@@ -101,6 +101,7 @@ fun ConversationDetailScreen(
     val context = LocalContext.current
     val ttsManager = remember { TextToSpeechManager(context) }
     var translationVisibleMap by remember { mutableStateOf(mapOf<Int, Boolean>()) }
+    val progressManager = remember { com.uilover.project247.data.repository.UserProgressManager(context) }
 
     // State cho ô chat (của Quiz 2)
     var userAnswer by rememberSaveable { mutableStateOf("") }
@@ -142,6 +143,21 @@ fun ConversationDetailScreen(
     }
     if (uiState.currentStep == ConversationStep.FINISHED) {
         LaunchedEffect(Unit) {
+            // Lưu kết quả hoàn thành conversation
+            conversation?.let { conv ->
+                val result = com.uilover.project247.data.repository.StudyResult(
+                    topicId = conv.id,
+                    topicName = conv.title,
+                    studyType = "conversation",
+                    totalItems = conv.dialogue.size,
+                    correctCount = conv.dialogue.size, // Hoàn thành tất cả
+                    timeSpent = 0, // TODO: Track thời gian nếu cần
+                    accuracy = 100f,
+                    completedDate = System.currentTimeMillis()
+                )
+                progressManager.saveStudyResult(result)
+            }
+            
             delay(1000) // Đợi 1s sau khi hoàn thành
             onNavigateBack()
         }

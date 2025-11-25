@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,20 +34,27 @@ fun TopicItem(
     topic: Topic, 
     onClick: () -> Unit,
     isCompleted: Boolean = false
-){
-    Card (
+) {
+    val containerColor = remember(isCompleted) {
+        if (isCompleted) Color(0xFF4CAF50) else Color.White
+    }
+    
+    val textColor = remember(isCompleted) {
+        if (isCompleted) Color.White else Color.Black
+    }
+    
+    val subtitleColor = remember(isCompleted) {
+        if (isCompleted) Color.White.copy(alpha = 0.9f) else Color.Gray
+    }
+    
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isCompleted) 
-                Color(0xFFE8F5E9) // Light green cho topic đã học
-            else 
-                MaterialTheme.colorScheme.surface
-        ),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
         onClick = onClick
-    ){
+    ) {
         Row (
             modifier = Modifier
                 .padding(16.dp)
@@ -73,12 +81,12 @@ fun TopicItem(
                             .size(20.dp)
                             .align(Alignment.BottomEnd)
                             .clip(CircleShape)
-                            .background(Color(0xFF4CAF50)),
+                            .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "✓",
-                            color = Color.White,
+                            color = Color(0xFF4CAF50),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -88,18 +96,17 @@ fun TopicItem(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Column (
-                modifier = Modifier.weight(1f)
-            ){
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = topic.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
                 )
                 Text(
                     text = topic.nameVi,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
+                    color = subtitleColor,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }

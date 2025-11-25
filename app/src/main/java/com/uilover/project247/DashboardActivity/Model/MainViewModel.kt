@@ -19,7 +19,8 @@ data class MainUiState(
     val levels: List<Level> = emptyList(),
     val topics: List<Topic> = emptyList(),
     val selectedLevelId: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val completedTopics: Set<String> = emptySet()
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -32,10 +33,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         loadLevels()
+        loadCompletedTopics()
+    }
+
+    fun refreshCompletedTopics() {
+        loadCompletedTopics()
+    }
+
+    private fun loadCompletedTopics() {
+        val completed = progressManager.getCompletedTopics().keys
+        _uiState.update { it.copy(completedTopics = completed) }
     }
 
     fun isTopicCompleted(topicId: String): Boolean {
-        return progressManager.isTopicCompleted(topicId)
+        return _uiState.value.completedTopics.contains(topicId)
     }
 
     private fun loadLevels() {

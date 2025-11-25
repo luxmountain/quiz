@@ -8,7 +8,11 @@ data class LearningUiState(
     val currentStudyMode: StudyMode = StudyMode.FLASHCARD,
     val isLoading: Boolean = true,
     val isTopicComplete: Boolean = false,
-    val checkResult: CheckResult = CheckResult.NEUTRAL
+    val checkResult: CheckResult = CheckResult.NEUTRAL,
+    val topicName: String = "",
+    val correctAnswers: Int = 0,
+    val wrongAnswers: Int = 0,
+    val startTime: Long = 0L
 ) {
     val currentCard: Flashcard?
         get() = flashcards.getOrNull(currentCardIndex)
@@ -16,4 +20,11 @@ data class LearningUiState(
     // Tính tiến trình
     val progress: Float
         get() = if (flashcards.isEmpty()) 0f else (currentCardIndex + 1) / flashcards.size.toFloat()
+    
+    // Tính accuracy
+    val accuracy: Float
+        get() {
+            val total = correctAnswers + wrongAnswers
+            return if (total == 0) 0f else (correctAnswers.toFloat() / total) * 100
+        }
 }

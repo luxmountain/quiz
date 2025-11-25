@@ -1,9 +1,12 @@
 package com.uilover.project247.LearningActivity.Model
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.uilover.project247.data.repository.FirebaseRepository
+import com.uilover.project247.data.repository.UserProgressManager
+import com.uilover.project247.data.repository.StudyResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,12 +15,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class LearningViewModel(private val levelId: String, private val topicId: String) : ViewModel() {
+class LearningViewModel(
+    application: Application,
+    private val levelId: String,
+    private val topicId: String
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(LearningUiState())
     val uiState: StateFlow<LearningUiState> = _uiState.asStateFlow()
     
     private val firebaseRepository = FirebaseRepository()
+    private val progressManager = UserProgressManager(application)
 
     init {
         loadFlashcardsForTopic()
@@ -35,7 +43,9 @@ class LearningViewModel(private val levelId: String, private val topicId: String
                 _uiState.update {
                     it.copy(
                         flashcards = flashcards,
-                        isLoading = false
+                        isLoading = false,
+                        topicName = topic?.name ?: "",
+                        startTime = System.currentTimeMillis()
                     )
                 }
                 
@@ -69,18 +79,38 @@ class LearningViewModel(private val levelId: String, private val topicId: String
 
         if (userAnswer.equals(correctWord, ignoreCase = true)) {
             // NẾU ĐÚNG: Chỉ set trạng thái, KHÔNG tự động chuyển
-            _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
+            _uiState.update { 
+                it.copy(
+                    checkResult = CheckResult.CORRECT,
+                    correctAnswers = it.correctAnswers + 1
+                ) 
+            }
         } else {
             // NẾU SAI: Chỉ set trạng thái
-            _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
+            _uiState.update { 
+                it.copy(
+                    checkResult = CheckResult.INCORRECT,
+                    wrongAnswers = it.wrongAnswers + 1
+                ) 
+            }
         }
     }
     fun checkListenAnswer(userAnswer: String) {
         val correctWord = _uiState.value.currentCard?.word ?: return
         if (userAnswer.equals(correctWord, ignoreCase = true)) {
-            _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
+            _uiState.update { 
+                it.copy(
+                    checkResult = CheckResult.CORRECT,
+                    correctAnswers = it.correctAnswers + 1
+                ) 
+            }
         } else {
-            _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }
+            _uiState.update { 
+                it.copy(
+                    checkResult = CheckResult.INCORRECT,
+                    wrongAnswers = it.wrongAnswers + 1
+                ) 
+            }
         }
     }
 
@@ -104,9 +134,22 @@ class LearningViewModel(private val levelId: String, private val topicId: String
                     )
                 }
             }
-            // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo
+            // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo hoặc hoàn thành
             StudyMode.LISTEN_AND_WRITE -> {
-                goToNextCard()
+                // Kiểm tra xem đây có phải câu cuối cùng không
+                if (currentState.currentCardIndex >= currentState.flashcards.size - 1) {
+                    // Câu cuối cùng - Lưu kết quả và đánh dấu hoàn thành
+                    saveStudyResult()
+                    _uiState.update { 
+                        it.copy(
+                            isTopicComplete = true,
+                            checkResult = CheckResult.NEUTRAL
+                        ) 
+                    }
+                } else {
+                    // Chưa phải câu cuối - Chuyển sang câu tiếp theo
+                    goToNextCard()
+                }
             }
             else -> {}
         }
@@ -127,8 +170,30 @@ class LearningViewModel(private val levelId: String, private val topicId: String
                     checkResult = CheckResult.NEUTRAL
                 )
             }
-        } else {
-            _uiState.update { it.copy(isTopicComplete = true) }
         }
+        // Không còn xử lý hoàn thành ở đây nữa - đã chuyển sang onQuizContinue
+    }
+    
+    private fun saveStudyResult() {
+        val currentState = _uiState.value
+        val timeSpent = System.currentTimeMillis() - currentState.startTime
+        
+        val result = StudyResult(
+            topicId = topicId,
+            topicName = currentState.topicName,
+            studyType = "flashcard",
+            totalItems = currentState.flashcards.size,
+            correctCount = currentState.correctAnswers,
+            timeSpent = timeSpent,
+            accuracy = currentState.accuracy,
+            completedDate = System.currentTimeMillis()
+        )
+        
+        progressManager.saveStudyResult(result)
+        
+        Log.d(
+            "LearningViewModel",
+            "Saved study result: ${currentState.correctAnswers}/${currentState.correctAnswers + currentState.wrongAnswers} correct, ${currentState.accuracy}% accuracy"
+        )
     }
 }

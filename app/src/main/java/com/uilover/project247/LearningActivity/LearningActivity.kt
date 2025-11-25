@@ -27,9 +27,9 @@ class LearningActivity : ComponentActivity() {
             return
         }
 
-        // 3. Khởi tạo ViewModel bằng Factory (để truyền `levelId` và `topicId` vào)
+        // 3. Khởi tạo ViewModel bằng Factory (để truyền `application`, `levelId` và `topicId` vào)
         val viewModel: LearningViewModel by viewModels {
-            LearningViewModelFactory(levelId, topicId)
+            LearningViewModelFactory(application, levelId, topicId)
         }
 
         setContent {

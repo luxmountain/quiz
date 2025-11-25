@@ -15,21 +15,23 @@ import com.uilover.project247.ui.theme.Project247Theme
 
 class TopicListActivity : ComponentActivity() {
 
+    private val viewModel: TopicListViewModel by viewModels {
+        TopicListViewModelFactory(application, levelId)
+    }
+    
+    private val levelId: String by lazy {
+        intent.getStringExtra("LEVEL_ID") ?: ""
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Lấy levelId từ Intent
-        val levelId = intent.getStringExtra("LEVEL_ID")
         val levelName = intent.getStringExtra("LEVEL_NAME") ?: "Topics"
 
-        if (levelId == null) {
+        if (levelId.isEmpty()) {
             finish()
             return
-        }
-
-        // Khởi tạo ViewModel với levelId
-        val viewModel: TopicListViewModel by viewModels {
-            TopicListViewModelFactory(levelId)
         }
 
         setContent {
@@ -50,5 +52,10 @@ class TopicListActivity : ComponentActivity() {
                 )
             }
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        viewModel.retryLoadTopics()
     }
 }

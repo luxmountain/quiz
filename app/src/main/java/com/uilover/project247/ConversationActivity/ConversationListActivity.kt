@@ -1,5 +1,6 @@
 package com.uilover.project247.ConversationActivity
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,37 +11,43 @@ import androidx.compose.ui.graphics.toArgb
 import com.uilover.project247.ConversationActivity.screens.ConversationListScreen
 import com.uilover.project247.ConversationActivity.viewmodels.ConversationListViewModel
 import com.uilover.project247.ui.theme.Project247Theme
+import androidx.lifecycle.ViewModelProvider
 
 class ConversationListActivity : ComponentActivity() {
 
-    // 1. Khởi tạo ViewModel cho màn hình danh sách
-    private val viewModel: ConversationListViewModel by viewModels()
+    private val viewModel: ConversationListViewModel by lazy {
+        ViewModelProvider(
+            this,
+            object : ViewModelProvider.Factory {
+                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHECKED_CAST")
+                    return ConversationListViewModel(application) as T
+                }
+            }
+        )[ConversationListViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            // TODO: Thay Project247Theme bằng tên Theme của bạn
             Project247Theme {
-                // Set màu thanh status bar
                 window.statusBarColor = MaterialTheme.colorScheme.surface.toArgb()
 
                 ConversationListScreen(
-                    viewModel = viewModel,
+                    application = application,
                     onConversationClick = { conversationId ->
-                        // 2. Xử lý sự kiện click
-                        // Khi người dùng bấm vào 1 chủ đề,
-                        // khởi động ConversationDetailActivity
-
                         val intent = Intent(this, ConversationDetailActivity::class.java)
-
-                        // 3. Gửi ID của chủ đề qua Intent
                         intent.putExtra("CONVERSATION_ID", conversationId)
-
                         startActivity(intent)
                     }
                 )
             }
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        viewModel.retry()
     }
 }

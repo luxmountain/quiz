@@ -11,7 +11,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.uilover.project247.LearningActivity.Model.LearningViewModel
 import com.uilover.project247.LearningActivity.Model.StudyMode
 import com.uilover.project247.LearningActivity.Model.CheckResult
@@ -66,7 +68,10 @@ fun LearningScreen(
             when {
                 uiState.isLoading -> CircularProgressIndicator()
 
-                uiState.isTopicComplete -> CompletionView(onNavigateBack)
+                uiState.isTopicComplete -> CompletionView(
+                    uiState = uiState,
+                    onNavigateBack = onNavigateBack
+                )
 
                 uiState.currentCard != null -> {
                     val card = uiState.currentCard!!
@@ -180,20 +185,143 @@ fun LearningScreen(
 }
 
 @Composable
-fun CompletionView(onNavigateBack: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun CompletionView(
+    uiState: com.uilover.project247.LearningActivity.Model.LearningUiState,
+    onNavigateBack: () -> Unit
+) {
+    val total = uiState.correctAnswers + uiState.wrongAnswers
+    val accuracyPercent = if (total > 0) (uiState.correctAnswers.toFloat() / total * 100).toInt() else 0
+    val isPassed = accuracyPercent >= 60
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Icon và tiêu đề
         Text(
-            "Chúc mừng!",
+            text = if (isPassed) "🎉" else "💪",
+            style = MaterialTheme.typography.displayLarge,
+            fontSize = 72.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = if (isPassed) "Chúc mừng!" else "Cố lên!",
             style = MaterialTheme.typography.headlineLarge,
-            color = Color(0xFF00C853)
+            fontWeight = FontWeight.Bold,
+            color = if (isPassed) Color(0xFF4CAF50) else Color(0xFFFF9800)
         )
+        
         Text(
-            "Bạn đã hoàn thành chủ đề này.",
-            style = MaterialTheme.typography.titleMedium
+            text = if (isPassed) 
+                "Bạn đã hoàn thành chủ đề này" 
+            else 
+                "Cần đạt 60% để hoàn thành",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.Gray
         )
+        
         Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = onNavigateBack) {
-            Text("Quay về")
+        
+        // Thống kê
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    "Kết quả học tập",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                HorizontalDivider()
+                
+                // Accuracy
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Độ chính xác:", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "$accuracyPercent%",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isPassed) Color(0xFF4CAF50) else Color(0xFFFF9800)
+                    )
+                }
+                
+                // Correct answers
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Câu trả lời đúng:", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "${uiState.correctAnswers}/$total",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4CAF50)
+                    )
+                }
+                
+                // Wrong answers
+                if (uiState.wrongAnswers > 0) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Câu trả lời sai:", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "${uiState.wrongAnswers}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFD32F2F)
+                        )
+                    }
+                }
+                
+                // Total words
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Tổng số từ:", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "${uiState.flashcards.size}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // Buttons
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6200EA)
+            )
+        ) {
+            Text(
+                "Hoàn thành",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
