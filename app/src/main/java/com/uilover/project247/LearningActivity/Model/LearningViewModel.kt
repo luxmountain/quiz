@@ -136,6 +136,11 @@ class LearningViewModel(
             }
             // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo hoặc hoàn thành
             StudyMode.LISTEN_AND_WRITE -> {
+                // Đánh dấu flashcard hiện tại là đã học
+                currentState.currentCard?.let { flashcard ->
+                    progressManager.markFlashcardAsLearned(topicId, flashcard.id)
+                }
+                
                 // Kiểm tra xem đây có phải câu cuối cùng không
                 if (currentState.currentCardIndex >= currentState.flashcards.size - 1) {
                     // Câu cuối cùng - Lưu kết quả và đánh dấu hoàn thành

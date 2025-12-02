@@ -25,8 +25,6 @@ fun CheckButton(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            // --- SỬA LỖI: XÓA DÒNG NÀY ĐI ---
-            // .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

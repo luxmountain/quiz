@@ -14,10 +14,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class TopicWithStatus(
+    val topic: Topic,
+    val isCompleted: Boolean,
+    val isLocked: Boolean,
+    val progress: Float // 0-100
+)
+
 data class MainUiState(
     val isLoading: Boolean = true,
     val levels: List<Level> = emptyList(),
     val topics: List<Topic> = emptyList(),
+    val topicsWithStatus: List<TopicWithStatus> = emptyList(),
     val selectedLevelId: String? = null,
     val errorMessage: String? = null,
     val completedTopics: Set<String> = emptySet()
@@ -94,10 +102,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val topics = firebaseRepository.getTopicsByLevel(levelId)
                 
+                // Tính toán trạng thái unlock cho từng topic
+                val topicsWithStatus = topics.mapIndexed { index, topic ->
+                    val isCompleted = isTopicCompleted(topic.id)
+                    val progress = progressManager.getTopicFlashcardProgress(topic.id, topic.totalWords)
+                    
+                    // Logic unlock:
+                    // - Topic đầu tiên luôn mở
+                    // - Topic tiếp theo mở khi topic trước đạt >= 80%
+                    val isLocked = if (index == 0) {
+                        false
+                    } else {
+                        val previousTopic = topics[index - 1]
+                        !progressManager.hasReachedUnlockThreshold(previousTopic.id, previousTopic.flashcards.size, 80f)
+                    }
+                    
+                    TopicWithStatus(
+                        topic = topic,
+                        isCompleted = isCompleted,
+                        isLocked = isLocked,
+                        progress = progress
+                    )
+                }
+                
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         topics = topics,
+                        topicsWithStatus = topicsWithStatus,
                         selectedLevelId = levelId,
                         errorMessage = if (topics.isEmpty()) "Không có chủ đề nào" else null
                     )
@@ -114,5 +146,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+    
+    /**
+     * Kiểm tra xem có thể mở topic không
+     */
+    fun canOpenTopic(topicId: String): Boolean {
+        val topicStatus = _uiState.value.topicsWithStatus.find { it.topic.id == topicId }
+        return topicStatus?.isLocked == false
     }
 }

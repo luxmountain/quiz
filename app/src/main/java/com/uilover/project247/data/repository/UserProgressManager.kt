@@ -23,7 +23,8 @@ data class TopicCompletionStatus(
     val totalFlashcardsLearned: Int = 0,
     val totalConversationsCompleted: Int = 0,
     val bestAccuracy: Float = 0f,
-    val totalTimeSpent: Long = 0
+    val totalTimeSpent: Long = 0,
+    val learnedFlashcardIds: Set<String> = emptySet() // Danh sách flashcard đã học
 )
 
 class UserProgressManager(context: Context) {
@@ -129,5 +130,52 @@ class UserProgressManager(context: Context) {
         val completed = getCompletedTopics().values.filter { it.isCompleted }
         if (completed.isEmpty()) return 0f
         return completed.map { it.bestAccuracy }.average().toFloat()
+    }
+
+    /**
+     * Lưu flashcard đã học
+     */
+    fun markFlashcardAsLearned(topicId: String, flashcardId: String) {
+        val completedTopics = getCompletedTopics().toMutableMap()
+        val existing = completedTopics[topicId]
+        
+        val updated = if (existing != null) {
+            val newLearnedIds = existing.learnedFlashcardIds + flashcardId
+            existing.copy(
+                learnedFlashcardIds = newLearnedIds,
+                totalFlashcardsLearned = newLearnedIds.size,
+                lastStudyDate = System.currentTimeMillis()
+            )
+        } else {
+            TopicCompletionStatus(
+                topicId = topicId,
+                isCompleted = false,
+                lastStudyDate = System.currentTimeMillis(),
+                learnedFlashcardIds = setOf(flashcardId),
+                totalFlashcardsLearned = 1
+            )
+        }
+        
+        completedTopics[topicId] = updated
+        val json = gson.toJson(completedTopics)
+        prefs.edit().putString(KEY_COMPLETED_TOPICS, json).apply()
+    }
+
+    /**
+     * Tính phần trăm hoàn thành flashcard của topic
+     * @return 0-100
+     */
+    fun getTopicFlashcardProgress(topicId: String, totalFlashcards: Int): Float {
+        if (totalFlashcards == 0) return 0f
+        val learned = getCompletedTopics()[topicId]?.learnedFlashcardIds?.size ?: 0
+        return (learned.toFloat() / totalFlashcards.toFloat()) * 100f
+    }
+
+    /**
+     * Kiểm tra xem topic có đạt ngưỡng để unlock topic tiếp theo không
+     * @param requiredProgress ngưỡng % cần đạt (mặc định 80%)
+     */
+    fun hasReachedUnlockThreshold(topicId: String, totalFlashcards: Int, requiredProgress: Float = 80f): Boolean {
+        return getTopicFlashcardProgress(topicId, totalFlashcards) >= requiredProgress
     }
 }

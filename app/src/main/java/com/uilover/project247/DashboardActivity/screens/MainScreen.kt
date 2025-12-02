@@ -223,19 +223,19 @@ fun MainScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         items(
-                            items = uiState.topics,
-                            key = { topic -> topic.id }
-                        ) { topic ->
-                            val isCompleted = remember(uiState.completedTopics) {
-                                uiState.completedTopics.contains(topic.id)
-                            }
-                            
+                            items = uiState.topicsWithStatus,
+                            key = { it.topic.id }
+                        ) { topicStatus ->
                             TopicItem(
-                                topic = topic,
-                                isCompleted = isCompleted,
+                                topic = topicStatus.topic,
+                                isCompleted = topicStatus.isCompleted,
+                                isLocked = topicStatus.isLocked,
+                                progress = topicStatus.progress,
                                 onClick = { 
-                                    uiState.selectedLevelId?.let { levelId ->
-                                        onTopicClick(levelId, topic.id)
+                                    if (!topicStatus.isLocked) {
+                                        uiState.selectedLevelId?.let { levelId ->
+                                            onTopicClick(levelId, topicStatus.topic.id)
+                                        }
                                     }
                                 }
                             )
