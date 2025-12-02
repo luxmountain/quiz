@@ -243,6 +243,24 @@ class FirebaseRepository {
         }
     }
     
+    // ==================== PLACEMENT TEST ====================
+    
+    /**
+     * Lấy Placement Test
+     */
+    suspend fun getPlacementTest(): com.uilover.project247.data.models.PlacementTest? {
+        return try {
+            val snapshot = database.getReference("placementTest")
+                .get()
+                .await()
+            
+            snapshot.getValue(com.uilover.project247.data.models.PlacementTest::class.java)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading placement test", e)
+            null
+        }
+    }
+    
     // ==================== HELPER METHODS ====================
     
     /**

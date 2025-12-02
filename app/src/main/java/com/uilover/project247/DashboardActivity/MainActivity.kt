@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.uilover.project247.ConversationActivity.ConversationDetailActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
 import com.uilover.project247.LearningActivity.LearningActivity
+import com.uilover.project247.PlacementTestActivity.PlacementTestActivity
+import com.uilover.project247.data.repository.PlacementTestManager
 import com.uilover.project247.ui.theme.Project247Theme
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.QuestionActivity.QuestionActivity
@@ -26,6 +28,8 @@ class MainActivity : ComponentActivity() {
         }
     }
     
+    private lateinit var placementTestManager: PlacementTestManager
+    
     override fun onResume() {
         super.onResume()
         viewModel.refreshCompletedTopics()
@@ -33,6 +37,16 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        placementTestManager = PlacementTestManager(this)
+
+        // Check placement test
+        if (!placementTestManager.hasCompletedTest()) {
+            // Chưa làm test -> Chuyển đến PlacementTestActivity
+            val intent = Intent(this, PlacementTestActivity::class.java)
+            startActivity(intent)
+            // Không finish() để khi test xong quay về MainActivity
+        }
 
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 

@@ -45,6 +45,9 @@
             android:name=".ResultActivity.ResultActivity"
             android:exported="false" />
         <activity
+            android:name=".PlacementTestActivity.PlacementTestActivity"
+            android:exported="false" />
+        <activity
             android:name=".DashboardActivity.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
