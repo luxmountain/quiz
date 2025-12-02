@@ -29,6 +29,8 @@ class LearningViewModel(
 
     init {
         loadFlashcardsForTopic()
+        // Reset flashcard progress khi bắt đầu session học mới
+        progressManager.resetFlashcardProgress(topicId)
     }
 
     private fun loadFlashcardsForTopic() {

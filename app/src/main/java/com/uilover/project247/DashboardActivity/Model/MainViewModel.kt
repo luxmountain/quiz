@@ -44,6 +44,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadCompletedTopics()
     }
 
+    /**
+     * Refresh data khi quay lại màn hình (onResume)
+     */
+    fun refreshData() {
+        loadCompletedTopics()
+        // Reload topics của level hiện tại để cập nhật trạng thái lock/unlock
+        val currentLevelId = _uiState.value.selectedLevelId
+        if (currentLevelId != null) {
+            loadTopicsByLevel(currentLevelId)
+        }
+    }
+
     fun refreshCompletedTopics() {
         loadCompletedTopics()
     }
@@ -109,12 +121,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     
                     // Logic unlock:
                     // - Topic đầu tiên luôn mở
-                    // - Topic tiếp theo mở khi topic trước đạt >= 80%
+                    // - Topic tiếp theo mở khi topic trước đã HOÀN THÀNH (làm xong 1 lần với accuracy >= 60%)
                     val isLocked = if (index == 0) {
                         false
                     } else {
                         val previousTopic = topics[index - 1]
-                        !progressManager.hasReachedUnlockThreshold(previousTopic.id, previousTopic.flashcards.size, 80f)
+                        !progressManager.hasReachedUnlockThreshold(previousTopic.id)
                     }
                     
                     TopicWithStatus(

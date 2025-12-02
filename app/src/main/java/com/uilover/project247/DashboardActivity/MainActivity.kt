@@ -32,7 +32,8 @@ class MainActivity : ComponentActivity() {
     
     override fun onResume() {
         super.onResume()
-        viewModel.refreshCompletedTopics()
+        // Refresh lại completed topics và reload topics để cập nhật trạng thái lock/unlock
+        viewModel.refreshData()
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -53,7 +53,8 @@ class UserProgressManager(context: Context) {
         val historyJson = gson.toJson(history)
         prefs.edit().putString(KEY_STUDY_HISTORY, historyJson).apply()
 
-        // 2. Cập nhật trạng thái hoàn thành topic
+        // 2. Cập nhật trạng thái hoàn thành topic (chỉ khi đạt độ chính xác tối thiểu)
+        // Topic chỉ được đánh dấu hoàn thành nếu làm đủ số lượng items trong 1 lần
         if (result.accuracy >= MIN_ACCURACY_TO_COMPLETE) {
             updateTopicCompletion(result)
         }
@@ -74,7 +75,9 @@ class UserProgressManager(context: Context) {
                     existing.totalConversationsCompleted + result.totalItems 
                 else existing.totalConversationsCompleted,
                 bestAccuracy = maxOf(existing.bestAccuracy, result.accuracy),
-                totalTimeSpent = existing.totalTimeSpent + result.timeSpent
+                totalTimeSpent = existing.totalTimeSpent + result.timeSpent,
+                // Không update learnedFlashcardIds ở đây vì chỉ dùng để track từng flashcard riêng lẻ
+                learnedFlashcardIds = existing.learnedFlashcardIds
             )
         } else {
             TopicCompletionStatus(
@@ -84,7 +87,8 @@ class UserProgressManager(context: Context) {
                 totalFlashcardsLearned = if (result.studyType == "flashcard") result.totalItems else 0,
                 totalConversationsCompleted = if (result.studyType == "conversation") result.totalItems else 0,
                 bestAccuracy = result.accuracy,
-                totalTimeSpent = result.timeSpent
+                totalTimeSpent = result.timeSpent,
+                learnedFlashcardIds = emptySet() // Không set flashcard IDs ở đây
             )
         }
         
@@ -133,7 +137,8 @@ class UserProgressManager(context: Context) {
     }
 
     /**
-     * Lưu flashcard đã học
+     * Lưu flashcard đã học - CHỈ dùng để track progress trong 1 lần học
+     * KHÔNG dùng để quyết định unlock topic (dùng isTopicCompleted thay vì)
      */
     fun markFlashcardAsLearned(topicId: String, flashcardId: String) {
         val completedTopics = getCompletedTopics().toMutableMap()
@@ -143,7 +148,6 @@ class UserProgressManager(context: Context) {
             val newLearnedIds = existing.learnedFlashcardIds + flashcardId
             existing.copy(
                 learnedFlashcardIds = newLearnedIds,
-                totalFlashcardsLearned = newLearnedIds.size,
                 lastStudyDate = System.currentTimeMillis()
             )
         } else {
@@ -152,7 +156,7 @@ class UserProgressManager(context: Context) {
                 isCompleted = false,
                 lastStudyDate = System.currentTimeMillis(),
                 learnedFlashcardIds = setOf(flashcardId),
-                totalFlashcardsLearned = 1
+                totalFlashcardsLearned = 0
             )
         }
         
@@ -162,7 +166,8 @@ class UserProgressManager(context: Context) {
     }
 
     /**
-     * Tính phần trăm hoàn thành flashcard của topic
+     * Tính phần trăm hoàn thành flashcard của topic trong lần học hiện tại
+     * KHÔNG dùng để unlock topic tiếp theo
      * @return 0-100
      */
     fun getTopicFlashcardProgress(topicId: String, totalFlashcards: Int): Float {
@@ -172,10 +177,25 @@ class UserProgressManager(context: Context) {
     }
 
     /**
-     * Kiểm tra xem topic có đạt ngưỡng để unlock topic tiếp theo không
-     * @param requiredProgress ngưỡng % cần đạt (mặc định 80%)
+     * Kiểm tra unlock topic tiếp theo - CHỈ dựa vào isTopicCompleted
+     * Topic chỉ completed khi làm XỐI 1 lần toàn bộ flashcards với accuracy >= 60%
      */
-    fun hasReachedUnlockThreshold(topicId: String, totalFlashcards: Int, requiredProgress: Float = 80f): Boolean {
-        return getTopicFlashcardProgress(topicId, totalFlashcards) >= requiredProgress
+    fun hasReachedUnlockThreshold(topicId: String): Boolean {
+        return isTopicCompleted(topicId)
+    }
+    
+    /**
+     * Reset flashcard progress khi bắt đầu 1 session học mới
+     */
+    fun resetFlashcardProgress(topicId: String) {
+        val completedTopics = getCompletedTopics().toMutableMap()
+        val existing = completedTopics[topicId]
+        
+        if (existing != null) {
+            val updated = existing.copy(learnedFlashcardIds = emptySet())
+            completedTopics[topicId] = updated
+            val json = gson.toJson(completedTopics)
+            prefs.edit().putString(KEY_COMPLETED_TOPICS, json).apply()
+        }
     }
 }
