@@ -33,18 +33,32 @@ import com.uilover.project247.data.models.Topic
 fun TopicItem(
     topic: Topic, 
     onClick: () -> Unit,
-    isCompleted: Boolean = false
+    isCompleted: Boolean = false,
+    isLocked: Boolean = false,
+    progress: Float = 0f // 0-100
 ) {
-    val containerColor = remember(isCompleted) {
-        if (isCompleted) Color(0xFF4CAF50) else Color.White
+    val containerColor = remember(isCompleted, isLocked) {
+        when {
+            isLocked -> Color(0xFFE0E0E0)
+            isCompleted -> Color(0xFF4CAF50)
+            else -> Color.White
+        }
     }
     
-    val textColor = remember(isCompleted) {
-        if (isCompleted) Color.White else Color.Black
+    val textColor = remember(isCompleted, isLocked) {
+        when {
+            isLocked -> Color.Gray
+            isCompleted -> Color.White
+            else -> Color.Black
+        }
     }
     
-    val subtitleColor = remember(isCompleted) {
-        if (isCompleted) Color.White.copy(alpha = 0.9f) else Color.Gray
+    val subtitleColor = remember(isCompleted, isLocked) {
+        when {
+            isLocked -> Color.Gray.copy(alpha = 0.6f)
+            isCompleted -> Color.White.copy(alpha = 0.9f)
+            else -> Color.Gray
+        }
     }
     
     Card(
@@ -97,18 +111,45 @@ fun TopicItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = topic.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = topic.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (isLocked) {
+                        Text(
+                            text = "🔒",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
                 Text(
                     text = topic.nameVi,
                     style = MaterialTheme.typography.bodyMedium,
                     color = subtitleColor,
                     modifier = Modifier.padding(top = 4.dp)
                 )
+                
+                // Hiển thị progress bar nếu đang học (chưa hoàn thành và chưa khóa)
+                if (!isCompleted && !isLocked && progress > 0) {
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+                    androidx.compose.material3.LinearProgressIndicator(
+                        progress = progress / 100f,
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFF6200EA),
+                        trackColor = Color(0xFFE0E0E0)
+                    )
+                    Text(
+                        text = "${progress.toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = subtitleColor,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
     }
