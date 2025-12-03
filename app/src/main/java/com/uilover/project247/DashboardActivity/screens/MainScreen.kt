@@ -36,6 +36,8 @@ import com.uilover.project247.AIAssistantActivity.Model.AIAssistantViewModel
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
 import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
+import com.uilover.project247.StatisticsActivity.Model.StatisticsViewModel
+import com.uilover.project247.StatisticsActivity.screens.StatisticsScreenContent
 import com.uilover.project247.DashboardActivity.components.InAppTourOverlay
 
 
@@ -58,6 +60,7 @@ fun MainScreen(
     val conversationViewModel = remember { ConversationListViewModel(context.applicationContext as android.app.Application) }
     val reviewViewModel = remember { ReviewViewModel() }
     val aiAssistantViewModel = remember { AIAssistantViewModel(context.applicationContext as android.app.Application) }
+    val statisticsViewModel = remember { StatisticsViewModel(context.applicationContext as android.app.Application) }
     
     // In-app tour state
     var showTour by remember { mutableStateOf(showInAppTour) }
@@ -86,6 +89,11 @@ fun MainScreen(
                         )
                         "Chat" -> Text(
                             text = "Hội thoại mẫu",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        "Statistics" -> Text(
+                            text = "Thống kê học tập 📊",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -198,6 +206,14 @@ fun MainScreen(
                     onConversationClick = { conversationId ->
                         onConversationClick(conversationId)
                     }
+                )
+            }
+
+            "Statistics" -> {
+                // Statistics Screen
+                StatisticsScreenContent(
+                    viewModel = statisticsViewModel,
+                    modifier = Modifier.padding(paddingValues)
                 )
             }
 

@@ -93,10 +93,10 @@ fun InAppTourOverlay(
                 emoji = "💬"
             ),
             InAppTourStep(
-                title = "AI Study Assistant",
-                description = "Trợ lý AI giúp bạn học từ vựng thông minh hơn với gợi ý cá nhân hóa",
-                targetId = "tab_hub",
-                emoji = "🤖"
+                title = "Thống kê học tập",
+                description = "Xem biểu đồ hoạt động, chuỗi học tập và theo dõi tiến trình của bạn",
+                targetId = "tab_statistics",
+                emoji = "📊"
             )
         )
     }
