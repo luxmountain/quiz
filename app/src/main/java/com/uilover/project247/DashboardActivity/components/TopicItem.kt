@@ -35,7 +35,8 @@ fun TopicItem(
     onClick: () -> Unit,
     isCompleted: Boolean = false,
     isLocked: Boolean = false,
-    progress: Float = 0f // 0-100
+    progress: Float = 0f, // 0-100
+    modifier: Modifier = Modifier
 ) {
     val containerColor = remember(isCompleted, isLocked) {
         when {
@@ -62,7 +63,7 @@ fun TopicItem(
     }
     
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),

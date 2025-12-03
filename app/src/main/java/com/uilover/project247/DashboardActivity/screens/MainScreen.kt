@@ -21,6 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.geometry.Rect
 import com.uilover.project247.ConversationActivity.viewmodels.ConversationListViewModel
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
@@ -33,17 +36,20 @@ import com.uilover.project247.AIAssistantActivity.Model.AIAssistantViewModel
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
 import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
+import com.uilover.project247.DashboardActivity.components.InAppTourOverlay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
+    showInAppTour: Boolean = false,
     onBoardClick: () -> Unit = {},
     onTopicClick: (levelId: String, topicId: String) -> Unit = { _, _ -> },
     onTopicReviewClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
-    onConversationClick: (String) -> Unit = {}
+    onConversationClick: (String) -> Unit = {},
+    onTourComplete: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableStateOf("Board") }
@@ -52,12 +58,20 @@ fun MainScreen(
     val conversationViewModel = remember { ConversationListViewModel(context.applicationContext as android.app.Application) }
     val reviewViewModel = remember { ReviewViewModel() }
     val aiAssistantViewModel = remember { AIAssistantViewModel(context.applicationContext as android.app.Application) }
+    
+    // In-app tour state
+    var showTour by remember { mutableStateOf(showInAppTour) }
+    var tourStep by remember { mutableStateOf(0) }
+    var tourTargets by remember { mutableStateOf<Map<String, Rect>>(emptyMap()) }
+    
+    fun updateTourTarget(id: String, rect: Rect) {
+        tourTargets = tourTargets + (id to rect)
+    }
 
-
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
                 title = {
                     when (selectedTab) {
                         "Search" -> Text(
@@ -90,6 +104,18 @@ fun MainScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .clickable { expanded = true }
+                                    .onGloballyPositioned { coordinates ->
+                                        val pos = coordinates.positionInRoot()
+                                        updateTourTarget(
+                                            "level_selector",
+                                            Rect(
+                                                left = pos.x,
+                                                top = pos.y,
+                                                right = pos.x + coordinates.size.width,
+                                                bottom = pos.y + coordinates.size.height
+                                            )
+                                        )
+                                    }
                             ) {
                                 Text(
                                     text = selectedLevel?.nameVi ?: "Chọn level",
@@ -135,6 +161,9 @@ fun MainScreen(
                         "Search" -> onSearchClick()
                         "Chat" -> {}
                     }
+                },
+                onTargetPositioned = { id, rect ->
+                    updateTourTarget(id, rect)
                 }
             )
         },
@@ -226,6 +255,7 @@ fun MainScreen(
                             items = uiState.topicsWithStatus,
                             key = { it.topic.id }
                         ) { topicStatus ->
+                            val isFirstTopic = uiState.topicsWithStatus.firstOrNull() == topicStatus
                             TopicItem(
                                 topic = topicStatus.topic,
                                 isCompleted = topicStatus.isCompleted,
@@ -237,12 +267,44 @@ fun MainScreen(
                                             onTopicClick(levelId, topicStatus.topic.id)
                                         }
                                     }
-                                }
+                                },
+                                modifier = if (isFirstTopic) {
+                                    Modifier.onGloballyPositioned { coordinates ->
+                                        val pos = coordinates.positionInRoot()
+                                        updateTourTarget(
+                                            "topic_item",
+                                            Rect(
+                                                left = pos.x,
+                                                top = pos.y,
+                                                right = pos.x + coordinates.size.width,
+                                                bottom = pos.y + coordinates.size.height
+                                            )
+                                        )
+                                    }
+                                } else Modifier
                             )
                         }
                     }
                 }
             }
+        }
+    }
+        
+        // In-app tour overlay
+        if (showTour) {
+            InAppTourOverlay(
+                currentStep = tourStep,
+                tourTargets = tourTargets,
+                onNext = { tourStep++ },
+                onSkip = { 
+                    showTour = false
+                    onTourComplete()
+                },
+                onComplete = {
+                    showTour = false
+                    onTourComplete()
+                }
+            )
         }
     }
 }

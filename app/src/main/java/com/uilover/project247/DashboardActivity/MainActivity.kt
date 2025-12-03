@@ -17,6 +17,8 @@ import com.uilover.project247.data.repository.PlacementTestManager
 import com.uilover.project247.ui.theme.Project247Theme
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.QuestionActivity.QuestionActivity
+import com.uilover.project247.utils.ProductTourManager
+import com.uilover.project247.ProductTourActivity.ProductTourActivity
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels {
@@ -29,6 +31,7 @@ class MainActivity : ComponentActivity() {
     }
     
     private lateinit var placementTestManager: PlacementTestManager
+    private lateinit var productTourManager: ProductTourManager
     
     override fun onResume() {
         super.onResume()
@@ -40,14 +43,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         placementTestManager = PlacementTestManager(this)
-
-        // Check placement test
-        if (!placementTestManager.hasCompletedTest()) {
-            // Chưa làm test -> Chuyển đến PlacementTestActivity
-            val intent = Intent(this, PlacementTestActivity::class.java)
-            startActivity(intent)
-            // Không finish() để khi test xong quay về MainActivity
-        }
+        productTourManager = ProductTourManager(this)
 
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
@@ -55,6 +51,7 @@ class MainActivity : ComponentActivity() {
             Project247Theme {
                 MainScreen(
                     viewModel = viewModel,
+                    showInAppTour = !productTourManager.hasCompletedTour(),
 
                     onBoardClick = {
                         // Stay on Board tab - do nothing
@@ -84,9 +81,18 @@ class MainActivity : ComponentActivity() {
                         // 3. Gửi ID của chủ đề qua Intent
                         intent.putExtra("CONVERSATION_ID", conversationId)
                         startActivity(intent)
+                    },
+                    onTourComplete = {
+                        productTourManager.setTourCompleted()
                     }
                 )
             }
+        }
+        
+        // Check placement test after UI is set
+        if (!placementTestManager.hasCompletedTest()) {
+            val intent = Intent(this, PlacementTestActivity::class.java)
+            startActivity(intent)
         }
     }
 }
