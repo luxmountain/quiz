@@ -1,5 +1,8 @@
 package com.uilover.project247.StatisticsActivity.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,16 +10,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import com.uilover.project247.data.models.MonthlyHeatmapData
 import java.text.SimpleDateFormat
@@ -37,170 +33,198 @@ fun CalendarHeatmap(
     modifier: Modifier = Modifier
 ) {
     var selectedDay by remember { mutableStateOf<Int?>(null) }
-    var tooltipOffset by remember { mutableStateOf(Pair(0.dp, 0.dp)) }
+
+    // Cấu hình Calendar
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.YEAR, monthlyHeatmap.year)
     calendar.set(Calendar.MONTH, monthlyHeatmap.month)
     calendar.set(Calendar.DAY_OF_MONTH, 1)
-    
+
     val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-    val firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1 // 0 = Sunday
-    
+    // Điều chỉnh để T2 là đầu tuần hoặc CN là đầu tuần tùy theo Locale (ở đây code cũ dùng CN = 0)
+    val firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
+
     val maxActivity = monthlyHeatmap.getMaxActivity()
-    
     val monthName = SimpleDateFormat("MMMM yyyy", Locale("vi")).format(calendar.time)
-    
+
+    // Màu chủ đạo: Orange Gradient
+    val baseColor = Color(0xFFFFB74D)
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
-            ) {
-                selectedDay = null
-            }
+            ) { selectedDay = null }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White, RoundedCornerShape(16.dp))
-                .padding(16.dp)
+                .shadow(4.dp, RoundedCornerShape(24.dp))
+                .background(Color.White, RoundedCornerShape(24.dp))
+                .padding(20.dp)
         ) {
-        Text(
-            text = "🔥 Chuỗi học tập",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = monthName.replaceFirstChar { it.uppercase() },
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray,
-            fontSize = 14.sp
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Week days header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            listOf("CN", "T2", "T3", "T4", "T5", "T6", "T7").forEach { day ->
-                Text(
-                    text = day,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
-                    fontSize = 11.sp,
-                    modifier = Modifier.width(36.dp)
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Calendar grid
-        var dayCounter = 1
-        var currentWeekDay = firstDayOfWeek
-        
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            while (dayCounter <= daysInMonth) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+            // --- Header ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "🔥 Chuỗi học tập",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = monthName.replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                }
+
+                // Hiển thị tổng số ngày đã học trong tháng (Optional badge)
+                Surface(
+                    color = Color(0xFFFFF3E0),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    for (i in 0..6) {
-                        if (i < currentWeekDay && dayCounter == 1) {
-                            // Empty cell before first day
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                            )
-                        } else if (dayCounter <= daysInMonth) {
-                            val activity = monthlyHeatmap.dailyActivityMap[dayCounter] ?: 0
-                            val currentDay = dayCounter
-                            DayCell(
-                                day = currentDay,
-                                activity = activity,
-                                maxActivity = maxActivity,
-                                isSelected = currentDay == selectedDay,
-                                onClick = { 
-                                    selectedDay = if (selectedDay == currentDay) null else currentDay
-                                }
-                            )
-                            dayCounter++
-                        } else {
-                            // Empty cell after last day
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                            )
+                    Text(
+                        text = "${monthlyHeatmap.dailyActivityMap.count { it.value > 0 }} ngày",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFFEF6C00),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // --- Week days header ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                listOf("CN", "T2", "T3", "T4", "T5", "T6", "T7").forEach { day ->
+                    Text(
+                        text = day,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp,
+                        modifier = Modifier.width(36.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // --- Calendar Grid ---
+            var dayCounter = 1
+            var currentWeekDay = firstDayOfWeek // 0 = CN, 1 = T2...
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                while (dayCounter <= daysInMonth) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        for (i in 0..6) {
+                            if ((dayCounter == 1 && i < currentWeekDay) || dayCounter > daysInMonth) {
+                                // Ô trống
+                                Box(modifier = Modifier.size(36.dp))
+                            } else {
+                                val activity = monthlyHeatmap.dailyActivityMap[dayCounter] ?: 0
+                                val currentDay = dayCounter
+
+                                DayCell(
+                                    day = currentDay,
+                                    activity = activity,
+                                    maxActivity = maxActivity,
+                                    isSelected = currentDay == selectedDay,
+                                    baseColor = baseColor,
+                                    onClick = {
+                                        selectedDay = if (selectedDay == currentDay) null else currentDay
+                                    }
+                                )
+                                dayCounter++
+                            }
                         }
                     }
+                    currentWeekDay = 0 // Reset về CN cho các tuần tiếp theo
                 }
-                currentWeekDay = 0 // Reset after first week
             }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Legend
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Ít",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
-                fontSize = 11.sp
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            listOf(0f, 0.25f, 0.5f, 0.75f, 1f).forEach { intensity ->
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(getHeatmapColor(intensity))
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- Legend (Chú thích) ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Ít",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    fontSize = 11.sp
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                val sampleIntensities = listOf(0f, 0.25f, 0.5f, 0.75f, 1f)
+                sampleIntensities.forEach { intensity ->
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(getOrangeHeatmapColor(intensity))
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
                 Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Nhiều",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    fontSize = 11.sp
+                )
             }
-            
-            Text(
-                text = "Nhiều",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
-                fontSize = 11.sp
-            )
         }
-        }
-        
-        // Show tooltip
-        selectedDay?.let { day ->
-            val activity = monthlyHeatmap.dailyActivityMap[day] ?: 0
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.YEAR, monthlyHeatmap.year)
-            calendar.set(Calendar.MONTH, monthlyHeatmap.month)
-            calendar.set(Calendar.DAY_OF_MONTH, day)
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            val dateString = dateFormat.format(calendar.time)
-            
-            DayTooltip(
-                date = dateString,
-                wordsReviewed = activity,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 8.dp)
-                    .zIndex(10f)
-            )
+
+        // --- Floating Tooltip ---
+        // Sử dụng Box BoxScope để căn chỉnh tooltip đè lên trên
+        AnimatedVisibility(
+            visible = selectedDay != null,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopCenter) // Xuất hiện ở phía trên cùng của Card
+                .padding(top = 8.dp)
+                .zIndex(10f)
+        ) {
+            selectedDay?.let { day ->
+                val activity = monthlyHeatmap.dailyActivityMap[day] ?: 0
+                val tooltipCalendar = Calendar.getInstance()
+                tooltipCalendar.set(Calendar.YEAR, monthlyHeatmap.year)
+                tooltipCalendar.set(Calendar.MONTH, monthlyHeatmap.month)
+                tooltipCalendar.set(Calendar.DAY_OF_MONTH, day)
+                val dateFormat = SimpleDateFormat("EEEE, dd/MM", Locale("vi"))
+                val dateString = dateFormat.format(tooltipCalendar.time)
+
+                DayTooltip(
+                    date = dateString,
+                    wordsReviewed = activity
+                )
+            }
         }
     }
 }
@@ -210,22 +234,25 @@ private fun DayCell(
     day: Int,
     activity: Int,
     maxActivity: Int,
-    isSelected: Boolean = false,
-    onClick: () -> Unit = {}
+    isSelected: Boolean,
+    baseColor: Color,
+    onClick: () -> Unit
 ) {
     val intensity = if (maxActivity > 0) {
         (activity.toFloat() / maxActivity.toFloat()).coerceIn(0f, 1f)
     } else {
         0f
     }
-    
-    val backgroundColor = getHeatmapColor(intensity)
-    val textColor = if (intensity > 0.5f) Color.White else Color.DarkGray
-    
+
+    val backgroundColor = getOrangeHeatmapColor(intensity)
+
+    // Màu chữ: Trắng nếu nền đậm, Đen nếu nền nhạt
+    val textColor = if (intensity > 0.4f) Color.White else Color.Black.copy(alpha = 0.7f)
+
     Box(
         modifier = Modifier
             .size(36.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(10.dp)) // Bo tròn mềm hơn
             .background(backgroundColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -236,14 +263,8 @@ private fun DayCell(
                 if (isSelected) {
                     Modifier.border(
                         width = 2.dp,
-                        color = Color(0xFF6200EA),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                } else if (activity == 0) {
-                    Modifier.border(
-                        width = 1.dp,
-                        color = Color.LightGray.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(8.dp)
+                        color = Color.Black, // Viền đen để nổi bật màu cam
+                        shape = RoundedCornerShape(10.dp)
                     )
                 } else {
                     Modifier
@@ -264,58 +285,50 @@ private fun DayCell(
 @Composable
 private fun DayTooltip(
     date: String,
-    wordsReviewed: Int,
-    modifier: Modifier = Modifier
+    wordsReviewed: Int
 ) {
     Surface(
-        modifier = modifier
-            .shadow(4.dp, RoundedCornerShape(8.dp)),
-        shape = RoundedCornerShape(8.dp),
-        color = Color(0xFF424242)
+        modifier = Modifier.shadow(8.dp, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF2D2D2D) // Nền tối màu Charcoal
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = date,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
+                text = date.replaceFirstChar { it.uppercase() },
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 11.sp
             )
+
             Spacer(modifier = Modifier.height(4.dp))
+
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "📚",
-                    fontSize = 16.sp
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "📚", fontSize = 14.sp)
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "$wordsReviewed từ",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
                 )
             }
         }
     }
 }
 
-private fun getHeatmapColor(intensity: Float): Color {
+// Logic màu Gradient Cam dựa trên yêu cầu 0xFFFFB74D
+private fun getOrangeHeatmapColor(intensity: Float): Color {
     return when {
-        intensity == 0f -> Color(0xFFEEEEEE)
-        intensity < 0.25f -> Color(0xFFE1BEE7) // Light purple
-        intensity < 0.5f -> Color(0xFFBA68C8)  // Medium purple
-        intensity < 0.75f -> Color(0xFF9C27B0) // Dark purple
-        else -> Color(0xFF6A1B9A)              // Darkest purple
+        intensity == 0f -> Color(0xFFF5F5F5) // Xám rất nhạt cho ngày không học
+        intensity < 0.25f -> Color(0xFFFFE0B2) // Cam rất nhạt (Orange 100)
+        intensity < 0.50f -> Color(0xFFFFCC80) // Cam nhạt (Orange 200)
+        intensity < 0.75f -> Color(0xFFFFB74D) // Màu yêu cầu (Orange 300)
+        else -> Color(0xFFFB8C00) // Cam đậm (Orange 600) cho hoạt động cao nhất
     }
-}
-
-private fun SimpleDateFormat(pattern: String, locale: Locale): java.text.SimpleDateFormat {
-    return java.text.SimpleDateFormat(pattern, locale)
 }

@@ -80,18 +80,25 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun calculateWeeklyStats(history: List<com.uilover.project247.data.repository.StudyResult>): WeeklyStats {
         val calendar = Calendar.getInstance()
-        val today = calendar.timeInMillis
         
-        // Lấy 7 ngày gần nhất
+        // Tìm ngày Chủ nhật đầu tuần hiện tại
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        
+        val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        val daysFromSunday = currentDayOfWeek - Calendar.SUNDAY
+        calendar.add(Calendar.DAY_OF_YEAR, -daysFromSunday)
+        
+        val weekStart = calendar.timeInMillis
+        
+        // Tạo map cho 7 ngày trong tuần (Chủ nhật -> Thứ 7)
         val dailyStatsMap = mutableMapOf<String, DailyStats>()
         
-        for (i in 6 downTo 0) {
-            calendar.timeInMillis = today
-            calendar.add(Calendar.DAY_OF_YEAR, -i)
-            calendar.set(Calendar.HOUR_OF_DAY, 0)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
+        for (i in 0..6) {
+            calendar.timeInMillis = weekStart
+            calendar.add(Calendar.DAY_OF_YEAR, i)
             
             val dayStart = calendar.timeInMillis
             val dateKey = getDayKey(dayStart)
