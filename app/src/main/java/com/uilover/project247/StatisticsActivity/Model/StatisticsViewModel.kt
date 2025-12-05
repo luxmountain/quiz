@@ -107,7 +107,8 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 date = dayStart,
                 wordsReviewed = 0,
                 studyTimeMinutes = 0,
-                accuracy = 0f
+                correctCount = 0,
+                totalCount = 0
             )
         }
         
@@ -117,12 +118,15 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
             
             if (dailyStatsMap.containsKey(dateKey)) {
                 val existing = dailyStatsMap[dateKey]!!
+                // Tính correctCount từ accuracy và totalItems
+                // accuracy đã là % (0-100), nên chia 100
+                val correctCount = ((result.accuracy / 100f) * result.totalItems).toInt()
+                
                 dailyStatsMap[dateKey] = existing.copy(
                     wordsReviewed = existing.wordsReviewed + result.totalItems,
                     studyTimeMinutes = existing.studyTimeMinutes + (result.timeSpent / 60000).toInt(),
-                    accuracy = if (existing.wordsReviewed == 0) result.accuracy
-                               else (existing.accuracy * existing.wordsReviewed + result.accuracy * result.totalItems) /
-                                    (existing.wordsReviewed + result.totalItems)
+                    correctCount = existing.correctCount + correctCount,
+                    totalCount = existing.totalCount + result.totalItems
                 )
             }
         }

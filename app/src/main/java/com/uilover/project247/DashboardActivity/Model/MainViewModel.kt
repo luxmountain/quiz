@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.data.models.Topic
 import com.uilover.project247.data.repository.FirebaseRepository
+import com.uilover.project247.data.repository.PlacementTestManager
 import com.uilover.project247.data.repository.UserProgressManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,8 @@ data class MainUiState(
     val topics: List<Topic> = emptyList(),
     val topicsWithStatus: List<TopicWithStatus> = emptyList(),
     val selectedLevelId: String? = null,
+    val currentLevel: Level? = null,
+    val levelProgress: Float = 0f, // 0-100
     val errorMessage: String? = null,
     val completedTopics: Set<String> = emptySet()
 )
@@ -38,6 +41,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     
     private val firebaseRepository = FirebaseRepository()
     private val progressManager = UserProgressManager(application)
+    private val placementTestManager = PlacementTestManager(application)
 
     init {
         loadLevels()
@@ -75,18 +79,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             try {
                 val levels = firebaseRepository.getLevels()
-                val defaultLevel = levels.find { it.name == "Beginner" } ?: levels.firstOrNull()
+                
+                // Lấy level từ placement test result nếu có
+                val recommendedLevelId = placementTestManager.getRecommendedLevel()
+                val defaultLevel = if (recommendedLevelId != null) {
+                    // Map level name từ placement test sang Firebase
+                    val levelName = when (recommendedLevelId) {
+                        "beginner" -> "Beginner"
+                        "elementary" -> "Elementary"
+                        "intermediate" -> "Intermediate"
+                        "advanced" -> "Advanced"
+                        else -> "Beginner"
+                    }
+                    levels.find { it.name == levelName } ?: levels.firstOrNull()
+                } else {
+                    levels.find { it.name == "Beginner" } ?: levels.firstOrNull()
+                }
                 
                 _uiState.update {
                     it.copy(
                         isLoading = false, 
                         levels = levels,
                         selectedLevelId = defaultLevel?.id,
+                        currentLevel = defaultLevel,
                         errorMessage = if (levels.isEmpty()) "Không có dữ liệu levels" else null
                     )
                 }
                 
-                Log.d("MainViewModel", "Loaded ${levels.size} levels from Firebase")
+                Log.d("MainViewModel", "Loaded ${levels.size} levels, selected: ${defaultLevel?.name}")
                 
                 if (defaultLevel != null) {
                     loadTopicsByLevel(defaultLevel.id)
@@ -137,12 +157,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
                 
+                // Tính progress của level (trung bình progress của tất cả topics)
+                val levelProgress = if (topicsWithStatus.isNotEmpty()) {
+                    topicsWithStatus.map { it.progress }.average().toFloat()
+                } else {
+                    0f
+                }
+                
+                val currentLevel = _uiState.value.levels.find { it.id == levelId }
+                
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         topics = topics,
                         topicsWithStatus = topicsWithStatus,
                         selectedLevelId = levelId,
+                        currentLevel = currentLevel,
+                        levelProgress = levelProgress,
                         errorMessage = if (topics.isEmpty()) "Không có chủ đề nào" else null
                     )
                 }

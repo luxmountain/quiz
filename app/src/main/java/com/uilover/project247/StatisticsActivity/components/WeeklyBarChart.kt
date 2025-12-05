@@ -171,6 +171,14 @@ fun WeeklyBarChart(
                 )
 
                 SummaryItem(
+                    label = "Thời gian",
+                    value = "${weeklyStats.getTotalStudyTime()}p",
+                    iconResId = R.drawable.watch,
+                    backgroundColor = Color(0xFFFFE5B4),
+                    modifier = Modifier.weight(1f)
+                )
+                
+                SummaryItem(
                     label = "Độ chính xác",
                     value = "${weeklyStats.getAverageAccuracy().toInt()}%",
                     iconResId = R.drawable.target,

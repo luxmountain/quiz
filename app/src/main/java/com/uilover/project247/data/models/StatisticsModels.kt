@@ -4,14 +4,23 @@ data class DailyStats(
     val date: Long, // Timestamp của ngày (00:00:00)
     val wordsReviewed: Int,
     val studyTimeMinutes: Int,
+    val correctCount: Int,
+    val totalCount: Int
+) {
     val accuracy: Float
-)
+        get() = if (totalCount > 0) (correctCount.toFloat() / totalCount.toFloat()) * 100f else 0f
+}
 
 data class WeeklyStats(
     val dailyStats: List<DailyStats>
 ) {
     fun getTotalWordsReviewed(): Int = dailyStats.sumOf { it.wordsReviewed }
-    fun getAverageAccuracy(): Float = if (dailyStats.isEmpty()) 0f else dailyStats.map { it.accuracy }.average().toFloat()
+    fun getTotalStudyTime(): Int = dailyStats.sumOf { it.studyTimeMinutes }
+    fun getAverageAccuracy(): Float {
+        val totalCorrect = dailyStats.sumOf { it.correctCount }
+        val totalQuestions = dailyStats.sumOf { it.totalCount }
+        return if (totalQuestions > 0) (totalCorrect.toFloat() / totalQuestions.toFloat()) * 100f else 0f
+    }
 }
 
 data class MonthlyHeatmapData(
