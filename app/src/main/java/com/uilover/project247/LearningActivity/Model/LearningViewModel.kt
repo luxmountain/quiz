@@ -124,15 +124,10 @@ class LearningViewModel(
     // --- 3. SỬA LẠI LOGIC "TIẾP TỤC" ---
     fun onQuizContinue() {
         val currentState = _uiState.value
-        if (currentState.checkResult == CheckResult.INCORRECT) {
-            // Nếu sai, cho thử lại
-            _uiState.update { it.copy(checkResult = CheckResult.NEUTRAL) }
-            return
-        }
-
-        // Nếu đúng:
+        
+        // Xử lý theo study mode hiện tại
         when (currentState.currentStudyMode) {
-            // 2. Nếu xong WRITE_WORD -> Chuyển sang LISTEN_AND_WRITE
+            // 2. Nếu xong WRITE_WORD -> Chuyển sang LISTEN_AND_WRITE (dù đúng hay sai)
             StudyMode.WRITE_WORD -> {
                 _uiState.update {
                     it.copy(
@@ -141,11 +136,13 @@ class LearningViewModel(
                     )
                 }
             }
-            // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo hoặc hoàn thành
+            // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo hoặc hoàn thành (dù đúng hay sai)
             StudyMode.LISTEN_AND_WRITE -> {
-                // Đánh dấu flashcard hiện tại là đã học
-                currentState.currentCard?.let { flashcard ->
-                    progressManager.markFlashcardAsLearned(topicId, flashcard.id)
+                // Chỉ đánh dấu flashcard là đã học nếu làm đúng
+                if (currentState.checkResult == CheckResult.CORRECT) {
+                    currentState.currentCard?.let { flashcard ->
+                        progressManager.markFlashcardAsLearned(topicId, flashcard.id)
+                    }
                 }
                 
                 // Kiểm tra xem đây có phải câu cuối cùng không

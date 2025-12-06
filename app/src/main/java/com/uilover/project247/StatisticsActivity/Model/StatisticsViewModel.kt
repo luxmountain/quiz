@@ -51,8 +51,8 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 // Tính toán Learning Streak
                 val streak = calculateLearningStreak(studyHistory)
                 
-                // Tính tổng số từ đã học
-                val totalWords = studyHistory.sumOf { it.totalItems }
+                // Tính tổng số từ đã học (unique - không trùng lặp)
+                val totalWords = progressManager.getTotalUniqueWordsLearned()
                 
                 // Tính tổng thời gian học (phút)
                 val totalTime = (studyHistory.sumOf { it.timeSpent } / 60000).toInt()

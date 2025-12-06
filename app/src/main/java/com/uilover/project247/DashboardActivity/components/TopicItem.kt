@@ -136,7 +136,7 @@ fun TopicItem(
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFE082),
+                        containerColor = Color(0xFFFFD72D),
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(12.dp)

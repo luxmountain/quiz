@@ -38,7 +38,7 @@ class UserProgressManager(context: Context) {
     companion object {
         private const val KEY_COMPLETED_TOPICS = "completed_topics"
         private const val KEY_STUDY_HISTORY = "study_history"
-        private const val MIN_ACCURACY_TO_COMPLETE = 60f
+        private const val MIN_ACCURACY_TO_COMPLETE = 80f
     }
 
     fun saveStudyResult(result: StudyResult) {
@@ -147,6 +147,18 @@ class UserProgressManager(context: Context) {
         val completed = getCompletedTopics().values.filter { it.isCompleted }
         if (completed.isEmpty()) return 0f
         return completed.map { it.bestAccuracy }.average().toFloat()
+    }
+
+    /**
+     * Lấy tổng số từ unique đã học (không trùng lặp)
+     * Gộp tất cả learnedFlashcardIds từ mọi topic thành một Set duy nhất
+     */
+    fun getTotalUniqueWordsLearned(): Int {
+        val allLearnedFlashcards = mutableSetOf<String>()
+        getCompletedTopics().values.forEach { status ->
+            allLearnedFlashcards.addAll(status.learnedFlashcardIds)
+        }
+        return allLearnedFlashcards.size
     }
 
     /**

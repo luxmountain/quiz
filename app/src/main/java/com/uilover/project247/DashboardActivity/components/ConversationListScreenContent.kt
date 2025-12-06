@@ -24,7 +24,6 @@ fun ConversationListScreenContent(
     onConversationClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
         Box(
             modifier = modifier
                 .fillMaxSize(),

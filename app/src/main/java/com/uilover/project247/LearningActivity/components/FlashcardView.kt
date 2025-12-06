@@ -249,8 +249,8 @@ fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Uni
                         .background(
                             brush = Brush.horizontalGradient(
                                 colors = listOf(
-                                    Color(0xFFFFB74D), // Cam nhạt
-                                    Color(0xFFFF8A65)  // Cam đậm
+                                    Color(0xFF66BB6A), // Green 400
+                                    Color(0xFF2E7D32)
                                 )
                             )
                         ),

@@ -367,8 +367,7 @@ private fun LevelProgressCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFFFB74D),
-                            Color(0xFFFF8A65)
+                            Color(0xFF64B5F6), Color(0xFF1976D2)
                         )
                     )
                 )
@@ -380,7 +379,7 @@ private fun LevelProgressCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.elephant),
+                    painter = painterResource(id = R.drawable.letsgo),
                     contentDescription = null,
                     modifier = Modifier
                         .weight(0.35f)

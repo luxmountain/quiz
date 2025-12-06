@@ -75,7 +75,7 @@ fun WeeklyBarChart(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Số từ đã ôn tập (CN - T7)",
+                text = "Lượt ôn tập trong tuần (CN - T7)",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray,
                 fontSize = 14.sp
@@ -245,7 +245,7 @@ private fun BarTooltip(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     TooltipItem(
-                        label = "Số từ",
+                        label = "Lượt ôn",
                         value = dayStats.wordsReviewed.toString()
                     )
                     TooltipItem(
