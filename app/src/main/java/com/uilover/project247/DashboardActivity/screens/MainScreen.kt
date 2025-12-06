@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -356,90 +357,103 @@ private fun LevelProgressCard(
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFB74D)
+            containerColor = Color.Transparent
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFFFB74D),
+                            Color(0xFFFF8A65)
+                        )
+                    )
+                )
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.elephant),
-                contentDescription = null,
+            Row(
                 modifier = Modifier
-                    .weight(0.35f)
-                    .height(120.dp),
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.CenterStart
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(
-                modifier = Modifier.weight(0.65f)
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Level hiện tại",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 12.sp
+                Image(
+                    painter = painterResource(id = R.drawable.elephant),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .weight(0.35f)
+                        .height(120.dp),
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.CenterStart
                 )
 
-                Text(
-                    text = level.nameVi,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
-                    fontSize = 24.sp
-                )
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "$completedTopics/$totalTopics chủ đề hoàn thành",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.weight(0.65f)
                 ) {
                     Text(
-                        text = "Tiến trình",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = "Level hiện tại",
+                        style = MaterialTheme.typography.labelMedium,
                         color = Color.White.copy(alpha = 0.9f),
                         fontSize = 12.sp
                     )
+
                     Text(
-                        text = "${progress.toInt()}%",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
+                        text = level.nameVi,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.ExtraBold,
                         color = Color.White,
-                        fontSize = 14.sp
+                        fontSize = 24.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "$completedTopics/$totalTopics chủ đề hoàn thành",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Tiến trình",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = "${progress.toInt()}%",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    LinearProgressIndicator(
+                        progress = { progress / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                            .clip(CircleShape),
+                        color = Color(0xFF339551),
+                        trackColor = Color(0xFFBEE0C7),
+                        strokeCap = StrokeCap.Round
                     )
                 }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                LinearProgressIndicator(
-                    progress = { progress / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp)
-                        .clip(CircleShape),
-                    color = Color(0xFF339551),
-                    trackColor = Color(0xFFBEE0C7),
-                    strokeCap = StrokeCap.Round
-                )
             }
         }
     }
