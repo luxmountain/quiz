@@ -53,10 +53,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun refreshData() {
         loadCompletedTopics()
-        // Reload topics của level hiện tại để cập nhật trạng thái lock/unlock
+        
+        // Kiểm tra xem có placement test result không
+        val recommendedLevelId = placementTestManager.getRecommendedLevel()
         val currentLevelId = _uiState.value.selectedLevelId
-        if (currentLevelId != null) {
-            loadTopicsByLevel(currentLevelId)
+        
+        // Nếu có placement test result
+        if (recommendedLevelId != null) {
+            // Map sang level name
+            val levelName = when (recommendedLevelId) {
+                "beginner" -> "Beginner"
+                "elementary" -> "Elementary"
+                "intermediate" -> "Intermediate"
+                "advanced" -> "Advanced"
+                else -> "Beginner"
+            }
+            
+            // Kiểm tra xem level hiện tại có đúng với recommended level không
+            val currentLevel = _uiState.value.currentLevel
+            if (currentLevel?.name != levelName) {
+                // Level sai, cần reload để chọn đúng level
+                Log.d("MainViewModel", "refreshData: Current level mismatch, reloading. Current: ${currentLevel?.name}, Recommended: $levelName")
+                loadLevels()
+            } else {
+                // Level đúng rồi, chỉ cần reload topics
+                if (currentLevelId != null) {
+                    loadTopicsByLevel(currentLevelId)
+                }
+            }
+        } else {
+            // Không có placement test, chỉ reload topics
+            if (currentLevelId != null) {
+                loadTopicsByLevel(currentLevelId)
+            }
         }
     }
 
@@ -85,6 +114,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 
                 // Lấy level từ placement test result nếu có
                 val recommendedLevelId = placementTestManager.getRecommendedLevel()
+                Log.d("MainViewModel", "recommendedLevelId from placement test: $recommendedLevelId")
+                
                 val defaultLevel = if (recommendedLevelId != null) {
                     // Map level name từ placement test sang Firebase
                     val levelName = when (recommendedLevelId) {
@@ -94,8 +125,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         "advanced" -> "Advanced"
                         else -> "Beginner"
                     }
-                    levels.find { it.name == levelName } ?: levels.firstOrNull()
+                    Log.d("MainViewModel", "Mapped to levelName: $levelName")
+                    val foundLevel = levels.find { it.name == levelName }
+                    Log.d("MainViewModel", "Found level: ${foundLevel?.id} - ${foundLevel?.name}")
+                    foundLevel ?: levels.firstOrNull()
                 } else {
+                    Log.d("MainViewModel", "No placement test result, using Beginner")
                     levels.find { it.name == "Beginner" } ?: levels.firstOrNull()
                 }
                 
