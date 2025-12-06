@@ -10,6 +10,7 @@ data class LearningUiState(
     val isTopicComplete: Boolean = false,
     val checkResult: CheckResult = CheckResult.NEUTRAL,
     val topicName: String = "",
+    val topicTotalWords: Int = 0, // Tổng số flashcards trong topic
     val correctAnswers: Int = 0,
     val wrongAnswers: Int = 0,
     val startTime: Long = 0L

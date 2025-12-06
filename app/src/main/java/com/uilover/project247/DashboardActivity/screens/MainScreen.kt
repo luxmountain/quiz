@@ -1,12 +1,14 @@
 package com.uilover.project247.DashboardActivity.screens
 
-import android.R
+import com.uilover.project247.R
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu // Ví dụ icon
@@ -24,6 +26,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import com.uilover.project247.ConversationActivity.viewmodels.ConversationListViewModel
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.DashboardActivity.components.BottomNavigationBarStub
@@ -36,6 +42,8 @@ import com.uilover.project247.AIAssistantActivity.Model.AIAssistantViewModel
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.DictionaryActivity.Model.DictionaryViewModel
 import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
+import com.uilover.project247.StatisticsActivity.Model.StatisticsViewModel
+import com.uilover.project247.StatisticsActivity.screens.StatisticsScreenContent
 import com.uilover.project247.DashboardActivity.components.InAppTourOverlay
 
 
@@ -58,6 +66,7 @@ fun MainScreen(
     val conversationViewModel = remember { ConversationListViewModel(context.applicationContext as android.app.Application) }
     val reviewViewModel = remember { ReviewViewModel() }
     val aiAssistantViewModel = remember { AIAssistantViewModel(context.applicationContext as android.app.Application) }
+    val statisticsViewModel = remember { StatisticsViewModel(context.applicationContext as android.app.Application) }
     
     // In-app tour state
     var showTour by remember { mutableStateOf(showInAppTour) }
@@ -86,6 +95,11 @@ fun MainScreen(
                         )
                         "Chat" -> Text(
                             text = "Hội thoại mẫu",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        "Statistics" -> Text(
+                            text = "Thống kê học tập 📊",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -201,6 +215,14 @@ fun MainScreen(
                 )
             }
 
+            "Statistics" -> {
+                // Statistics Screen
+                StatisticsScreenContent(
+                    viewModel = statisticsViewModel,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+
             "MochiHub" -> {
                 // AI Study Assistant Screen
                 AIAssistantScreenContent(
@@ -249,8 +271,21 @@ fun MainScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        // Level progress card
+                        item {
+                            uiState.currentLevel?.let { level ->
+                                LevelProgressCard(
+                                    level = level,
+                                    progress = uiState.levelProgress,
+                                    completedTopics = uiState.topicsWithStatus.count { it.isCompleted },
+                                    totalTopics = uiState.topicsWithStatus.size
+                                )
+                            }
+                        }
+                        
                         items(
                             items = uiState.topicsWithStatus,
                             key = { it.topic.id }
@@ -305,6 +340,120 @@ fun MainScreen(
                     onTourComplete()
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun LevelProgressCard(
+    level: Level,
+    progress: Float,
+    completedTopics: Int,
+    totalTopics: Int
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF64B5F6), Color(0xFF1976D2)
+                        )
+                    )
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.letsgo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .weight(0.35f)
+                        .height(120.dp),
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.CenterStart
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(
+                    modifier = Modifier.weight(0.65f)
+                ) {
+                    Text(
+                        text = "Level hiện tại",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 12.sp
+                    )
+
+                    Text(
+                        text = level.nameVi,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        fontSize = 24.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "$completedTopics/$totalTopics chủ đề hoàn thành",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Tiến trình",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = "${progress.toInt()}%",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    LinearProgressIndicator(
+                        progress = { progress / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                            .clip(CircleShape),
+                        color = Color(0xFF339551),
+                        trackColor = Color(0xFFBEE0C7),
+                        strokeCap = StrokeCap.Round
+                    )
+                }
+            }
         }
     }
 }

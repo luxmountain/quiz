@@ -24,15 +24,9 @@ fun ConversationListScreenContent(
     onConversationClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val backgroundColor = Color(0xFFF7F7F7)
-
-    Scaffold(
-        containerColor = backgroundColor
-    ) { paddingValues ->
         Box(
             modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             when {
@@ -61,7 +55,7 @@ fun ConversationListScreenContent(
                     }
                 }
             }
-        }
+
     }
 }
 

@@ -30,7 +30,7 @@ fun BottomNavigationBarStub(
         Quadruple("Học từ vựng", R.drawable.ic_learning_selected, R.drawable.ic_learning, "Board"),
         Quadruple("Ôn tập", R.drawable.ic_rising_selected, R.drawable.ic_rising, "Review"),
         Quadruple("Hội thoại", R.drawable.ic_chat_selected, R.drawable.ic_chat, "Chat"),
-        Quadruple("MochiHub", R.drawable.ic_hub_selected, R.drawable.ic_hub, "Hub")
+        Quadruple("Thống kê", R.drawable.ic_hub_selected, R.drawable.ic_hub, "Statistics")
     )
 
     NavigationBar(
@@ -68,7 +68,7 @@ fun BottomNavigationBarStub(
                         "Board" -> "tab_board"
                         "Review" -> "tab_review"
                         "Chat" -> "tab_chat"
-                        "Hub" -> "tab_hub"
+                        "Statistics" -> "tab_statistics"
                         else -> ""
                     }
                     if (targetId.isNotEmpty()) {

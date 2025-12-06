@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -42,7 +42,6 @@ fun WriteWordView(
     val correctWord = card.word
     val wordLength = correctWord.length
 
-    // Logic tạo Hint ngẫu nhiên (Giữ nguyên)
     val hints: Map<Int, Char> = remember(card) {
         if (correctWord.isBlank()) {
             emptyMap()
@@ -67,7 +66,6 @@ fun WriteWordView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        // Cụm 1: Tiêu đề (Giữ nguyên)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(top = 32.dp)
@@ -79,12 +77,10 @@ fun WriteWordView(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Cụm 2: Ô nhập liệu
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // BasicTextField (ẨN) - (Giữ nguyên)
             BasicTextField(
                 value = userAnswer,
                 onValueChange = {
@@ -112,49 +108,45 @@ fun WriteWordView(
                 enabled = !isChecking
             )
 
-            // Hàng (Row) hiển thị các ô gạch chân
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFFFFFFFF),
+                                Color(0xFFF0F4F8)
+                            )
+                        )
+                    )
                     .clickable { focusRequester.requestFocus() }
-                    .padding(horizontal = 16.dp, vertical = 20.dp),
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // --- BẮT ĐẦU SỬA LOGIC ---
                 repeat(wordLength) { index ->
-
-                    // 1. Ký tự để hiển thị: Ưu tiên (1) User gõ, (2) Hint
                     val charToShow: Char? = userAnswer.getOrNull(index) ?: hints[index]
 
-                    // 2. Màu của ký tự:
                     val charColor = when {
-                        userAnswer.getOrNull(index) != null -> Color.Black // 1. User đã gõ -> Màu đen
-                        hints.containsKey(index) -> Color.Gray         // 2. Là Hint -> Màu xám
-                        else -> Color.Black                            // 3. Rỗng (màu gì cũng được)
+                        userAnswer.getOrNull(index) != null -> Color.Black
+                        hints.containsKey(index) -> Color.Gray
+                        else -> Color.Black
                     }
 
-                    // 3. Màu của gạch chân:
                     val isCurrentCursorPosition = (index == userAnswer.length) && !isChecking
 
                     val lineColor = when {
-                        // A. Đã bấm "Kiểm tra"
                         isChecking -> {
-                            // So sánh ký tự (không phân biệt hoa thường)
                             val isCorrectChar = userAnswer.getOrNull(index)?.lowercaseChar() == correctWord.getOrNull(index)?.lowercaseChar()
-                            if (isCorrectChar) Color(0xFF00C853) // Xanh lá
-                            else Color.Red // Đỏ
+                            if (isCorrectChar) Color(0xFF00C853)
+                            else Color.Red
                         }
-                        // B. Đang gõ, tại vị trí con trỏ
-                        isCurrentCursorPosition -> MaterialTheme.colorScheme.primary // Xanh dương
-                        // C. Mặc định
+                        isCurrentCursorPosition -> MaterialTheme.colorScheme.primary
                         else -> Color.Gray
                     }
 
-                    // 4. Render 1 ô ký tự
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -162,7 +154,7 @@ fun WriteWordView(
                             text = charToShow?.toString() ?: "",
                             style = MaterialTheme.typography.headlineSmall.copy(
                                 fontWeight = FontWeight.Normal,
-                                color = charColor // <-- Áp dụng màu chữ
+                                color = charColor
                             ),
                             modifier = Modifier.width(24.dp),
                             textAlign = TextAlign.Center
@@ -172,7 +164,7 @@ fun WriteWordView(
                             modifier = Modifier
                                 .width(24.dp)
                                 .height(2.dp)
-                                .background(lineColor) // <-- Áp dụng màu gạch chân
+                                .background(lineColor)
                         )
                     }
 
@@ -180,24 +172,46 @@ fun WriteWordView(
                         Spacer(modifier = Modifier.width(4.dp))
                     }
                 }
-                // --- KẾT THÚC SỬA LOGIC ---
-            } // Hết Row (gạch chân)
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Nút "Hand-writing" (Giữ nguyên)
-            OutlinedButton(
+            Button(
                 onClick = { /* TODO: Mở màn hình viết tay */ },
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Gray)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent
+                ),
+                contentPadding = PaddingValues()
             ) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = "Hand-writing",
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Hand-writing")
+                Box(
+                    modifier = Modifier
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFFE0F7FA),
+                                    Color(0xFFB2EBF2)
+                                )
+                            )
+                        )
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Hand-writing",
+                            modifier = Modifier.size(16.dp),
+                            tint = Color(0xFF006064)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Hand-writing",
+                            color = Color(0xFF006064),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
     }
