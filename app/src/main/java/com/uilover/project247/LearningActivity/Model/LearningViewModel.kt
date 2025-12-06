@@ -42,16 +42,21 @@ class LearningViewModel(
                 val topic = firebaseRepository.getTopic(levelId, topicId)
                 val flashcards = topic?.flashcards ?: emptyList()
                 
+                // Sử dụng flashcards.size làm totalWords để đảm bảo chính xác
+                // vì có thể topic.totalWords chưa được set đúng trong Firebase
+                val totalWords = if (flashcards.isNotEmpty()) flashcards.size else (topic?.totalWords ?: 0)
+                
                 _uiState.update {
                     it.copy(
                         flashcards = flashcards,
                         isLoading = false,
                         topicName = topic?.name ?: "",
+                        topicTotalWords = totalWords,
                         startTime = System.currentTimeMillis()
                     )
                 }
                 
-                Log.d("LearningViewModel", "Loaded ${flashcards.size} flashcards for topic $topicId in level $levelId")
+                Log.d("LearningViewModel", "Loaded topic $topicId: flashcards=${flashcards.size}, totalWords=$totalWords, topic.totalWords=${topic?.totalWords}")
             } catch (e: Exception) {
                 Log.e("LearningViewModel", "Error loading flashcards for topic $topicId in level $levelId", e)
                 _uiState.update {
@@ -185,22 +190,33 @@ class LearningViewModel(
         val currentState = _uiState.value
         val timeSpent = System.currentTimeMillis() - currentState.startTime
         
+        // Lấy số flashcards ĐÃ THỰC SỰ HỌC từ learnedFlashcardIds
+        val learnedIds = progressManager.getTopicCompletion(topicId)?.learnedFlashcardIds ?: emptySet()
+        
+        // Validation: đảm bảo topicTotalWords hợp lệ
+        val topicTotal = if (currentState.topicTotalWords > 0) {
+            currentState.topicTotalWords
+        } else {
+            currentState.flashcards.size // Fallback nếu topicTotalWords = 0
+        }
+        
         val result = StudyResult(
             topicId = topicId,
             topicName = currentState.topicName,
             studyType = "flashcard",
-            totalItems = currentState.flashcards.size,
+            totalItems = learnedIds.size, // Số flashcards đã học thực tế
             correctCount = currentState.correctAnswers,
             timeSpent = timeSpent,
             accuracy = currentState.accuracy,
-            completedDate = System.currentTimeMillis()
+            completedDate = System.currentTimeMillis(),
+            topicTotalWords = topicTotal
         )
         
         progressManager.saveStudyResult(result)
         
         Log.d(
             "LearningViewModel",
-            "Saved study result: ${currentState.correctAnswers}/${currentState.correctAnswers + currentState.wrongAnswers} correct, ${currentState.accuracy}% accuracy"
+            "Saved study result: topicId=$topicId, learned=${learnedIds.size}, total=$topicTotal, accuracy=${currentState.accuracy}%, correct=${currentState.correctAnswers}/${currentState.correctAnswers + currentState.wrongAnswers}"
         )
     }
 }

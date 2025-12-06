@@ -65,7 +65,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadCompletedTopics() {
-        val completed = progressManager.getCompletedTopics().keys
+        // CHỈ lấy topics có isCompleted = true
+        val completed = progressManager.getCompletedTopics()
+            .filter { it.value.isCompleted }
+            .keys
         _uiState.update { it.copy(completedTopics = completed) }
     }
 
@@ -157,9 +160,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
                 
-                // Tính progress của level (trung bình progress của tất cả topics)
+                // Tính progress của level = số topic hoàn thành / tổng số topic
+                val completedCount = topicsWithStatus.count { it.isCompleted }
                 val levelProgress = if (topicsWithStatus.isNotEmpty()) {
-                    topicsWithStatus.map { it.progress }.average().toFloat()
+                    (completedCount.toFloat() / topicsWithStatus.size.toFloat()) * 100f
                 } else {
                     0f
                 }
