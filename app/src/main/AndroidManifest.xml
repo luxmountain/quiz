@@ -9,9 +9,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/mochi"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/mochi"
         android:supportsRtl="true"
         android:theme="@style/Theme.Project247">
         <activity
@@ -48,16 +48,20 @@
             android:name=".PlacementTestActivity.PlacementTestActivity"
             android:exported="false" />
         <activity
-            android:name=".DashboardActivity.MainActivity"
+            android:name=".SplashActivity.SplashActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Project247">
+            android:theme="@style/Theme.Project247.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".DashboardActivity.MainActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Project247" />
     </application>
 
 </manifest>

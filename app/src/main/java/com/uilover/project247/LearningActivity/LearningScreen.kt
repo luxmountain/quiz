@@ -2,6 +2,7 @@ package com.uilover.project247.LearningActivity.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,7 +23,6 @@ import com.uilover.project247.LearningActivity.components.*
 import com.uilover.project247.R
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,12 +81,11 @@ fun LearningScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .imePadding()                 // <-- quan trọng
+                            .imePadding()
                             .navigationBarsPadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // PHẦN HIỂN THỊ BÀI HỌC
                         Box(modifier = Modifier.weight(1f, fill = false)) {
                             when (uiState.currentStudyMode) {
                                 StudyMode.FLASHCARD -> FlashcardView(
@@ -121,12 +121,10 @@ fun LearningScreen(
                                 )
 
                                 StudyMode.MULTIPLE_CHOICE -> {
-                                    // TODO
                                 }
                             }
                         }
 
-                        // NÚT KIỂM TRA — TRƯỢT LÊN/XUỐNG
                         AnimatedVisibility(
                             visible = (
                                     (uiState.currentStudyMode == StudyMode.WRITE_WORD ||
@@ -134,11 +132,11 @@ fun LearningScreen(
                                             && uiState.checkResult == CheckResult.NEUTRAL
                                     ),
                             enter = slideInVertically(
-                                initialOffsetY = { it },  // từ dưới lên
+                                initialOffsetY = { it },
                                 animationSpec = tween(280)
                             ) + fadeIn(),
                             exit = slideOutVertically(
-                                targetOffsetY = { it },    // trượt xuống đáy
+                                targetOffsetY = { it },
                                 animationSpec = tween(240)
                             ) + fadeOut()
                         ) {
@@ -158,33 +156,27 @@ fun LearningScreen(
             }
 
 
-        if ((uiState.currentStudyMode == StudyMode.WRITE_WORD ||
-                    uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE) &&
-            uiState.currentCard != null &&
-            uiState.checkResult != CheckResult.NEUTRAL
-        ) {
-            AnimatedVisibility(
-                visible = (uiState.currentStudyMode == StudyMode.WRITE_WORD ||
+            if ((uiState.currentStudyMode == StudyMode.WRITE_WORD ||
                         uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE) &&
-                        uiState.currentCard != null &&
-                        uiState.checkResult != CheckResult.NEUTRAL,
-
-                // Hiệu ứng xuất hiện: Trượt từ dưới lên + Mờ dần vào
-                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-
-                // Hiệu ứng biến mất: Trượt xuống dưới + Mờ dần đi
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-
-                modifier = Modifier.align(Alignment.BottomCenter)
+                uiState.currentCard != null &&
+                uiState.checkResult != CheckResult.NEUTRAL
             ) {
-                // Gọi component Popup của bạn
-                AnswerFeedbackPopup(
-                    card = uiState.currentCard!!,
-                    checkResult = uiState.checkResult,
-                    onContinue = { viewModel.onQuizContinue() }
-                )
+                AnimatedVisibility(
+                    visible = (uiState.currentStudyMode == StudyMode.WRITE_WORD ||
+                            uiState.currentStudyMode == StudyMode.LISTEN_AND_WRITE) &&
+                            uiState.currentCard != null &&
+                            uiState.checkResult != CheckResult.NEUTRAL,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
+                    AnswerFeedbackPopup(
+                        card = uiState.currentCard!!,
+                        checkResult = uiState.checkResult,
+                        onContinue = { viewModel.onQuizContinue() }
+                    )
+                }
             }
-        }
         }
     }
 }
@@ -198,7 +190,7 @@ fun CompletionView(
     val total = uiState.correctAnswers + uiState.wrongAnswers
     val accuracyPercent = if (total > 0) (uiState.correctAnswers.toFloat() / total * 100).toInt() else 0
     val isPassed = accuracyPercent >= 60
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -206,128 +198,161 @@ fun CompletionView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Icon và tiêu đề
         Text(
             text = if (isPassed) "🎉" else "💪",
             style = MaterialTheme.typography.displayLarge,
             fontSize = 72.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Text(
             text = if (isPassed) "Chúc mừng!" else "Cố lên!",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = if (isPassed) Color(0xFF4CAF50) else Color(0xFFFF9800)
         )
-        
+
         Text(
-            text = if (isPassed) 
-                "Bạn đã hoàn thành chủ đề này" 
-            else 
+            text = if (isPassed)
+                "Bạn đã hoàn thành chủ đề này"
+            else
                 "Cần đạt 60% để hoàn thành",
             style = MaterialTheme.typography.titleMedium,
             color = Color.Gray
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
-        // Thống kê
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White
+                containerColor = Color.Transparent
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            Box(
+                modifier = Modifier
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color(0xFF64B5F6), Color(0xFF1976D2))
+                        )
+                    )
             ) {
-                Text(
-                    "Kết quả học tập",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                HorizontalDivider()
-                
-                // Accuracy
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text("Độ chính xác:", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        "$accuracyPercent%",
-                        style = MaterialTheme.typography.bodyLarge,
+                        "Kết quả học tập",
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = if (isPassed) Color(0xFF4CAF50) else Color(0xFFFF9800)
+                        color = Color.White
                     )
-                }
-                
-                // Correct answers
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Câu trả lời đúng:", style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        "${uiState.correctAnswers}/$total",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4CAF50)
-                    )
-                }
-                
-                // Wrong answers
-                if (uiState.wrongAnswers > 0) {
+
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Câu trả lời sai:", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            "${uiState.wrongAnswers}",
+                            "Độ chính xác:",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                        Text(
+                            "$accuracyPercent%",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFD32F2F)
+                            color = Color.White
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Câu trả lời đúng:",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                        Text(
+                            "${uiState.correctAnswers}/$total",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+
+                    if (uiState.wrongAnswers > 0) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Câu trả lời sai:",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.White.copy(alpha = 0.9f)
+                            )
+                            Text(
+                                "${uiState.wrongAnswers}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFFCDD2)
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Tổng số từ:",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                        Text(
+                            "${uiState.flashcards.size}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
                 }
-                
-                // Total words
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Tổng số từ:", style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        "${uiState.flashcards.size}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
-        // Buttons
+
         Button(
             onClick = onNavigateBack,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF6200EA)
-            )
+                containerColor = Color.Transparent
+            ),
+            contentPadding = PaddingValues()
         ) {
-            Text(
-                "Hoàn thành",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(Color(0xFFFFB74D), Color(0xFFFF8A65))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "Hoàn thành",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
         }
     }
 }

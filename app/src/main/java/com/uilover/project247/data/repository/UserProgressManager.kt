@@ -9,22 +9,23 @@ data class StudyResult(
     val topicId: String,
     val topicName: String,
     val studyType: String, // "flashcard" hoặc "conversation"
-    val totalItems: Int,
+    val totalItems: Int, // Số flashcards đã học trong session này
     val correctCount: Int,
     val timeSpent: Long,
     val accuracy: Float,
-    val completedDate: Long
+    val completedDate: Long,
+    val topicTotalWords: Int = 0 // Tổng số flashcards trong topic
 )
 
 data class TopicCompletionStatus(
     val topicId: String,
     val isCompleted: Boolean,
     val lastStudyDate: Long,
-    val totalFlashcardsLearned: Int = 0,
+    val studyCount: Int = 0, // Số lần đã học topic
     val totalConversationsCompleted: Int = 0,
     val bestAccuracy: Float = 0f,
     val totalTimeSpent: Long = 0,
-    val learnedFlashcardIds: Set<String> = emptySet() // Danh sách flashcard đã học
+    val learnedFlashcardIds: Set<String> = emptySet() // Tất cả unique flashcards đã học (không reset khi học lại)
 )
 
 class UserProgressManager(context: Context) {
@@ -37,7 +38,7 @@ class UserProgressManager(context: Context) {
     companion object {
         private const val KEY_COMPLETED_TOPICS = "completed_topics"
         private const val KEY_STUDY_HISTORY = "study_history"
-        private const val MIN_ACCURACY_TO_COMPLETE = 60f
+        private const val MIN_ACCURACY_TO_COMPLETE = 80f
     }
 
     fun saveStudyResult(result: StudyResult) {
@@ -53,42 +54,54 @@ class UserProgressManager(context: Context) {
         val historyJson = gson.toJson(history)
         prefs.edit().putString(KEY_STUDY_HISTORY, historyJson).apply()
 
-        // 2. Cập nhật trạng thái hoàn thành topic (chỉ khi đạt độ chính xác tối thiểu)
-        // Topic chỉ được đánh dấu hoàn thành nếu làm đủ số lượng items trong 1 lần
-        if (result.accuracy >= MIN_ACCURACY_TO_COMPLETE) {
-            updateTopicCompletion(result)
-        }
+        // 2. Luôn cập nhật topic completion để track learnedFlashcardIds
+        updateTopicCompletion(result)
     }
 
     private fun updateTopicCompletion(result: StudyResult) {
         val completedTopics = getCompletedTopics().toMutableMap()
         
         val existing = completedTopics[result.topicId]
+        
+        // learnedFlashcardIds đã được cập nhật qua markFlashcardAsLearned() trong session
+        // Chỉ cần lấy giá trị hiện tại
+        val currentLearnedIds = existing?.learnedFlashcardIds ?: emptySet()
+        
+        // CHỈ đánh dấu hoàn thành khi:
+        // 1. Độ chính xác >= 60%
+        // 2. Số flashcards unique đã học >= tổng số flashcards trong topic
+        val shouldMarkComplete = result.accuracy >= MIN_ACCURACY_TO_COMPLETE && 
+                                 currentLearnedIds.size >= result.topicTotalWords &&
+                                 result.topicTotalWords > 0
+        
+        android.util.Log.d("UserProgressManager", 
+            "updateTopicCompletion: topicId=${result.topicId}, " +
+            "learned=${currentLearnedIds.size}, total=${result.topicTotalWords}, " +
+            "accuracy=${result.accuracy}%, shouldComplete=$shouldMarkComplete"
+        )
+        
         val updated = if (existing != null) {
             existing.copy(
-                isCompleted = true,
+                isCompleted = shouldMarkComplete || existing.isCompleted, // Giữ trạng thái completed nếu đã hoàn thành
                 lastStudyDate = result.completedDate,
-                totalFlashcardsLearned = if (result.studyType == "flashcard") 
-                    existing.totalFlashcardsLearned + result.totalItems 
-                else existing.totalFlashcardsLearned,
+                studyCount = existing.studyCount + 1,
                 totalConversationsCompleted = if (result.studyType == "conversation") 
                     existing.totalConversationsCompleted + result.totalItems 
                 else existing.totalConversationsCompleted,
                 bestAccuracy = maxOf(existing.bestAccuracy, result.accuracy),
                 totalTimeSpent = existing.totalTimeSpent + result.timeSpent,
-                // Không update learnedFlashcardIds ở đây vì chỉ dùng để track từng flashcard riêng lẻ
-                learnedFlashcardIds = existing.learnedFlashcardIds
+                learnedFlashcardIds = currentLearnedIds // Giữ nguyên (không reset)
             )
         } else {
             TopicCompletionStatus(
                 topicId = result.topicId,
-                isCompleted = true,
+                isCompleted = shouldMarkComplete,
                 lastStudyDate = result.completedDate,
-                totalFlashcardsLearned = if (result.studyType == "flashcard") result.totalItems else 0,
+                studyCount = 1,
                 totalConversationsCompleted = if (result.studyType == "conversation") result.totalItems else 0,
                 bestAccuracy = result.accuracy,
                 totalTimeSpent = result.timeSpent,
-                learnedFlashcardIds = emptySet() // Không set flashcard IDs ở đây
+                learnedFlashcardIds = currentLearnedIds
             )
         }
         
@@ -137,6 +150,18 @@ class UserProgressManager(context: Context) {
     }
 
     /**
+     * Lấy tổng số từ unique đã học (không trùng lặp)
+     * Gộp tất cả learnedFlashcardIds từ mọi topic thành một Set duy nhất
+     */
+    fun getTotalUniqueWordsLearned(): Int {
+        val allLearnedFlashcards = mutableSetOf<String>()
+        getCompletedTopics().values.forEach { status ->
+            allLearnedFlashcards.addAll(status.learnedFlashcardIds)
+        }
+        return allLearnedFlashcards.size
+    }
+
+    /**
      * Lưu flashcard đã học - CHỈ dùng để track progress trong 1 lần học
      * KHÔNG dùng để quyết định unlock topic (dùng isTopicCompleted thay vì)
      */
@@ -146,17 +171,24 @@ class UserProgressManager(context: Context) {
         
         val updated = if (existing != null) {
             val newLearnedIds = existing.learnedFlashcardIds + flashcardId
+            android.util.Log.d("UserProgressManager", 
+                "markFlashcardAsLearned: topicId=$topicId, flashcardId=$flashcardId, " +
+                "learnedCount=${newLearnedIds.size}, isCompleted=${existing.isCompleted}"
+            )
             existing.copy(
                 learnedFlashcardIds = newLearnedIds,
                 lastStudyDate = System.currentTimeMillis()
             )
         } else {
+            android.util.Log.d("UserProgressManager", 
+                "markFlashcardAsLearned: NEW topic $topicId, flashcardId=$flashcardId"
+            )
             TopicCompletionStatus(
                 topicId = topicId,
                 isCompleted = false,
                 lastStudyDate = System.currentTimeMillis(),
                 learnedFlashcardIds = setOf(flashcardId),
-                totalFlashcardsLearned = 0
+                studyCount = 0
             )
         }
         
@@ -185,17 +217,11 @@ class UserProgressManager(context: Context) {
     }
     
     /**
-     * Reset flashcard progress khi bắt đầu 1 session học mới
+     * KHÔNG CÒN DÙNG - learnedFlashcardIds giờ track tất cả flashcards đã học, không reset khi học lại
+     * Giữ hàm này để tránh lỗi nếu có code cũ gọi
      */
+    @Deprecated("Không còn reset learnedFlashcardIds - nó giờ track unique flashcards đã học qua các lần")
     fun resetFlashcardProgress(topicId: String) {
-        val completedTopics = getCompletedTopics().toMutableMap()
-        val existing = completedTopics[topicId]
-        
-        if (existing != null) {
-            val updated = existing.copy(learnedFlashcardIds = emptySet())
-            completedTopics[topicId] = updated
-            val json = gson.toJson(completedTopics)
-            prefs.edit().putString(KEY_COMPLETED_TOPICS, json).apply()
-        }
+        // Không làm gì cả - learnedFlashcardIds giờ là persistent tracking
     }
 }
