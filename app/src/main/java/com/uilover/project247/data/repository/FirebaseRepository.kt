@@ -43,9 +43,21 @@ class FirebaseRepository {
             val levels = mutableListOf<Level>()
             snapshot.children.forEach { levelSnapshot ->
                 try {
-                    val level = levelSnapshot.getValue(Level::class.java)
-                    if (level != null) {
+                    // Parse level data manually to exclude nested topics
+                    val levelData = levelSnapshot.value as? Map<*, *>
+                    if (levelData != null) {
+                        val level = Level(
+                            id = levelData["id"] as? String ?: "",
+                            name = levelData["name"] as? String ?: "",
+                            nameVi = levelData["nameVi"] as? String ?: "",
+                            description = levelData["description"] as? String ?: "",
+                            descriptionVi = levelData["descriptionVi"] as? String ?: "",
+                            order = (levelData["order"] as? Long)?.toInt() ?: 0,
+                            totalTopics = (levelData["totalTopics"] as? Long)?.toInt() ?: 0,
+                            imageUrl = levelData["imageUrl"] as? String ?: ""
+                        )
                         levels.add(level)
+                        Log.d(TAG, "Parsed level: ${level.id} - ${level.name}")
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error parsing level: ${levelSnapshot.key}", e)

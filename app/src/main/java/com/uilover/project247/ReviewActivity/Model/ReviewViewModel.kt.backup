@@ -1,0 +1,245 @@
+package com.uilover.project247.ReviewActivity.Model
+
+import android.app.Application
+import android.content.Context
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.uilover.project247.data.models.*
+import com.uilover.project247.data.repository.ReviewRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+/**
+ * ViewModel cho Review Dashboard - Spaced Repetition System
+ */
+class ReviewViewModel(application: Application) : AndroidViewModel(application) {
+    
+    private val _uiState = MutableStateFlow(ReviewUiState())
+    val uiState: StateFlow<ReviewUiState> = _uiState.asStateFlow()
+    
+    private val reviewRepository = ReviewRepository(application)
+    
+    companion object {
+        private const val TAG = "ReviewViewModel"
+    }
+    
+    init {
+        loadReviewStats()
+    }
+    
+    /**
+     * Load thống kê Dashboard
+     */
+    fun loadReviewStats() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            
+            try {
+                val stats = reviewRepository.getReviewStats()
+                
+                _uiState.update {
+                    it.copy(
+                        stats = stats,
+                        isLoading = false,
+                        errorMessage = null
+                    )
+                }
+                
+                Log.d(TAG, "Loaded stats: ${stats.totalWordsInNotebook} words, ${stats.dueForReviewCount} due")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading stats", e)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Lỗi tải dữ liệu: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Bắt đầu session ôn tập (Flexible Review)
+     */
+    fun startReviewSession() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            
+            try {
+                // Lấy batch từ để ôn tập (không cần check due)
+                val batchFlashcards = reviewRepository.getReviewBatch(limit = 10)
+                
+                if (batchFlashcards.isEmpty()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Sổ tay chưa có từ nào. Hãy học từ mới trước!"
+                        )
+                    }
+                    return@launch
+                }
+                
+                // Tạo bài tập cho từng flashcard
+                val exercises = batchFlashcards.map { flashcard ->
+                    reviewRepository.createReviewExercise(flashcard)
+                }
+                
+                val session = ReviewSession(exercises = exercises)
+                
+                _uiState.update {
+                    it.copy(
+                        currentSession = session,
+                        currentExerciseIndex = 0,
+                        isInReviewMode = true,
+                        isLoading = false
+                    )
+                }
+                
+                Log.d(TAG, "Started flexible review session with ${exercises.size} exercises")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error starting review session", e)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Lỗi khởi tạo ôn tập: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Submit câu trả lời
+     */
+    fun submitAnswer(userAnswer: String) {
+        val state = _uiState.value
+        val currentExercise = state.currentExercise ?: return
+        
+        val isCorrect = userAnswer.trim().lowercase() == 
+                       currentExercise.correctAnswer.trim().lowercase()
+        
+        val result = ReviewResult(
+            flashcardId = currentExercise.flashcard.id,
+            exerciseType = currentExercise.type,
+            isCorrect = isCorrect,
+            userAnswer = userAnswer,
+            correctAnswer = currentExercise.correctAnswer
+        )
+        
+        // Update progress in repository
+        reviewRepository.updateProgressAfterReview(
+            currentExercise.flashcard.id,
+            isCorrect
+        )
+        
+        // Update UI state
+        val updatedSession = state.currentSession?.let { session ->
+            session.copy(
+                results = session.results + result
+            )
+        }
+        
+        _uiState.update {
+            it.copy(
+                currentSession = updatedSession,
+                lastResult = result,
+                showFeedback = true
+            )
+        }
+        
+        Log.d(TAG, "Answer submitted: ${if (isCorrect) "Correct" else "Wrong"}")
+    }
+    
+    /**
+     * Chuyển sang bài tập tiếp theo
+     */
+    fun nextExercise() {
+        val state = _uiState.value
+        val session = state.currentSession ?: return
+        
+        val nextIndex = state.currentExerciseIndex + 1
+        
+        if (nextIndex >= session.exercises.size) {
+            // Kết thúc session
+            finishReviewSession()
+        } else {
+            // Chuyển sang bài tiếp theo
+            _uiState.update {
+                it.copy(
+                    currentExerciseIndex = nextIndex,
+                    showFeedback = false,
+                    lastResult = null
+                )
+            }
+        }
+    }
+    
+    /**
+     * Kết thúc session ôn tập
+     */
+    private fun finishReviewSession() {
+        val state = _uiState.value
+        val session = state.currentSession?.copy(
+            endTime = System.currentTimeMillis()
+        )
+        
+        _uiState.update {
+            it.copy(
+                currentSession = session,
+                isSessionComplete = true
+            )
+        }
+        
+        Log.d(TAG, "Review session completed: ${session?.getAccuracy()}% accuracy")
+    }
+    
+    /**
+     * Đóng feedback và tự động chuyển bài
+     */
+    fun dismissFeedback() {
+        _uiState.update { it.copy(showFeedback = false) }
+        nextExercise()
+    }
+    
+    /**
+     * Exit review mode
+     */
+    fun exitReviewMode() {
+        _uiState.update {
+            ReviewUiState() // Reset về state ban đầu
+        }
+        loadReviewStats() // Reload stats
+    }
+}
+
+/**
+ * UI State cho Review Feature
+ */
+data class ReviewUiState(
+    val isLoading: Boolean = false,
+    val stats: ReviewStats = ReviewStats(),
+    val errorMessage: String? = null,
+    
+    // Review Session
+    val isInReviewMode: Boolean = false,
+    val currentSession: ReviewSession? = null,
+    val currentExerciseIndex: Int = 0,
+    val showFeedback: Boolean = false,
+    val lastResult: ReviewResult? = null,
+    val isSessionComplete: Boolean = false
+) {
+    val currentExercise: ReviewExercise?
+        get() = currentSession?.exercises?.getOrNull(currentExerciseIndex)
+    
+    val progress: Float
+        get() = currentSession?.let {
+            if (it.exercises.isEmpty()) 0f
+            else (currentExerciseIndex + 1).toFloat() / it.exercises.size
+        } ?: 0f
+}

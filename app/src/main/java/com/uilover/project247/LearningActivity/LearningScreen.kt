@@ -91,7 +91,8 @@ fun LearningScreen(
                                 StudyMode.FLASHCARD -> FlashcardView(
                                     card = card,
                                     onComplete = { viewModel.onActionCompleted() },
-                                    onKnowWord = { viewModel.goToNextCard() }
+                                    //onKnowWord = { viewModel.goToNextCard() }
+                                    onKnowWord = { viewModel.onMarkAsKnown() }
                                 )
 
                                 StudyMode.WRITE_WORD -> WriteWordView(

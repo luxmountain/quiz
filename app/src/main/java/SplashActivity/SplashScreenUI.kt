@@ -18,14 +18,14 @@ fun SplashScreenUI() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White), // Đặt màu nền bạn muốn
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            // Dùng tệp PNG bạn vừa kéo vào
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "App Logo",
-            modifier = Modifier.size(200.dp) // Đặt kích thước bạn muốn
-        )
+        // TODO: Add logo image here when available
+        // Image(
+        //     painter = painterResource(id = R.drawable.logo),
+        //     contentDescription = "App Logo",
+        //     modifier = Modifier.size(200.dp)
+        // )
     }
 }

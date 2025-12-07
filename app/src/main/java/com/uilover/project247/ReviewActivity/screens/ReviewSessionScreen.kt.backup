@@ -1,0 +1,248 @@
+package com.uilover.project247.ReviewActivity.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.uilover.project247.LearningActivity.components.ProgressBar
+import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
+import com.uilover.project247.data.models.ReviewExerciseType
+import com.uilover.project247.utils.TextToSpeechManager
+import androidx.compose.ui.ExperimentalComposeUiApi
+import kotlinx.coroutines.delay
+import com.uilover.project247.R
+
+/**
+ * Màn hình ôn tập - Review Session
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun ReviewSessionScreen(
+    viewModel: ReviewViewModel,
+    onExit: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val tts = remember { TextToSpeechManager(context) }
+    
+    // Auto dismiss feedback sau 1.5s
+    LaunchedEffect(uiState.showFeedback) {
+        if (uiState.showFeedback) {
+            delay(1500)
+            viewModel.dismissFeedback()
+        }
+    }
+    
+    // Cleanup TTS
+    DisposableEffect(Unit) {
+        onDispose {
+            tts.shutdown()
+        }
+    }
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Ôn tập từ vựng",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onExit) {
+                        Icon(Icons.Default.Close, "Close")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(Color(0xFFF5F5F5))
+        ) {
+            // Progress bar
+            ProgressBar(
+                progress = uiState.progress,
+                modifier = Modifier.fillMaxWidth(),
+                iconResId = R.drawable.cat1 // Using cat icon for progress indicator
+            )
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                when {
+                    uiState.isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    
+                    uiState.errorMessage != null -> {
+                        // Show error message
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = uiState.errorMessage ?: "",
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Button(onClick = onExit) {
+                                Text("Quay lại")
+                            }
+                        }
+                    }
+                    
+                    uiState.isSessionComplete -> {
+                        SessionCompleteScreen(
+                            session = uiState.currentSession,
+                            onExit = onExit
+                        )
+                    }
+                    
+                    uiState.currentExercise != null -> {
+                        val exercise = uiState.currentExercise!!
+                        when (exercise.type) {
+                            ReviewExerciseType.LISTEN_AND_WRITE -> {
+                                ListenAndWriteExercise(
+                                    exercise = exercise,
+                                    viewModel = viewModel,
+                                    tts = tts,
+                                    showFeedback = uiState.showFeedback,
+                                    lastResult = uiState.lastResult
+                                )
+                            }
+                            
+                            ReviewExerciseType.FILL_IN_BLANK -> {
+                                FillInBlankExercise(
+                                    exercise = exercise,
+                                    viewModel = viewModel,
+                                    showFeedback = uiState.showFeedback,
+                                    lastResult = uiState.lastResult
+                                )
+                            }
+                            
+                            ReviewExerciseType.MULTIPLE_CHOICE -> {
+                                MultipleChoiceExercise(
+                                    exercise = exercise,
+                                    viewModel = viewModel,
+                                    showFeedback = uiState.showFeedback,
+                                    lastResult = uiState.lastResult
+                                )
+                            }
+                        }
+                    }
+                    
+                    else -> {
+                        // Fallback: No exercise available
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Đang tải bài tập...",
+                                fontSize = 16.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Màn hình kết thúc session
+ */
+@Composable
+private fun SessionCompleteScreen(
+    session: com.uilover.project247.data.models.ReviewSession?,
+    onExit: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "🎉",
+            fontSize = 72.sp
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Hoàn thành!",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        session?.let {
+            Text(
+                text = "Độ chính xác: ${it.getAccuracy().toInt()}%",
+                fontSize = 24.sp,
+                color = Color.Gray
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "${it.results.size} câu hỏi",
+                fontSize = 18.sp,
+                color = Color.Gray
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(48.dp))
+        
+        Button(
+            onClick = onExit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4CAF50)
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(
+                text = "Hoàn tất",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}

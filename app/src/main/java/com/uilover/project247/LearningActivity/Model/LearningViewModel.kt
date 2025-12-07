@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.uilover.project247.data.repository.FirebaseRepository
 import com.uilover.project247.data.repository.UserProgressManager
+import com.uilover.project247.data.repository.ReviewRepository
 import com.uilover.project247.data.repository.StudyResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ class LearningViewModel(
     
     private val firebaseRepository = FirebaseRepository()
     private val progressManager = UserProgressManager(application)
+    private val reviewRepository = ReviewRepository(application)
 
     init {
         loadFlashcardsForTopic()
@@ -77,7 +79,7 @@ class LearningViewModel(
     fun checkWrittenAnswer(userAnswer: String) {
         val correctWord = _uiState.value.currentCard?.word ?: return
 
-        if (userAnswer.equals(correctWord, ignoreCase = true)) {
+        if (userAnswer.trim().equals(correctWord.trim(), ignoreCase = true)) {
             // NẾU ĐÚNG: Chỉ set trạng thái, KHÔNG tự động chuyển
             _uiState.update { 
                 it.copy(
@@ -97,7 +99,7 @@ class LearningViewModel(
     }
     fun checkListenAnswer(userAnswer: String) {
         val correctWord = _uiState.value.currentCard?.word ?: return
-        if (userAnswer.equals(correctWord, ignoreCase = true)) {
+        if (userAnswer.trim().equals(correctWord.trim(), ignoreCase = true)) {
             _uiState.update { 
                 it.copy(
                     checkResult = CheckResult.CORRECT,
@@ -136,6 +138,12 @@ class LearningViewModel(
             }
             // 3. Nếu xong LISTEN_AND_WRITE -> Chuyển sang từ tiếp theo hoặc hoàn thành
             StudyMode.LISTEN_AND_WRITE -> {
+                // Đánh dấu flashcard đã học (cho Spaced Repetition)
+                val flashcard = currentState.currentCard
+                if (flashcard != null) {
+                    reviewRepository.markFlashcardLearned(flashcard.id, flashcard.word)
+                }
+                
                 // Kiểm tra xem đây có phải câu cuối cùng không
                 if (currentState.currentCardIndex >= currentState.flashcards.size - 1) {
                     // Câu cuối cùng - Lưu kết quả và đánh dấu hoàn thành
@@ -173,7 +181,35 @@ class LearningViewModel(
         }
         // Không còn xử lý hoàn thành ở đây nữa - đã chuyển sang onQuizContinue
     }
-    
+    fun onMarkAsKnown() {
+        val currentState = _uiState.value
+        val currentCard = currentState.currentCard ?: return
+
+        viewModelScope.launch {
+            // 1. Đánh dấu "Tôi đã biết" (knownAlready = true)
+            // NOTE: Không gọi markFlashcardLearned ở đây vì chưa học đủ 3 bước
+            try {
+                reviewRepository.markFlashcardKnownAlready(currentCard.id, currentCard.word)
+            } catch (e: Exception) {
+                Log.e("LearningViewModel", "Error marking card as known already", e)
+            }
+
+            // 2. Logic điều hướng: Kiểm tra xem đã hết từ chưa?
+            if (currentState.currentCardIndex >= currentState.flashcards.size - 1) {
+                // TRƯỜNG HỢP: ĐÂY LÀ TỪ CUỐI CÙNG -> KẾT THÚC TOPIC
+                saveStudyResult() // Quan trọng: Lưu kết quả học tập
+                _uiState.update {
+                    it.copy(
+                        isTopicComplete = true, // Bật cờ này để UI chuyển sang màn Result
+                        checkResult = CheckResult.NEUTRAL
+                    )
+                }
+            } else {
+                // TRƯỜNG HỢP: CÒN TỪ TIẾP THEO -> NEXT
+                goToNextCard()
+            }
+        }
+    }
     private fun saveStudyResult() {
         val currentState = _uiState.value
         val timeSpent = System.currentTimeMillis() - currentState.startTime

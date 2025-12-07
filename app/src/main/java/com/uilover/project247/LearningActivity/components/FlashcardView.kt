@@ -37,9 +37,10 @@ import com.uilover.project247.R
 fun FlashcardView(card: Flashcard, onComplete: () -> Unit, onKnowWord: () -> Unit) {
 
     val context = LocalContext.current
-    val ttsManager = remember { TextToSpeechManager(context) }
+    // FIX: Use rememberSaveable to survive configuration changes
+    val ttsManager = remember(context) { TextToSpeechManager(context) }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(context) {
         onDispose {
             ttsManager.shutdown()
         }
