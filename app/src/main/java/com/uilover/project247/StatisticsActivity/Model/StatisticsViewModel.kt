@@ -37,26 +37,41 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     fun loadStatistics() {
         viewModelScope.launch {
+            android.util.Log.d("StatisticsViewModel", "========== START loadStatistics ==========")
             _uiState.update { it.copy(isLoading = true) }
             
             try {
+                android.util.Log.d("StatisticsViewModel", "Step 1: Getting study history...")
                 val studyHistory = progressManager.getStudyHistory() ?: emptyList()
+                android.util.Log.d("StatisticsViewModel", "Study history size: ${studyHistory.size}")
+                android.util.Log.d("StatisticsViewModel", "Study history is null? ${studyHistory == null}")
                 
                 // Tính toán Weekly Stats (7 ngày gần nhất)
+                android.util.Log.d("StatisticsViewModel", "Step 2: Calculating weekly stats...")
                 val weeklyStats = calculateWeeklyStats(studyHistory)
+                android.util.Log.d("StatisticsViewModel", "Weekly stats: ${weeklyStats?.dailyStats?.size} days")
                 
                 // Tính toán Monthly Heatmap (tháng hiện tại)
+                android.util.Log.d("StatisticsViewModel", "Step 3: Calculating monthly heatmap...")
                 val monthlyHeatmap = calculateMonthlyHeatmap(studyHistory)
+                android.util.Log.d("StatisticsViewModel", "Monthly heatmap: ${monthlyHeatmap?.dailyActivityMap?.size} days")
                 
                 // Tính toán Learning Streak
+                android.util.Log.d("StatisticsViewModel", "Step 4: Calculating learning streak...")
                 val streak = calculateLearningStreak(studyHistory)
+                android.util.Log.d("StatisticsViewModel", "Streak: current=${streak.currentStreak}, longest=${streak.longestStreak}")
                 
                 // Tính tổng số từ đã học (unique - không trùng lặp)
+                android.util.Log.d("StatisticsViewModel", "Step 5: Getting total unique words...")
                 val totalWords = progressManager.getTotalUniqueWordsLearned()
+                android.util.Log.d("StatisticsViewModel", "Total words: $totalWords")
                 
                 // Tính tổng thời gian học (phút)
+                android.util.Log.d("StatisticsViewModel", "Step 6: Calculating total time...")
                 val totalTime = (studyHistory.sumOf { it.timeSpent } / 60000).toInt()
+                android.util.Log.d("StatisticsViewModel", "Total time: $totalTime minutes")
                 
+                android.util.Log.d("StatisticsViewModel", "Step 7: Updating UI state...")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -67,8 +82,12 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                         totalStudyTime = totalTime
                     )
                 }
+                android.util.Log.d("StatisticsViewModel", "========== SUCCESS loadStatistics ==========")
             } catch (e: Exception) {
-                android.util.Log.e("StatisticsViewModel", "Error loading statistics", e)
+                android.util.Log.e("StatisticsViewModel", "========== ERROR loadStatistics ==========", e)
+                android.util.Log.e("StatisticsViewModel", "Error type: ${e.javaClass.simpleName}")
+                android.util.Log.e("StatisticsViewModel", "Error message: ${e.message}")
+                e.printStackTrace()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -81,6 +100,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun calculateWeeklyStats(history: List<com.uilover.project247.data.repository.StudyResult>): WeeklyStats {
         return try {
+            android.util.Log.d("StatisticsViewModel", "calculateWeeklyStats: START, history size=${history.size}")
             val calendar = Calendar.getInstance()
             
             // Tìm ngày Chủ nhật đầu tuần hiện tại
@@ -114,6 +134,8 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 )
             }
             
+            android.util.Log.d("StatisticsViewModel", "calculateWeeklyStats: Created ${dailyStatsMap.size} daily stats entries")
+            
             // Fill data from history
             history.forEach { result ->
                 val dateKey = getDayKey(result.completedDate)
@@ -134,9 +156,10 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
             }
             
             val dailyStatsList = dailyStatsMap.values.toList().sortedBy { it.date }
+            android.util.Log.d("StatisticsViewModel", "calculateWeeklyStats: SUCCESS, returning ${dailyStatsList.size} days")
             WeeklyStats(dailyStatsList)
         } catch (e: Exception) {
-            android.util.Log.e("StatisticsViewModel", "Error calculating weekly stats", e)
+            android.util.Log.e("StatisticsViewModel", "calculateWeeklyStats: ERROR", e)
             WeeklyStats(emptyList())
         }
     }
