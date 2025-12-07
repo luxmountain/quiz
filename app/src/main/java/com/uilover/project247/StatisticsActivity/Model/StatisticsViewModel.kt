@@ -40,7 +40,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
             _uiState.update { it.copy(isLoading = true) }
             
             try {
-                val studyHistory = progressManager.getStudyHistory()
+                val studyHistory = progressManager.getStudyHistory() ?: emptyList()
                 
                 // Tính toán Weekly Stats (7 ngày gần nhất)
                 val weeklyStats = calculateWeeklyStats(studyHistory)
@@ -68,10 +68,11 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                     )
                 }
             } catch (e: Exception) {
+                android.util.Log.e("StatisticsViewModel", "Error loading statistics", e)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message
+                        errorMessage = "Không thể tải thống kê: ${e.message}"
                     )
                 }
             }
@@ -132,7 +133,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         }
         
         val dailyStatsList = dailyStatsMap.values.sortedBy { it.date }
-        return WeeklyStats(dailyStatsList)
+        return WeeklyStats(dailyStatsList.takeIf { it.isNotEmpty() } ?: emptyList())
     }
 
     private fun calculateMonthlyHeatmap(history: List<com.uilover.project247.data.repository.StudyResult>): MonthlyHeatmapData {

@@ -12,7 +12,7 @@ data class DailyStats(
 }
 
 data class WeeklyStats(
-    val dailyStats: List<DailyStats>
+    val dailyStats: List<DailyStats> = emptyList()
 ) {
     fun getTotalWordsReviewed(): Int = dailyStats.sumOf { it.wordsReviewed }
     fun getTotalStudyTime(): Int = dailyStats.sumOf { it.studyTimeMinutes }
@@ -26,7 +26,7 @@ data class WeeklyStats(
 data class MonthlyHeatmapData(
     val year: Int,
     val month: Int,
-    val dailyActivityMap: Map<Int, Int> // day of month -> words reviewed count
+    val dailyActivityMap: Map<Int, Int> = emptyMap() // day of month -> words reviewed count
 ) {
     fun getMaxActivity(): Int = dailyActivityMap.values.maxOrNull() ?: 0
 }
