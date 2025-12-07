@@ -114,14 +114,24 @@ class UserProgressManager(context: Context) {
 
     fun getStudyHistory(): List<StudyResult> {
         val json = prefs.getString(KEY_STUDY_HISTORY, null) ?: return emptyList()
-        val type = object : TypeToken<List<StudyResult>>() {}.type
-        return gson.fromJson(json, type)
+        return try {
+            val type = object : TypeToken<List<StudyResult>>() {}.type
+            gson.fromJson<List<StudyResult>>(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            android.util.Log.e("UserProgressManager", "Error parsing study history", e)
+            emptyList()
+        }
     }
 
     fun getCompletedTopics(): Map<String, TopicCompletionStatus> {
         val json = prefs.getString(KEY_COMPLETED_TOPICS, null) ?: return emptyMap()
-        val type = object : TypeToken<Map<String, TopicCompletionStatus>>() {}.type
-        return gson.fromJson(json, type)
+        return try {
+            val type = object : TypeToken<Map<String, TopicCompletionStatus>>() {}.type
+            gson.fromJson<Map<String, TopicCompletionStatus>>(json, type) ?: emptyMap()
+        } catch (e: Exception) {
+            android.util.Log.e("UserProgressManager", "Error parsing completed topics", e)
+            emptyMap()
+        }
     }
 
     fun isTopicCompleted(topicId: String): Boolean {
