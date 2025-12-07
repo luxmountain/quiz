@@ -1,18 +1,13 @@
 package com.uilover.project247.LearningActivity.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,11 +17,17 @@ fun CheckButton(
     isEnabled: Boolean,
     onClick: () -> Unit
 ) {
+    // 1. Định nghĩa Gradient (Xanh lá nhạt -> Xanh lá đậm)
+    val gradientBrush = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFF66BB6A), // Green 400
+            Color(0xFF2E7D32)  // Green 800
+        )
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            // --- SỬA LỖI: XÓA DÒNG NÀY ĐI ---
-            // .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -38,20 +39,34 @@ fun CheckButton(
                 .height(56.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
-                // Màu khi BẬT (xanh lá)
-                containerColor = Color(0xFF76C81A),
+                // Đặt transparent để hiển thị gradient của Box bên trong
+                containerColor = Color.Transparent,
                 contentColor = Color.White,
 
-                // --- SỬA LẠI MÀU KHI TẮT (GIỐNG ẢNH) ---
-                disabledContainerColor = Color(0xFFE8E8E8), // Màu xám nhạt
-                disabledContentColor = Color.Gray // Chữ màu xám
-            )
+                // Giữ nguyên màu khi disable (Xám)
+                disabledContainerColor = Color(0xFFE8E8E8),
+                disabledContentColor = Color.Gray
+            ),
+            // Quan trọng: Xóa padding mặc định để Box gradient tràn viền
+            contentPadding = PaddingValues()
         ) {
-            Text(
-                "Kiểm tra",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            // 2. Tạo Box chứa Gradient
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        // Chỉ hiện gradient khi Button đang bật (Enabled)
+                        if (isEnabled) Modifier.background(gradientBrush)
+                        else Modifier
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Kiểm tra",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.uilover.project247.data.models.Level
 import com.uilover.project247.data.models.Topic
 import com.uilover.project247.data.repository.FirebaseRepository
+import com.uilover.project247.data.repository.PlacementTestManager
 import com.uilover.project247.data.repository.UserProgressManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,11 +15,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class TopicWithStatus(
+    val topic: Topic,
+    val isCompleted: Boolean,
+    val isLocked: Boolean,
+    val progress: Float // 0-100
+)
+
 data class MainUiState(
     val isLoading: Boolean = true,
     val levels: List<Level> = emptyList(),
     val topics: List<Topic> = emptyList(),
+    val topicsWithStatus: List<TopicWithStatus> = emptyList(),
     val selectedLevelId: String? = null,
+    val currentLevel: Level? = null,
+    val levelProgress: Float = 0f, // 0-100
     val errorMessage: String? = null,
     val completedTopics: Set<String> = emptySet()
 )
@@ -30,10 +41,52 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     
     private val firebaseRepository = FirebaseRepository()
     private val progressManager = UserProgressManager(application)
+    private val placementTestManager = PlacementTestManager(application)
 
     init {
         loadLevels()
         loadCompletedTopics()
+    }
+
+    /**
+     * Refresh data khi quay lại màn hình (onResume)
+     */
+    fun refreshData() {
+        loadCompletedTopics()
+        
+        // Kiểm tra xem có placement test result không
+        val recommendedLevelId = placementTestManager.getRecommendedLevel()
+        val currentLevelId = _uiState.value.selectedLevelId
+        
+        // Nếu có placement test result
+        if (recommendedLevelId != null) {
+            // Map sang level name
+            val levelName = when (recommendedLevelId) {
+                "beginner" -> "Beginner"
+                "elementary" -> "Elementary"
+                "intermediate" -> "Intermediate"
+                "advanced" -> "Advanced"
+                else -> "Beginner"
+            }
+            
+            // Kiểm tra xem level hiện tại có đúng với recommended level không
+            val currentLevel = _uiState.value.currentLevel
+            if (currentLevel?.name != levelName) {
+                // Level sai, cần reload để chọn đúng level
+                Log.d("MainViewModel", "refreshData: Current level mismatch, reloading. Current: ${currentLevel?.name}, Recommended: $levelName")
+                loadLevels()
+            } else {
+                // Level đúng rồi, chỉ cần reload topics
+                if (currentLevelId != null) {
+                    loadTopicsByLevel(currentLevelId)
+                }
+            }
+        } else {
+            // Không có placement test, chỉ reload topics
+            if (currentLevelId != null) {
+                loadTopicsByLevel(currentLevelId)
+            }
+        }
     }
 
     fun refreshCompletedTopics() {
@@ -41,7 +94,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadCompletedTopics() {
-        val completed = progressManager.getCompletedTopics().keys
+        // CHỈ lấy topics có isCompleted = true
+        val completed = progressManager.getCompletedTopics()
+            .filter { it.value.isCompleted }
+            .keys
         _uiState.update { it.copy(completedTopics = completed) }
     }
 
@@ -55,18 +111,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             try {
                 val levels = firebaseRepository.getLevels()
-                val defaultLevel = levels.find { it.name == "Beginner" } ?: levels.firstOrNull()
+                
+                // Lấy level từ placement test result nếu có
+                val recommendedLevelId = placementTestManager.getRecommendedLevel()
+                Log.d("MainViewModel", "recommendedLevelId from placement test: $recommendedLevelId")
+                
+                val defaultLevel = if (recommendedLevelId != null) {
+                    // Map level name từ placement test sang Firebase
+                    val levelName = when (recommendedLevelId) {
+                        "beginner" -> "Beginner"
+                        "elementary" -> "Elementary"
+                        "intermediate" -> "Intermediate"
+                        "advanced" -> "Advanced"
+                        else -> "Beginner"
+                    }
+                    Log.d("MainViewModel", "Mapped to levelName: $levelName")
+                    val foundLevel = levels.find { it.name == levelName }
+                    Log.d("MainViewModel", "Found level: ${foundLevel?.id} - ${foundLevel?.name}")
+                    foundLevel ?: levels.firstOrNull()
+                } else {
+                    Log.d("MainViewModel", "No placement test result, using Beginner")
+                    levels.find { it.name == "Beginner" } ?: levels.firstOrNull()
+                }
                 
                 _uiState.update {
                     it.copy(
                         isLoading = false, 
                         levels = levels,
                         selectedLevelId = defaultLevel?.id,
+                        currentLevel = defaultLevel,
                         errorMessage = if (levels.isEmpty()) "Không có dữ liệu levels" else null
                     )
                 }
                 
-                Log.d("MainViewModel", "Loaded ${levels.size} levels from Firebase")
+                Log.d("MainViewModel", "Loaded ${levels.size} levels, selected: ${defaultLevel?.name}")
                 
                 if (defaultLevel != null) {
                     loadTopicsByLevel(defaultLevel.id)
@@ -94,11 +172,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val topics = firebaseRepository.getTopicsByLevel(levelId)
                 
+                // Tính toán trạng thái unlock cho từng topic
+                val topicsWithStatus = topics.mapIndexed { index, topic ->
+                    val isCompleted = isTopicCompleted(topic.id)
+                    val progress = progressManager.getTopicFlashcardProgress(topic.id, topic.totalWords)
+                    
+                    // Logic unlock:
+                    // - Topic đầu tiên luôn mở
+                    // - Topic tiếp theo mở khi topic trước đã HOÀN THÀNH (làm xong 1 lần với accuracy >= 60%)
+                    val isLocked = if (index == 0) {
+                        false
+                    } else {
+                        val previousTopic = topics[index - 1]
+                        !progressManager.hasReachedUnlockThreshold(previousTopic.id)
+                    }
+                    
+                    TopicWithStatus(
+                        topic = topic,
+                        isCompleted = isCompleted,
+                        isLocked = isLocked,
+                        progress = progress
+                    )
+                }
+                
+                // Tính progress của level = số topic hoàn thành / tổng số topic
+                val completedCount = topicsWithStatus.count { it.isCompleted }
+                val levelProgress = if (topicsWithStatus.isNotEmpty()) {
+                    (completedCount.toFloat() / topicsWithStatus.size.toFloat()) * 100f
+                } else {
+                    0f
+                }
+                
+                val currentLevel = _uiState.value.levels.find { it.id == levelId }
+                
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         topics = topics,
+                        topicsWithStatus = topicsWithStatus,
                         selectedLevelId = levelId,
+                        currentLevel = currentLevel,
+                        levelProgress = levelProgress,
                         errorMessage = if (topics.isEmpty()) "Không có chủ đề nào" else null
                     )
                 }
@@ -114,5 +228,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+    
+    /**
+     * Kiểm tra xem có thể mở topic không
+     */
+    fun canOpenTopic(topicId: String): Boolean {
+        val topicStatus = _uiState.value.topicsWithStatus.find { it.topic.id == topicId }
+        return topicStatus?.isLocked == false
     }
 }

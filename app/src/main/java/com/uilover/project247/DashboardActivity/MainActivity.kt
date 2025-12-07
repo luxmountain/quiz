@@ -13,9 +13,13 @@ import com.uilover.project247.ConversationActivity.ConversationDetailActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
 import com.uilover.project247.LearningActivity.LearningActivity
 import com.uilover.project247.ReviewActivity.ReviewActivity
+import com.uilover.project247.PlacementTestActivity.PlacementTestActivity
+import com.uilover.project247.data.repository.PlacementTestManager
 import com.uilover.project247.ui.theme.Project247Theme
 import com.uilover.project247.DashboardActivity.Model.MainViewModel
 import com.uilover.project247.QuestionActivity.QuestionActivity
+import com.uilover.project247.utils.ProductTourManager
+import com.uilover.project247.ProductTourActivity.ProductTourActivity
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels {
@@ -27,13 +31,20 @@ class MainActivity : ComponentActivity() {
         }
     }
     
+    private lateinit var placementTestManager: PlacementTestManager
+    private lateinit var productTourManager: ProductTourManager
+    
     override fun onResume() {
         super.onResume()
-        viewModel.refreshCompletedTopics()
+        // Refresh lại completed topics và reload topics để cập nhật trạng thái lock/unlock
+        viewModel.refreshData()
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        placementTestManager = PlacementTestManager(this)
+        productTourManager = ProductTourManager(this)
 
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
@@ -41,6 +52,7 @@ class MainActivity : ComponentActivity() {
             Project247Theme {
                 MainScreen(
                     viewModel = viewModel,
+                    showInAppTour = !productTourManager.hasCompletedTour(),
 
                     onBoardClick = {
                         // Stay on Board tab - do nothing
@@ -76,9 +88,19 @@ class MainActivity : ComponentActivity() {
                         // Navigate to ReviewActivity (Review Session)
                         val intent = Intent(this, ReviewActivity::class.java)
                         startActivity(intent)
+                    },
+                    
+                    onTourComplete = {
+                        productTourManager.setTourCompleted()
                     }
                 )
             }
+        }
+        
+        // Check placement test after UI is set
+        if (!placementTestManager.hasCompletedTest()) {
+            val intent = Intent(this, PlacementTestActivity::class.java)
+            startActivity(intent)
         }
     }
 }
