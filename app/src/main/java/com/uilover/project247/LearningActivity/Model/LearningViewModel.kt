@@ -144,7 +144,10 @@ class LearningViewModel(
                 // NOTE: Đánh dấu DÙ ĐÚNG HAY SAI vì user đã trải qua 3 bước
                 val flashcard = currentState.currentCard
                 if (flashcard != null) {
+                    // Đánh dấu cho Review system (Spaced Repetition)
                     reviewRepository.markFlashcardLearned(flashcard.id, flashcard.word)
+                    // Đánh dấu cho Progress tracking (unlock topic, progress bar)
+                    progressManager.markFlashcardAsLearned(topicId, flashcard.id)
                 }
                 
                 // Kiểm tra xem đây có phải câu cuối cùng không
@@ -190,9 +193,11 @@ class LearningViewModel(
 
         viewModelScope.launch {
             // 1. Đánh dấu "Tôi đã biết" (knownAlready = true)
-            // NOTE: Không gọi markFlashcardLearned ở đây vì chưa học đủ 3 bước
+            // NOTE: Đánh dấu cho cả Review và Progress tracking
             try {
                 reviewRepository.markFlashcardKnownAlready(currentCard.id, currentCard.word)
+                // Cũng đánh dấu vào progressManager để tính tiến độ
+                progressManager.markFlashcardAsLearned(topicId, currentCard.id)
             } catch (e: Exception) {
                 Log.e("LearningViewModel", "Error marking card as known already", e)
             }

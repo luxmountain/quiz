@@ -418,7 +418,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             // Ví dụ: 13:23:50 -> 14:00:00, 13:58:40 -> 14:00:00
             // Đảm bảo countdown luôn hiển thị số giờ tròn (10h, 3d, 7d...)
             val now = System.currentTimeMillis()
-            val finishTime = ((now / 3600000) + 1) * 3600000  // Round UP to next hour (3600000ms = 1 hour)
+            val finishTime = now  // Round UP to next hour (3600000ms = 1 hour)
             
             val sessionStartTime = session.startTime
             val studyDuration = now - sessionStartTime

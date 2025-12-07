@@ -38,7 +38,7 @@ class UserProgressManager(context: Context) {
     companion object {
         private const val KEY_COMPLETED_TOPICS = "completed_topics"
         private const val KEY_STUDY_HISTORY = "study_history"
-        private const val MIN_ACCURACY_TO_COMPLETE = 80f
+        private const val MIN_ACCURACY_TO_COMPLETE = 60f // Giảm xuống 60% để dễ hoàn thành hơn
     }
 
     fun saveStudyResult(result: StudyResult) {
@@ -68,10 +68,11 @@ class UserProgressManager(context: Context) {
         val currentLearnedIds = existing?.learnedFlashcardIds ?: emptySet()
         
         // CHỈ đánh dấu hoàn thành khi:
-        // 1. Độ chính xác >= 60%
+        // 1. Độ chính xác >= 60% HOẶC
         // 2. Số flashcards unique đã học >= tổng số flashcards trong topic
-        val shouldMarkComplete = result.accuracy >= MIN_ACCURACY_TO_COMPLETE && 
-                                 currentLearnedIds.size >= result.topicTotalWords &&
+        // => Chỉ cần 1 trong 2 điều kiện là đủ để hoàn thành
+        val shouldMarkComplete = (result.accuracy >= MIN_ACCURACY_TO_COMPLETE || 
+                                  currentLearnedIds.size >= result.topicTotalWords) &&
                                  result.topicTotalWords > 0
         
         android.util.Log.d("UserProgressManager", 
