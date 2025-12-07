@@ -57,6 +57,7 @@ fun MainScreen(
     onTopicReviewClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onConversationClick: (String) -> Unit = {},
+    onStartReviewSession: () -> Unit = {}, // NEW: Navigate to ReviewActivity
     onTourComplete: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -64,7 +65,7 @@ fun MainScreen(
     val context = LocalContext.current
     val dictionaryViewModel = remember { DictionaryViewModel(context) }
     val conversationViewModel = remember { ConversationListViewModel(context.applicationContext as android.app.Application) }
-    val reviewViewModel = remember { ReviewViewModel() }
+    val reviewViewModel = remember { ReviewViewModel(context.applicationContext as android.app.Application) }
     val aiAssistantViewModel = remember { AIAssistantViewModel(context.applicationContext as android.app.Application) }
     val statisticsViewModel = remember { StatisticsViewModel(context.applicationContext as android.app.Application) }
     
@@ -200,7 +201,8 @@ fun MainScreen(
                     onReviewTopicClick = { topicId ->
                         onTopicReviewClick(topicId)
                     },
-                    onNavigateBack = null // nếu muốn, có thể truyền { selectedTab = "Board" }
+                    onNavigateBack = null, // nếu muốn, có thể truyền { selectedTab = "Board" }
+                    onStartReviewSession = onStartReviewSession // Pass navigation callback
                 )
             }
 

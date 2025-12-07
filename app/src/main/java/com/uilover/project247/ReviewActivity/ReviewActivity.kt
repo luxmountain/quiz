@@ -1,45 +1,72 @@
 package com.uilover.project247.ReviewActivity
 
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
-import com.uilover.project247.QuestionActivity.QuestionActivity
+import androidx.lifecycle.ViewModelProvider
 import com.uilover.project247.ReviewActivity.Model.ReviewViewModel
+import com.uilover.project247.ReviewActivity.screens.ReviewSessionScreen
 import com.uilover.project247.ui.theme.Project247Theme
 
+/**
+ * Activity cho Review Session - màn hình ôn tập với exercises
+ * 
+ * LIFECYCLE FIX: Restore session on resume to prevent blank screen
+ */
 class ReviewActivity : ComponentActivity() {
-    private val viewModel: ReviewViewModel by viewModels()
-
+    
+    private lateinit var reviewViewModel: ReviewViewModel
+    private var isFirstResume = true
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
+        Log.d("ReviewActivity", "onCreate - Starting review session")
+        Log.d("ReviewActivity", "savedInstanceState = ${if (savedInstanceState == null) "null (fresh)" else "not null (restored)"}")
+        
+        reviewViewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[ReviewViewModel::class.java]
+        
+        // Only start new session on fresh create
+        if (savedInstanceState == null) {
+            Log.d("ReviewActivity", "Fresh start - Starting NEW session")
+            reviewViewModel.startReviewSession()
+        } else {
+            Log.d("ReviewActivity", "Restored from saved state")
+            // ViewModel will check if session needs reload on resume
+        }
+        
         setContent {
-            // TODO: Thay Project247Theme bằng tên Theme của bạn
             Project247Theme {
-                // Set màu thanh status bar
-                window.statusBarColor = MaterialTheme.colorScheme.surface.toArgb()
-
-                ReviewScreen(
-                    viewModel = viewModel,
-                    onNavigateBack = {
-                        finish() // Đóng Activity khi bấm back
-                    },
-                    onTopicClick = { topicId ->
-                        val intent = Intent(this, QuestionActivity::class.java)
-                        intent.putExtra("TOPIC_ID", topicId)
-                        startActivity(intent)
+                ReviewSessionScreen(
+                    viewModel = reviewViewModel,
+                    onExit = {
+                        // CRITICAL: Save progress before exiting
+                        reviewViewModel.exitReviewMode()
+                        finish()
                     }
                 )
             }
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        Log.d("ReviewActivity", "onResume - isFirstResume=$isFirstResume")
+        
+        // Refresh session state when returning (handles process death)
+        if (!isFirstResume) {
+            Log.d("ReviewActivity", "Refreshing session after resume")
+            reviewViewModel.refreshSessionIfNeeded()
+        }
+        isFirstResume = false
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        Log.d("ReviewActivity", "onPause")
     }
 }

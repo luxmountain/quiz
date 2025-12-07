@@ -25,7 +25,7 @@ data class TopicCompletionStatus(
     val totalConversationsCompleted: Int = 0,
     val bestAccuracy: Float = 0f,
     val totalTimeSpent: Long = 0,
-    val learnedFlashcardIds: Set<String> = emptySet() // Tất cả unique flashcards đã học (không reset khi học lại)
+    val learnedFlashcardIds: Set<String>? = emptySet() // Nullable để tương thích với data cũ
 )
 
 class UserProgressManager(context: Context) {
@@ -38,7 +38,7 @@ class UserProgressManager(context: Context) {
     companion object {
         private const val KEY_COMPLETED_TOPICS = "completed_topics"
         private const val KEY_STUDY_HISTORY = "study_history"
-        private const val MIN_ACCURACY_TO_COMPLETE = 80f
+        private const val MIN_ACCURACY_TO_COMPLETE = 60f // Giảm xuống 60% để dễ hoàn thành hơn
     }
 
     fun saveStudyResult(result: StudyResult) {
@@ -64,14 +64,15 @@ class UserProgressManager(context: Context) {
         val existing = completedTopics[result.topicId]
         
         // learnedFlashcardIds đã được cập nhật qua markFlashcardAsLearned() trong session
-        // Chỉ cần lấy giá trị hiện tại
+        // Chỉ cần lấy giá trị hiện tại (null-safe cho data cũ)
         val currentLearnedIds = existing?.learnedFlashcardIds ?: emptySet()
         
         // CHỈ đánh dấu hoàn thành khi:
-        // 1. Độ chính xác >= 60%
+        // 1. Độ chính xác >= 60% HOẶC
         // 2. Số flashcards unique đã học >= tổng số flashcards trong topic
-        val shouldMarkComplete = result.accuracy >= MIN_ACCURACY_TO_COMPLETE && 
-                                 currentLearnedIds.size >= result.topicTotalWords &&
+        // => Chỉ cần 1 trong 2 điều kiện là đủ để hoàn thành
+        val shouldMarkComplete = (result.accuracy >= MIN_ACCURACY_TO_COMPLETE || 
+                                  currentLearnedIds.size >= result.topicTotalWords) &&
                                  result.topicTotalWords > 0
         
         android.util.Log.d("UserProgressManager", 
@@ -112,15 +113,45 @@ class UserProgressManager(context: Context) {
     }
 
     fun getStudyHistory(): List<StudyResult> {
-        val json = prefs.getString(KEY_STUDY_HISTORY, null) ?: return emptyList()
-        val type = object : TypeToken<List<StudyResult>>() {}.type
-        return gson.fromJson(json, type)
+        android.util.Log.d("UserProgressManager", "getStudyHistory: START")
+        val json = prefs.getString(KEY_STUDY_HISTORY, null)
+        android.util.Log.d("UserProgressManager", "getStudyHistory: json is null? ${json == null}, length=${json?.length ?: 0}")
+        
+        if (json == null) {
+            android.util.Log.d("UserProgressManager", "getStudyHistory: Returning empty list (no data)")
+            return emptyList()
+        }
+        
+        return try {
+            val type = object : TypeToken<List<StudyResult>>() {}.type
+            val result = gson.fromJson<List<StudyResult>>(json, type) ?: emptyList()
+            android.util.Log.d("UserProgressManager", "getStudyHistory: SUCCESS, size=${result.size}")
+            result
+        } catch (e: Exception) {
+            android.util.Log.e("UserProgressManager", "getStudyHistory: ERROR parsing JSON", e)
+            emptyList()
+        }
     }
 
     fun getCompletedTopics(): Map<String, TopicCompletionStatus> {
-        val json = prefs.getString(KEY_COMPLETED_TOPICS, null) ?: return emptyMap()
-        val type = object : TypeToken<Map<String, TopicCompletionStatus>>() {}.type
-        return gson.fromJson(json, type)
+        android.util.Log.d("UserProgressManager", "getCompletedTopics: START")
+        val json = prefs.getString(KEY_COMPLETED_TOPICS, null)
+        android.util.Log.d("UserProgressManager", "getCompletedTopics: json is null? ${json == null}, length=${json?.length ?: 0}")
+        
+        if (json == null) {
+            android.util.Log.d("UserProgressManager", "getCompletedTopics: Returning empty map (no data)")
+            return emptyMap()
+        }
+        
+        return try {
+            val type = object : TypeToken<Map<String, TopicCompletionStatus>>() {}.type
+            val result = gson.fromJson<Map<String, TopicCompletionStatus>>(json, type) ?: emptyMap()
+            android.util.Log.d("UserProgressManager", "getCompletedTopics: SUCCESS, size=${result.size}")
+            result
+        } catch (e: Exception) {
+            android.util.Log.e("UserProgressManager", "getCompletedTopics: ERROR parsing JSON", e)
+            emptyMap()
+        }
     }
 
     fun isTopicCompleted(topicId: String): Boolean {
@@ -154,11 +185,20 @@ class UserProgressManager(context: Context) {
      * Gộp tất cả learnedFlashcardIds từ mọi topic thành một Set duy nhất
      */
     fun getTotalUniqueWordsLearned(): Int {
-        val allLearnedFlashcards = mutableSetOf<String>()
-        getCompletedTopics().values.forEach { status ->
-            allLearnedFlashcards.addAll(status.learnedFlashcardIds)
+        return try {
+            val allLearnedFlashcards = mutableSetOf<String>()
+            getCompletedTopics().values.forEach { status ->
+                // Null-safe: nếu learnedFlashcardIds null (data cũ), skip
+                status.learnedFlashcardIds?.let { 
+                    allLearnedFlashcards.addAll(it)
+                }
+            }
+            android.util.Log.d("UserProgressManager", "getTotalUniqueWordsLearned: ${allLearnedFlashcards.size} words")
+            allLearnedFlashcards.size
+        } catch (e: Exception) {
+            android.util.Log.e("UserProgressManager", "getTotalUniqueWordsLearned: ERROR", e)
+            0
         }
-        return allLearnedFlashcards.size
     }
 
     /**
@@ -170,7 +210,7 @@ class UserProgressManager(context: Context) {
         val existing = completedTopics[topicId]
         
         val updated = if (existing != null) {
-            val newLearnedIds = existing.learnedFlashcardIds + flashcardId
+            val newLearnedIds = (existing.learnedFlashcardIds ?: emptySet()) + flashcardId
             android.util.Log.d("UserProgressManager", 
                 "markFlashcardAsLearned: topicId=$topicId, flashcardId=$flashcardId, " +
                 "learnedCount=${newLearnedIds.size}, isCompleted=${existing.isCompleted}"

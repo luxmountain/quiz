@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.uilover.project247.ConversationActivity.ConversationDetailActivity
 import com.uilover.project247.DashboardActivity.screens.MainScreen
 import com.uilover.project247.LearningActivity.LearningActivity
+import com.uilover.project247.ReviewActivity.ReviewActivity
 import com.uilover.project247.PlacementTestActivity.PlacementTestActivity
 import com.uilover.project247.data.repository.PlacementTestManager
 import com.uilover.project247.ui.theme.Project247Theme
@@ -82,6 +83,13 @@ class MainActivity : ComponentActivity() {
                         intent.putExtra("CONVERSATION_ID", conversationId)
                         startActivity(intent)
                     },
+                    
+                    onStartReviewSession = {
+                        // Navigate to ReviewActivity (Review Session)
+                        val intent = Intent(this, ReviewActivity::class.java)
+                        startActivity(intent)
+                    },
+                    
                     onTourComplete = {
                         productTourManager.setTourCompleted()
                     }

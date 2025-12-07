@@ -37,26 +37,41 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     fun loadStatistics() {
         viewModelScope.launch {
+            android.util.Log.d("StatisticsViewModel", "========== START loadStatistics ==========")
             _uiState.update { it.copy(isLoading = true) }
             
             try {
-                val studyHistory = progressManager.getStudyHistory()
+                android.util.Log.d("StatisticsViewModel", "Step 1: Getting study history...")
+                val studyHistory = progressManager.getStudyHistory() ?: emptyList()
+                android.util.Log.d("StatisticsViewModel", "Study history size: ${studyHistory.size}")
+                android.util.Log.d("StatisticsViewModel", "Study history is null? ${studyHistory == null}")
                 
                 // Tính toán Weekly Stats (7 ngày gần nhất)
+                android.util.Log.d("StatisticsViewModel", "Step 2: Calculating weekly stats...")
                 val weeklyStats = calculateWeeklyStats(studyHistory)
+                android.util.Log.d("StatisticsViewModel", "Weekly stats: ${weeklyStats?.dailyStats?.size} days")
                 
                 // Tính toán Monthly Heatmap (tháng hiện tại)
+                android.util.Log.d("StatisticsViewModel", "Step 3: Calculating monthly heatmap...")
                 val monthlyHeatmap = calculateMonthlyHeatmap(studyHistory)
+                android.util.Log.d("StatisticsViewModel", "Monthly heatmap: ${monthlyHeatmap?.dailyActivityMap?.size} days")
                 
                 // Tính toán Learning Streak
+                android.util.Log.d("StatisticsViewModel", "Step 4: Calculating learning streak...")
                 val streak = calculateLearningStreak(studyHistory)
+                android.util.Log.d("StatisticsViewModel", "Streak: current=${streak.currentStreak}, longest=${streak.longestStreak}")
                 
                 // Tính tổng số từ đã học (unique - không trùng lặp)
+                android.util.Log.d("StatisticsViewModel", "Step 5: Getting total unique words...")
                 val totalWords = progressManager.getTotalUniqueWordsLearned()
+                android.util.Log.d("StatisticsViewModel", "Total words: $totalWords")
                 
                 // Tính tổng thời gian học (phút)
+                android.util.Log.d("StatisticsViewModel", "Step 6: Calculating total time...")
                 val totalTime = (studyHistory.sumOf { it.timeSpent } / 60000).toInt()
+                android.util.Log.d("StatisticsViewModel", "Total time: $totalTime minutes")
                 
+                android.util.Log.d("StatisticsViewModel", "Step 7: Updating UI state...")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -67,11 +82,16 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                         totalStudyTime = totalTime
                     )
                 }
+                android.util.Log.d("StatisticsViewModel", "========== SUCCESS loadStatistics ==========")
             } catch (e: Exception) {
+                android.util.Log.e("StatisticsViewModel", "========== ERROR loadStatistics ==========", e)
+                android.util.Log.e("StatisticsViewModel", "Error type: ${e.javaClass.simpleName}")
+                android.util.Log.e("StatisticsViewModel", "Error message: ${e.message}")
+                e.printStackTrace()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message
+                        errorMessage = "Không thể tải thống kê: ${e.message}"
                     )
                 }
             }
@@ -79,85 +99,101 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun calculateWeeklyStats(history: List<com.uilover.project247.data.repository.StudyResult>): WeeklyStats {
-        val calendar = Calendar.getInstance()
-        
-        // Tìm ngày Chủ nhật đầu tuần hiện tại
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        
-        val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        val daysFromSunday = currentDayOfWeek - Calendar.SUNDAY
-        calendar.add(Calendar.DAY_OF_YEAR, -daysFromSunday)
-        
-        val weekStart = calendar.timeInMillis
-        
-        // Tạo map cho 7 ngày trong tuần (Chủ nhật -> Thứ 7)
-        val dailyStatsMap = mutableMapOf<String, DailyStats>()
-        
-        for (i in 0..6) {
-            calendar.timeInMillis = weekStart
-            calendar.add(Calendar.DAY_OF_YEAR, i)
+        return try {
+            android.util.Log.d("StatisticsViewModel", "calculateWeeklyStats: START, history size=${history.size}")
+            val calendar = Calendar.getInstance()
             
-            val dayStart = calendar.timeInMillis
-            val dateKey = getDayKey(dayStart)
+            // Tìm ngày Chủ nhật đầu tuần hiện tại
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
             
-            dailyStatsMap[dateKey] = DailyStats(
-                date = dayStart,
-                wordsReviewed = 0,
-                studyTimeMinutes = 0,
-                correctCount = 0,
-                totalCount = 0
-            )
-        }
-        
-        // Fill data from history
-        history.forEach { result ->
-            val dateKey = getDayKey(result.completedDate)
+            val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+            val daysFromSunday = currentDayOfWeek - Calendar.SUNDAY
+            calendar.add(Calendar.DAY_OF_YEAR, -daysFromSunday)
             
-            if (dailyStatsMap.containsKey(dateKey)) {
-                val existing = dailyStatsMap[dateKey]!!
-                // Tính correctCount từ accuracy và totalItems
-                // accuracy đã là % (0-100), nên chia 100
-                val correctCount = ((result.accuracy / 100f) * result.totalItems).toInt()
+            val weekStart = calendar.timeInMillis
+            
+            // Tạo map cho 7 ngày trong tuần (Chủ nhật -> Thứ 7)
+            val dailyStatsMap = mutableMapOf<String, DailyStats>()
+            
+            for (i in 0..6) {
+                calendar.timeInMillis = weekStart
+                calendar.add(Calendar.DAY_OF_YEAR, i)
                 
-                dailyStatsMap[dateKey] = existing.copy(
-                    wordsReviewed = existing.wordsReviewed + result.totalItems,
-                    studyTimeMinutes = existing.studyTimeMinutes + (result.timeSpent / 60000).toInt(),
-                    correctCount = existing.correctCount + correctCount,
-                    totalCount = existing.totalCount + result.totalItems
+                val dayStart = calendar.timeInMillis
+                val dateKey = getDayKey(dayStart)
+                
+                dailyStatsMap[dateKey] = DailyStats(
+                    date = dayStart,
+                    wordsReviewed = 0,
+                    studyTimeMinutes = 0,
+                    correctCount = 0,
+                    totalCount = 0
                 )
             }
+            
+            android.util.Log.d("StatisticsViewModel", "calculateWeeklyStats: Created ${dailyStatsMap.size} daily stats entries")
+            
+            // Fill data from history
+            history.forEach { result ->
+                val dateKey = getDayKey(result.completedDate)
+                
+                if (dailyStatsMap.containsKey(dateKey)) {
+                    val existing = dailyStatsMap[dateKey]!!
+                    // Tính correctCount từ accuracy và totalItems
+                    // accuracy đã là % (0-100), nên chia 100
+                    val correctCount = ((result.accuracy / 100f) * result.totalItems).toInt()
+                    
+                    dailyStatsMap[dateKey] = existing.copy(
+                        wordsReviewed = existing.wordsReviewed + result.totalItems,
+                        studyTimeMinutes = existing.studyTimeMinutes + (result.timeSpent / 60000).toInt(),
+                        correctCount = existing.correctCount + correctCount,
+                        totalCount = existing.totalCount + result.totalItems
+                    )
+                }
+            }
+            
+            val dailyStatsList = dailyStatsMap.values.toList().sortedBy { it.date }
+            android.util.Log.d("StatisticsViewModel", "calculateWeeklyStats: SUCCESS, returning ${dailyStatsList.size} days")
+            WeeklyStats(dailyStatsList)
+        } catch (e: Exception) {
+            android.util.Log.e("StatisticsViewModel", "calculateWeeklyStats: ERROR", e)
+            WeeklyStats(emptyList())
         }
-        
-        val dailyStatsList = dailyStatsMap.values.sortedBy { it.date }
-        return WeeklyStats(dailyStatsList)
     }
 
     private fun calculateMonthlyHeatmap(history: List<com.uilover.project247.data.repository.StudyResult>): MonthlyHeatmapData {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        
-        val dailyActivityMap = mutableMapOf<Int, Int>()
-        
-        history.forEach { result ->
-            calendar.timeInMillis = result.completedDate
+        return try {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
             
-            if (calendar.get(Calendar.YEAR) == year && calendar.get(Calendar.MONTH) == month) {
-                val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-                dailyActivityMap[dayOfMonth] = (dailyActivityMap[dayOfMonth] ?: 0) + result.totalItems
+            val dailyActivityMap = mutableMapOf<Int, Int>()
+            
+            history.forEach { result ->
+                calendar.timeInMillis = result.completedDate
+                
+                if (calendar.get(Calendar.YEAR) == year && calendar.get(Calendar.MONTH) == month) {
+                    val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+                    dailyActivityMap[dayOfMonth] = (dailyActivityMap[dayOfMonth] ?: 0) + result.totalItems
+                }
             }
+            
+            MonthlyHeatmapData(year, month, dailyActivityMap)
+        } catch (e: Exception) {
+            android.util.Log.e("StatisticsViewModel", "Error calculating monthly heatmap", e)
+            val calendar = Calendar.getInstance()
+            MonthlyHeatmapData(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), emptyMap())
         }
-        
-        return MonthlyHeatmapData(year, month, dailyActivityMap)
     }
 
     private fun calculateLearningStreak(history: List<com.uilover.project247.data.repository.StudyResult>): LearningStreak {
-        if (history.isEmpty()) {
-            return LearningStreak(0, 0, null)
-        }
+        return try {
+            if (history.isEmpty()) {
+                return LearningStreak(0, 0, null)
+            }
         
         val sortedHistory = history.sortedByDescending { it.completedDate }
         val calendar = Calendar.getInstance()
@@ -214,7 +250,11 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         }
         longestStreak = maxOf(longestStreak, tempStreak)
         
-        return LearningStreak(currentStreak, longestStreak, lastStudyDate)
+        LearningStreak(currentStreak, longestStreak, lastStudyDate)
+        } catch (e: Exception) {
+            android.util.Log.e("StatisticsViewModel", "Error calculating learning streak", e)
+            LearningStreak(0, 0, null)
+        }
     }
 
     private fun getDayKey(timestamp: Long): String {
