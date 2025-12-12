@@ -31,7 +31,7 @@ Mục đích: lưu **tiến độ học và lịch sử trên máy** để hiể
 - `placement_test_prefs` (class `PlacementTestManager`)
   - `test_completed`, `test_result`, `recommended_level`, `completed_date`: lưu kết quả bài test đầu vào.
 
-Ghi chú: tiến độ người dùng hiện tại ưu tiên lưu local; RTDB có thể mở rộng để đồng bộ lên `/userProgress/{userId}` khi cần.
+Ghi chú: **tiến độ người dùng hiện tại lưu trên máy (local)**. Firebase RTDB hiện dùng để lưu dữ liệu nội dung học tập.
 
 ## 🗂️ Cấu trúc Database
 
@@ -46,8 +46,6 @@ firebase-database/
 │               └── flashcards: [ ... ]
 ├── placementTest/
 │   └── (single object)
-├── userProgress/
-│   └── {userId}/
 └── settings/
     └── app/
 ```
@@ -155,18 +153,18 @@ Chứa thông tin về các chủ đề học tập.
 
 ### Fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | String | ✅ | Unique identifier (phải trùng với topicId) |
-| `name` | String | ✅ | Tên chủ đề (tiếng Anh) |
-| `nameVi` | String | ✅ | Tên chủ đề (tiếng Việt) |
-| `description` | String | ✅ | Mô tả chủ đề (tiếng Anh) |
-| `descriptionVi` | String | ✅ | Mô tả chủ đề (tiếng Việt) |
-| `imageUrl` | String | ✅ | URL hình ảnh đại diện (phải bắt đầu với http/https) |
-| `order` | Number | ✅ | Thứ tự hiển thị (>= 0) |
-| `totalWords` | Number | ✅ | Tổng số từ vựng trong chủ đề (>= 0) |
-| `createdAt` | Number | ✅ | Timestamp tạo (milliseconds) |
-| `updatedAt` | Number | ✅ | Timestamp cập nhật cuối (milliseconds) |
+| Field           | Type   | Required | Description                                         |
+| --------------- | ------ | -------- | --------------------------------------------------- |
+| `id`            | String | ✅       | Unique identifier (phải trùng với topicId)          |
+| `name`          | String | ✅       | Tên chủ đề (tiếng Anh)                              |
+| `nameVi`        | String | ✅       | Tên chủ đề (tiếng Việt)                             |
+| `description`   | String | ✅       | Mô tả chủ đề (tiếng Anh)                            |
+| `descriptionVi` | String | ✅       | Mô tả chủ đề (tiếng Việt)                           |
+| `imageUrl`      | String | ✅       | URL hình ảnh đại diện (phải bắt đầu với http/https) |
+| `order`         | Number | ✅       | Thứ tự hiển thị (>= 0)                              |
+| `totalWords`    | Number | ✅       | Tổng số từ vựng trong chủ đề (>= 0)                 |
+| `createdAt`     | Number | ✅       | Timestamp tạo (milliseconds)                        |
+| `updatedAt`     | Number | ✅       | Timestamp cập nhật cuối (milliseconds)              |
 
 ### Example:
 
@@ -197,23 +195,23 @@ Chứa thông tin về từ vựng (flashcard).
 
 ### Fields:
 
-| Field | Type | Required | Validation | Description |
-|-------|------|----------|------------|-------------|
-| `id` | String | ✅ | Phải trùng với flashcardId | Unique identifier |
-| `topicId` | String | ✅ | Phải tồn tại trong /topics | ID của chủ đề |
-| `word` | String | ✅ | Length > 0 | Từ vựng tiếng Anh |
-| `pronunciation` | String | ✅ | - | Phiên âm IPA |
-| `meaning` | String | ✅ | Length > 0 | Nghĩa tiếng Việt |
-| `wordType` | String | ✅ | Enum: noun, verb, adjective, adverb, preposition, conjunction | Loại từ (tiếng Anh) |
-| `wordTypeVi` | String | ✅ | - | Loại từ (tiếng Việt) |
-| `imageUrl` | String | ✅ | URL format | Hình ảnh minh họa |
-| `contextSentence` | String | ✅ | - | Câu ví dụ có chứa từ (HTML: `<b><u>word</u></b>`) |
-| `contextSentenceVi` | String | ✅ | - | Câu ví dụ tiếng Việt |
-| `example` | String | ✅ | - | Câu ví dụ bổ sung |
-| `exampleVi` | String | ✅ | - | Câu ví dụ bổ sung tiếng Việt |
-| `order` | Number | ✅ | >= 0 | Thứ tự trong chủ đề |
-| `difficulty` | String | ✅ | Enum: easy, medium, hard | Độ khó |
-| `createdAt` | Number | ✅ | - | Timestamp tạo |
+| Field               | Type   | Required | Validation                                                    | Description                                       |
+| ------------------- | ------ | -------- | ------------------------------------------------------------- | ------------------------------------------------- |
+| `id`                | String | ✅       | Phải trùng với flashcardId                                    | Unique identifier                                 |
+| `topicId`           | String | ✅       | Phải tồn tại trong /topics                                    | ID của chủ đề                                     |
+| `word`              | String | ✅       | Length > 0                                                    | Từ vựng tiếng Anh                                 |
+| `pronunciation`     | String | ✅       | -                                                             | Phiên âm IPA                                      |
+| `meaning`           | String | ✅       | Length > 0                                                    | Nghĩa tiếng Việt                                  |
+| `wordType`          | String | ✅       | Enum: noun, verb, adjective, adverb, preposition, conjunction | Loại từ (tiếng Anh)                               |
+| `wordTypeVi`        | String | ✅       | -                                                             | Loại từ (tiếng Việt)                              |
+| `imageUrl`          | String | ✅       | URL format                                                    | Hình ảnh minh họa                                 |
+| `contextSentence`   | String | ✅       | -                                                             | Câu ví dụ có chứa từ (HTML: `<b><u>word</u></b>`) |
+| `contextSentenceVi` | String | ✅       | -                                                             | Câu ví dụ tiếng Việt                              |
+| `example`           | String | ✅       | -                                                             | Câu ví dụ bổ sung                                 |
+| `exampleVi`         | String | ✅       | -                                                             | Câu ví dụ bổ sung tiếng Việt                      |
+| `order`             | Number | ✅       | >= 0                                                          | Thứ tự trong chủ đề                               |
+| `difficulty`        | String | ✅       | Enum: easy, medium, hard                                      | Độ khó                                            |
+| `createdAt`         | Number | ✅       | -                                                             | Timestamp tạo                                     |
 
 ### Word Types:
 
@@ -264,49 +262,49 @@ Chứa thông tin về các bài hội thoại học từ vựng.
 
 ### Fields:
 
-| Field | Type | Required | Validation | Description |
-|-------|------|----------|------------|-------------|
-| `id` | String | ✅ | Phải trùng với conversationId | Unique identifier |
-| `title` | String | ✅ | Length > 0 | Tiêu đề (tiếng Anh) |
-| `titleVi` | String | ✅ | Length > 0 | Tiêu đề (tiếng Việt) |
-| `imageUrl` | String | ✅ | URL format | Hình ảnh minh họa |
-| `contextDescription` | String | ✅ | - | Mô tả ngữ cảnh (tiếng Anh) |
-| `contextDescriptionVi` | String | ✅ | - | Mô tả ngữ cảnh (tiếng Việt) |
-| `dialogue` | Array | ✅ | - | Danh sách câu thoại (có thể kèm câu hỏi trắc nghiệm) |
-| `vocabularyWords` | Array | ✅ | - | Danh sách từ vựng xuất hiện trong hội thoại |
-| `order` | Number | ✅ | >= 0 | Thứ tự |
-| `createdAt` | Number | ❌ | - | Timestamp tạo (nếu có) |
+| Field                  | Type   | Required | Validation                    | Description                                          |
+| ---------------------- | ------ | -------- | ----------------------------- | ---------------------------------------------------- |
+| `id`                   | String | ✅       | Phải trùng với conversationId | Unique identifier                                    |
+| `title`                | String | ✅       | Length > 0                    | Tiêu đề (tiếng Anh)                                  |
+| `titleVi`              | String | ✅       | Length > 0                    | Tiêu đề (tiếng Việt)                                 |
+| `imageUrl`             | String | ✅       | URL format                    | Hình ảnh minh họa                                    |
+| `contextDescription`   | String | ✅       | -                             | Mô tả ngữ cảnh (tiếng Anh)                           |
+| `contextDescriptionVi` | String | ✅       | -                             | Mô tả ngữ cảnh (tiếng Việt)                          |
+| `dialogue`             | Array  | ✅       | -                             | Danh sách câu thoại (có thể kèm câu hỏi trắc nghiệm) |
+| `vocabularyWords`      | Array  | ✅       | -                             | Danh sách từ vựng xuất hiện trong hội thoại          |
+| `order`                | Number | ✅       | >= 0                          | Thứ tự                                               |
+| `createdAt`            | Number | ❌       | -                             | Timestamp tạo (nếu có)                               |
 
 ### Dialogue Schema:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `speaker` | String | ✅ | Tên người nói |
-| `text` | String | ✅ | Nội dung (tiếng Anh) |
-| `textVi` | String | ✅ | Nội dung (tiếng Việt) |
-| `order` | Number | ✅ | Thứ tự câu |
-| `vocabularyWord` | String | ❌ | Từ vựng trọng tâm của dòng này (nếu có) |
-| `question` | String | ❌ | Câu hỏi trắc nghiệm (EN) |
-| `questionVi` | String | ❌ | Câu hỏi trắc nghiệm (VI) |
-| `options` | Array | ❌ | Danh sách lựa chọn (QuizOption) |
+| Field            | Type   | Required | Description                             |
+| ---------------- | ------ | -------- | --------------------------------------- |
+| `speaker`        | String | ✅       | Tên người nói                           |
+| `text`           | String | ✅       | Nội dung (tiếng Anh)                    |
+| `textVi`         | String | ✅       | Nội dung (tiếng Việt)                   |
+| `order`          | Number | ✅       | Thứ tự câu                              |
+| `vocabularyWord` | String | ❌       | Từ vựng trọng tâm của dòng này (nếu có) |
+| `question`       | String | ❌       | Câu hỏi trắc nghiệm (EN)                |
+| `questionVi`     | String | ❌       | Câu hỏi trắc nghiệm (VI)                |
+| `options`        | Array  | ❌       | Danh sách lựa chọn (QuizOption)         |
 
 ### VocabularyWord Schema:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `word` | String | ✅ | Từ vựng |
-| `meaning` | String | ✅ | Nghĩa tiếng Việt |
-| `pronunciation` | String | ✅ | Phiên âm |
-| `wordType` | String | ✅ | Loại từ (EN) |
-| `wordTypeVi` | String | ✅ | Loại từ (VI) |
+| Field           | Type   | Required | Description      |
+| --------------- | ------ | -------- | ---------------- |
+| `word`          | String | ✅       | Từ vựng          |
+| `meaning`       | String | ✅       | Nghĩa tiếng Việt |
+| `pronunciation` | String | ✅       | Phiên âm         |
+| `wordType`      | String | ✅       | Loại từ (EN)     |
+| `wordTypeVi`    | String | ✅       | Loại từ (VI)     |
 
 ### QuizOption Schema:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | String | ✅ | ID lựa chọn |
-| `text` | String | ✅ | Nội dung đáp án |
-| `isCorrect` | Boolean | ✅ | Đáp án đúng hay sai |
+| Field       | Type    | Required | Description         |
+| ----------- | ------- | -------- | ------------------- |
+| `id`        | String  | ✅       | ID lựa chọn         |
+| `text`      | String  | ✅       | Nội dung đáp án     |
+| `isCorrect` | Boolean | ✅       | Đáp án đúng hay sai |
 
 ### Example:
 
@@ -371,62 +369,49 @@ Chứa thông tin về các bài hội thoại học từ vựng.
 
 ---
 
-## 👤 User Progress Schema
+## 👤 User Progress (Local - trên máy)
 
-**Path**: `/userProgress/{userId}`
+Ứng dụng **không lưu user progress lên Firebase RTDB** ở phiên bản hiện tại. Thay vào đó, tiến độ học được lưu bằng SharedPreferences để:
 
-> Ghi chú triển khai: ứng dụng hiện tại đang ưu tiên lưu tiến độ local qua `UserProgressManager` (SharedPreferences). Node `/userProgress/{userId}` là schema mở rộng để đồng bộ cloud khi cần.
+- đọc/ghi nhanh (không cần mạng),
+- cập nhật UI tức thời,
+- làm dữ liệu đầu vào cho AI gợi ý.
 
-Lưu trữ tiến độ học tập của người dùng.
+### Local Keys (SharedPreferences)
 
-### Fields:
+- `user_progress` (UserProgressManager)
+  - `study_history`: List<StudyResult> (tối đa 100)
+  - `completed_topics`: Map<String, TopicCompletionStatus>
 
-| Field | Type | Required | Validation | Description |
-|-------|------|----------|------------|-------------|
-| `userId` | String | ✅ | Phải trùng với userId | ID người dùng |
-| `displayName` | String | ✅ | - | Tên hiển thị |
-| `email` | String | ✅ | Email format | Email người dùng |
-| `totalPoints` | Number | ✅ | >= 0 | Tổng điểm |
-| `level` | Number | ✅ | >= 1 | Cấp độ |
-| `streak` | Number | ✅ | >= 0 | Số ngày học liên tục |
-| `lastStudyDate` | Number/null | ❌ | - | Ngày học gần nhất |
-| `createdAt` | Number | ✅ | - | Timestamp tạo tài khoản |
-| `topicProgress` | Map | ❌ | - | Tiến độ theo chủ đề |
-| `flashcardResults` | Map | ❌ | - | Kết quả học flashcard |
-| `conversationResults` | Map | ❌ | - | Kết quả học conversation |
+> Nếu sau này cần đồng bộ cloud, có thể bổ sung node `/userProgress/{userId}` như một schema mở rộng.
 
-### TopicProgress Schema:
+### Cấu trúc dữ liệu local (tương đương “bảng”)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `topicId` | String | ✅ | ID chủ đề |
-| `completedFlashcards` | Number | ✅ | Số flashcard đã hoàn thành |
-| `completedConversations` | Number | ✅ | Số conversation đã hoàn thành |
-| `totalFlashcards` | Number | ✅ | Tổng số flashcard |
-| `totalConversations` | Number | ✅ | Tổng số conversation |
-| `progress` | Number | ✅ | Phần trăm hoàn thành (0-100) |
-| `lastStudyDate` | Number/null | ❌ | Ngày học gần nhất |
+#### StudyResult (lưu trong `study_history`)
 
-### FlashcardResult Schema:
+| Field           | Type   | Description                     |
+| --------------- | ------ | ------------------------------- |
+| `topicId`       | String | ID topic                        |
+| `topicName`     | String | Tên topic (để hiển thị nhanh)   |
+| `studyType`     | String | `flashcard` hoặc `conversation` |
+| `totalItems`    | Int    | Số lượng item trong phiên học   |
+| `correctCount`  | Int    | Số câu đúng                     |
+| `timeSpent`     | Long   | Thời gian học (ms)              |
+| `accuracy`      | Float  | % đúng                          |
+| `completedDate` | Long   | Timestamp (ms)                  |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `flashcardId` | String | ✅ | ID flashcard |
-| `learned` | Boolean | ✅ | Đã học xong chưa |
-| `reviewCount` | Number | ✅ | Số lần ôn tập |
-| `lastReviewDate` | Number/null | ❌ | Lần ôn gần nhất |
-| `nextReviewDate` | Number/null | ❌ | Lần ôn tiếp theo |
-| `confidence` | Number | ✅ | Độ tự tin (0-100) |
+#### TopicCompletionStatus (lưu trong `completed_topics`)
 
-### ConversationResult Schema:
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `conversationId` | String | ✅ | ID conversation |
-| `completed` | Boolean | ✅ | Đã hoàn thành chưa |
-| `attempts` | Number | ✅ | Số lần thử |
-| `correctAnswers` | Number | ✅ | Số câu trả lời đúng |
-| `lastAttemptDate` | Number/null | ❌ | Lần thử gần nhất |
+| Field                         | Type        | Description                                  |
+| ----------------------------- | ----------- | -------------------------------------------- |
+| `topicId`                     | String      | ID topic                                     |
+| `isCompleted`                 | Boolean     | Đã hoàn thành topic hay chưa                 |
+| `lastStudyDate`               | Long        | Lần học gần nhất                             |
+| `totalFlashcardsLearned`      | Int         | Tổng flashcards learned (dùng thống kê)      |
+| `totalConversationsCompleted` | Int         | Tổng conversations completed (dùng thống kê) |
+| `bestAccuracy`                | Float       | Accuracy tốt nhất                            |
+| `totalTimeSpent`              | Long        | Tổng thời gian học                           |
+| `learnedFlashcardIds`         | Set<String> | Tập flashcard đã học (phục vụ % progress UI) |
 
 ---
 
@@ -438,32 +423,32 @@ Chứa bài test đầu vào (1 object) gồm metadata + danh sách câu hỏi.
 
 ### Fields chính:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | String | ✅ | ID bài test |
-| `title` | String | ✅ | Tiêu đề (VI) |
-| `titleEn` | String | ✅ | Tiêu đề (EN) |
-| `description` | String | ✅ | Mô tả (VI) |
-| `descriptionEn` | String | ✅ | Mô tả (EN) |
-| `duration` | Number | ✅ | Thời gian (giây) |
-| `instructions` | Array<String> | ✅ | Hướng dẫn |
-| `passingScores` | Object | ✅ | Ngưỡng điểm theo level |
-| `questions` | Array<Object> | ✅ | Danh sách câu hỏi |
+| Field           | Type          | Required | Description            |
+| --------------- | ------------- | -------- | ---------------------- |
+| `id`            | String        | ✅       | ID bài test            |
+| `title`         | String        | ✅       | Tiêu đề (VI)           |
+| `titleEn`       | String        | ✅       | Tiêu đề (EN)           |
+| `description`   | String        | ✅       | Mô tả (VI)             |
+| `descriptionEn` | String        | ✅       | Mô tả (EN)             |
+| `duration`      | Number        | ✅       | Thời gian (giây)       |
+| `instructions`  | Array<String> | ✅       | Hướng dẫn              |
+| `passingScores` | Object        | ✅       | Ngưỡng điểm theo level |
+| `questions`     | Array<Object> | ✅       | Danh sách câu hỏi      |
 
 ### Question fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | String | ✅ | ID câu hỏi |
-| `order` | Number | ✅ | Thứ tự |
-| `level` | String | ✅ | beginner/elementary/intermediate/advanced |
-| `type` | String | ✅ | vocabulary/grammar/reading |
-| `question` | String | ✅ | Câu hỏi (EN) |
-| `questionVi` | String | ✅ | Câu hỏi (VI) |
-| `options` | Array<String> | ✅ | 4 lựa chọn |
-| `correctAnswer` | Number | ✅ | Index đáp án đúng (0-3) |
-| `explanation` | String | ❌ | Giải thích (EN) |
-| `explanationVi` | String | ❌ | Giải thích (VI) |
+| Field           | Type          | Required | Description                               |
+| --------------- | ------------- | -------- | ----------------------------------------- |
+| `id`            | String        | ✅       | ID câu hỏi                                |
+| `order`         | Number        | ✅       | Thứ tự                                    |
+| `level`         | String        | ✅       | beginner/elementary/intermediate/advanced |
+| `type`          | String        | ✅       | vocabulary/grammar/reading                |
+| `question`      | String        | ✅       | Câu hỏi (EN)                              |
+| `questionVi`    | String        | ✅       | Câu hỏi (VI)                              |
+| `options`       | Array<String> | ✅       | 4 lựa chọn                                |
+| `correctAnswer` | Number        | ✅       | Index đáp án đúng (0-3)                   |
+| `explanation`   | String        | ❌       | Giải thích (EN)                           |
+| `explanationVi` | String        | ❌       | Giải thích (VI)                           |
 
 > Lưu ý UI: bài kiểm tra đầu vào không hiển thị đáp án/giải thích trong lúc làm bài; `explanation*` có thể giữ lại trong data để mở rộng (ví dụ chế độ luyện tập).
 
@@ -477,16 +462,16 @@ Cài đặt ứng dụng.
 
 ### Fields:
 
-| Field | Type | Required | Validation | Description |
-|-------|------|----------|------------|-------------|
-| `version` | String | ✅ | Format: x.x.x | Phiên bản hiện tại |
-| `minSupportedVersion` | String | ✅ | Format: x.x.x | Phiên bản tối thiểu |
-| `maintenanceMode` | Boolean | ✅ | - | Chế độ bảo trì |
-| `dailyGoal` | Number | ✅ | >= 1 | Mục tiêu hàng ngày |
-| `reminderEnabled` | Boolean | ✅ | - | Bật nhắc nhở |
-| `reminderTime` | String | ✅ | Format: HH:mm | Giờ nhắc nhở |
-| `soundEnabled` | Boolean | ✅ | - | Bật âm thanh |
-| `autoPlayAudio` | Boolean | ✅ | - | Tự động phát âm |
+| Field                 | Type    | Required | Validation    | Description         |
+| --------------------- | ------- | -------- | ------------- | ------------------- |
+| `version`             | String  | ✅       | Format: x.x.x | Phiên bản hiện tại  |
+| `minSupportedVersion` | String  | ✅       | Format: x.x.x | Phiên bản tối thiểu |
+| `maintenanceMode`     | Boolean | ✅       | -             | Chế độ bảo trì      |
+| `dailyGoal`           | Number  | ✅       | >= 1          | Mục tiêu hàng ngày  |
+| `reminderEnabled`     | Boolean | ✅       | -             | Bật nhắc nhở        |
+| `reminderTime`        | String  | ✅       | Format: HH:mm | Giờ nhắc nhở        |
+| `soundEnabled`        | Boolean | ✅       | -             | Bật âm thanh        |
+| `autoPlayAudio`       | Boolean | ✅       | -             | Tự động phát âm     |
 
 ---
 
@@ -495,7 +480,6 @@ Cài đặt ứng dụng.
 File `firebase-rules.json` định nghĩa các quy tắc bảo mật:
 
 - **Topics/Flashcards/Conversations**: Đọc công khai, chỉ admin mới được ghi
-- **UserProgress**: Chỉ user sở hữu mới được đọc/ghi
 - **Settings**: Đọc công khai, chỉ admin mới được ghi
 
 ### Validation Rules:
@@ -520,8 +504,6 @@ val topicsRef = database.getReference(FirebasePaths.TOPICS)
 val topicRef = database.getReference(FirebasePaths.topic("topic_001"))
 
 // Lấy user progress
-val userProgressRef = database.getReference(FirebasePaths.userProgress(userId))
-
 // Query flashcards theo topic
 val flashcardsRef = database.getReference(FirebasePaths.FLASHCARDS)
     .orderByChild("topicId")
@@ -536,10 +518,10 @@ Tất cả data models được định nghĩa trong file:
 `app/src/main/java/com/uilover/project247/data/models/FirebaseModels.kt`
 
 Các models chính:
+
 - `Topic`
 - `Flashcard`
 - `Conversation` (với `DialogueLine` và `QuizOption`)
-- `UserProgress` (với `TopicProgress`, `FlashcardResult`, `ConversationResult`)
 - `AppSettings`
 
 ---

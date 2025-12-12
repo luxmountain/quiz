@@ -1,190 +1,120 @@
-# Product Tour - Hướng dẫn sử dụng (Spotlight Style)
+# Tài liệu chức năng: Product Tour (Spotlight Tour trong Dashboard)
 
-## Tính năng Product Tour đã được tích hợp thành công! 🎉
+## 0) Tổng quan
 
-### Kiểu Spotlight Tour (như intro.js):
+Product Tour hướng dẫn người dùng **lần đầu mở app** bằng “spotlight overlay”: làm tối toàn màn hình và khoét “lỗ” (hole) tại đúng UI element cần giới thiệu, kèm tooltip mô tả.
 
-#### 1. **Lần đầu mở app:**
-- User sẽ thấy **màn hình chào mừng** giới thiệu app
-- Nhấn "Bắt đầu hướng dẫn" để xem tour
-- Tour sẽ **highlight từng element** cụ thể trên màn hình với hiệu ứng spotlight
-
-#### 2. **Tour với 6 bước highlight:**
-1. ✅ **Level Selector** - Cách chọn cấp độ (Beginner/Intermediate/Advanced)
-2. ✅ **Topic Item** - Cách chọn chủ đề để học
-3. ✅ **Tab Tra từ** - Giới thiệu tính năng từ điển
-4. ✅ **Tab Học từ vựng** - Giới thiệu tab chính
-5. ✅ **Tab Hội thoại** - Luyện hội thoại mẫu
-6. ✅ **Tab AI Assistant** - Trợ lý AI
-
-#### 3. **Hiệu ứng Spotlight:**
-- ✨ **Background tối** (80% opacity) che toàn màn hình
-- 🔦 **Cutout sáng** highlight element đang hướng dẫn
-- 💜 **Border tím** quanh element được highlight
-- 💬 **Tooltip card** xuất hiện phía trên/dưới element
-- 🖱️ **Tap anywhere** để next bước tiếp theo
-
-#### 4. **Tương tác:**
-- **Tap màn hình tối**: Chuyển sang bước tiếp theo
-- **Nút X** (góc phải tooltip): Bỏ qua tour
-- **Progress bar**: Hiển thị tiến độ tour
-- **"Hoàn thành! 🎉"**: Nút ở bước cuối
-
-### UI/UX Features:
-
-✅ **Spotlight effect** - Làm tối xung quanh, sáng element target  
-✅ **Smooth animation** - Fade in/out mượt mà
-✅ **Smart tooltip positioning** - Tự động đặt phía trên/dưới element
-✅ **Rounded cutout** - Bo góc 12dp cho đẹp
-✅ **Purple border** - Viền tím highlight element
-✅ **Auto-tracking** - Tự động track vị trí element
-✅ **Responsive** - Thích ứng với kích thước màn hình
-
-### Files đã tạo/cập nhật:
-
-```
-app/src/main/java/com/uilover/project247/
-├── utils/
-│   └── ProductTourManager.kt           # Quản lý trạng thái tour
-├── data/models/
-│   └── InAppTourModels.kt              # Data model
-├── DashboardActivity/
-│   ├── components/
-│   │   ├── InAppTourOverlay.kt         # ⭐ Spotlight overlay + tooltip
-│   │   ├── BottomNavigationBarStub.kt  # Track vị trí tabs
-│   │   └── TopicItem.kt                # Support modifier
-│   ├── screens/
-│   │   └── MainScreen.kt               # Track vị trí elements
-│   └── MainActivity.kt                 # Trigger tour
-```
-
-### Cách hoạt động kỹ thuật:
-
-#### 1. **Tracking element positions:**
-```kotlin
-.onGloballyPositioned { coordinates ->
-    val pos = coordinates.positionInRoot()
-    updateTourTarget(
-        "element_id",
-        Rect(left, top, right, bottom)
-    )
-}
-```
-
-#### 2. **Drawing spotlight:**
-```kotlin
-Canvas {
-    // Draw black overlay
-    drawRect(Color.Black.copy(alpha = 0.8f))
-    
-    // Cut out spotlight area
-    drawPath(
-        path = roundRectPath,
-        color = Color.Transparent,
-        blendMode = BlendMode.Clear
-    )
-    
-    // Draw border
-    drawRoundRect(color = Purple, style = Stroke)
-}
-```
-
-#### 3. **Smart tooltip positioning:**
-```kotlin
-val tooltipY = if (elementBottom + tooltipHeight < screenHeight) {
-    elementBottom + 16.dp // Below
-} else {
-    elementTop - tooltipHeight - 16.dp // Above
-}
-```
-
-### Thêm target mới:
-
-#### 1. Trong composable cần highlight:
-```kotlin
-MyComponent(
-    modifier = Modifier.onGloballyPositioned { coordinates ->
-        val pos = coordinates.positionInRoot()
-        updateTourTarget(
-            "my_element_id",
-            Rect(pos.x, pos.y, pos.x + width, pos.y + height)
-        )
-    }
-)
-```
-
-#### 2. Thêm step trong `InAppTourOverlay.kt`:
-```kotlin
-InAppTourStep(
-    title = "Tính năng mới",
-    description = "Mô tả chi tiết về tính năng",
-    targetId = "my_element_id",
-    emoji = "✨"
-)
-```
-
-### Tùy chỉnh màu sắc:
-
-```kotlin
-// Overlay
-Color.Black.copy(alpha = 0.8f) // Độ tối
-
-// Border highlight
-Color(0xFF6200EA) // Tím chủ đạo
-
-// Tooltip background
-Color.White
-
-// Padding around spotlight
-8.dp // Khoảng cách viền
-```
-
-### Testing:
-
-1. **Xóa app data**: Settings → Apps → Clear Data
-2. Mở app lần đầu
-3. Nhấn "Bắt đầu hướng dẫn"
-4. Quan sát:
-   - ✅ Level selector được highlight
-   - ✅ Topic item đầu tiên được highlight
-   - ✅ Các tab bottom được highlight lần lượt
-5. Tap màn hình tối để next
-6. Hoặc nhấn X để skip
-
-### Lợi ích của Spotlight Tour:
-
-✅ **Tương tác trực quan** - User nhìn thấy đúng element cần dùng  
-✅ **Không gây nhiễu** - Chỉ highlight 1 element tại 1 thời điểm  
-✅ **Học nhanh hơn** - Hiểu ngay vị trí và cách dùng  
-✅ **Chuyên nghiệp** - Giống Uber, Airbnb, Google apps  
-✅ **Giữ chân user** - Giảm confusion, tăng engagement
-
-### So sánh với tour cũ:
-
-| Feature | Tour cũ | Tour mới (Spotlight) |
-|---------|---------|---------------------|
-| Hiển thị | Card giữa màn hình | Highlight element |
-| Tương tác | Đọc mô tả | Thấy element thật |
-| Animation | Fade in/out card | Spotlight + tooltip |
-| UX | Passive reading | Active discovery |
-| Retention | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+Trạng thái “đã xem tour” được lưu cục bộ bằng SharedPreferences để **không hiển thị lại** ở các lần mở app sau (trừ khi reset).
 
 ---
 
-## 🎯 Kết quả
+## a) Luồng hoạt động + ràng buộc nghiệp vụ
 
-User lần đầu mở app sẽ được **hướng dẫn trực quan** từng tính năng với **spotlight effect**, giúp học cách dùng app nhanh chóng và hiệu quả!
+### Luồng (activity diagram – Mermaid)
 
-### Demo Flow:
+```mermaid
+flowchart TD
+        A[MainActivity onCreate] --> B[Khởi tạo ProductTourManager]
+        B --> C{hasCompletedTour()?}
+        C -- false --> D[Render MainScreen(showInAppTour=true)]
+        C -- true --> E[Render MainScreen(showInAppTour=false)]
 
+        D --> F[InAppTourOverlay hiển thị (Welcome card)]
+        F --> G[User bấm "Bắt đầu" hoặc tap để Next]
+        G --> H[Highlight Level Selector]
+        H --> I[Highlight Topic item đầu tiên]
+        I --> J[Highlight Tab Tra từ]
+        J --> K[Highlight Tab Ôn tập]
+        K --> L[Highlight Tab Hội thoại]
+        L --> M[Highlight Tab Thống kê]
+
+        M --> N[Complete/Skip]
+        N --> O[setTourCompleted()]
 ```
-1. Mở app → Màn chào mừng
-2. "Bắt đầu hướng dẫn" → Màn tối + Level selector sáng + tooltip
-3. Tap màn hình → Topic item sáng + tooltip
-4. Tap → Tab "Tra từ" sáng + tooltip
-5. Tap → Tab "Học từ vựng" sáng + tooltip
-6. Tap → Tab "Hội thoại" sáng + tooltip  
-7. Tap → Tab "AI Assistant" sáng + tooltip
-8. "Hoàn thành! 🎉" → Bắt đầu sử dụng app
-```
 
+### Ràng buộc / Business rules
+
+- Tour chỉ auto-show khi `!hasCompletedTour()`.
+- User có thể **Skip** (nút X) ở mọi bước.
+- Khi complete/skip → lưu `tour_completed = true`.
+- Nếu thiếu “target rect” (UI chưa đo được bounds) → hệ thống fallback:
+  - Step “welcome”: không cần target.
+  - Step có target nhưng chưa có bounds: overlay vẫn tối; tooltip logic chỉ hiển thị khi có target hợp lệ.
+
+---
+
+## b) Thiết kế UI/UX
+
+### Thành phần UI chính
+
+- Overlay phủ toàn màn hình (zIndex cao).
+- Nền tối (alpha ~0.75).
+- “Hole” bo góc (corner radius ~12dp, padding ~8dp) để nhìn thấy element đang được hướng dẫn.
+- Tooltip card:
+  - Emoji + tiêu đề + mô tả.
+  - Hiển thị tiến độ `${stepIndex+1}/${totalSteps}` + progress bar.
+  - Nút “Tiếp theo” / “Hoàn thành!”.
+  - Nút X để bỏ qua.
+
+### Định vị tooltip
+
+- Nếu element nằm nửa dưới màn hình → tooltip ưu tiên hiển thị phía **trên**.
+- Nếu element nằm nửa trên màn hình → tooltip ưu tiên hiển thị phía **dưới**.
+
+### Danh sách bước (đúng theo hiện trạng code)
+
+- Welcome (không target)
+- Level Selector (`level_selector`)
+- Topic item đầu tiên (`topic_item`)
+- Tab Tra từ (`tab_search`)
+- Tab Học/Board (`tab_board`)
+- Tab Hội thoại (`tab_chat`)
+- Tab Thống kê (`tab_statistics`)
+
+---
+
+## c) Giải pháp kỹ thuật (Compose) + điểm mới + thách thức
+
+### Kiến trúc & các module
+
+- Local state manager: `ProductTourManager`
+  - SharedPreferences: `product_tour_prefs`
+  - Key: `tour_completed`
+- Trigger:
+  - `MainActivity` truyền `showInAppTour = !hasCompletedTour()` vào `MainScreen`.
+  - Khi tour complete: gọi `setTourCompleted()`.
+- Tracking vị trí UI element:
+  - `MainScreen` dùng `Modifier.onGloballyPositioned { positionInRoot() }` để đo `Rect`.
+  - `BottomNavigationBarStub` đo bounds từng tab và callback về `MainScreen`.
+- Spotlight rendering:
+  - `Canvas` vẽ path “full screen rect” trừ “rounded rect” của target (FillType.EvenOdd).
+
+### Điểm mới / novelty
+
+- Spotlight tour được viết thuần Compose (không phụ thuộc thư viện ngoài), dễ tuỳ biến theo UI.
+- Cơ chế “auto-tracking” target dựa trên layout measurement (`onGloballyPositioned`).
+
+### Thách thức khi triển khai
+
+- Bounds phụ thuộc layout/scroll: với `LazyColumn`, item có thể thay đổi vị trí theo scroll → cần đảm bảo target đang nằm trong viewport.
+- Timing đo layout: ở lần render đầu, có thể chưa có Rect → cần fallback UI (welcome/step tiếp theo).
+- Z-index & gesture: overlay bắt event click để next/complete nhưng không làm hỏng UI nền.
+
+---
+
+## d) Hướng phát triển
+
+- Thêm “scroll to target” (nếu target nằm ngoài viewport).
+- Vẽ viền highlight quanh hole (hiện code chỉ khoét lỗ, chưa vẽ border riêng).
+- Cho phép “xem lại tour” trong phần Settings.
+- Tách cấu hình steps ra JSON/Firebase để chỉnh nội dung mà không cần release app.
+
+---
+
+## Phụ lục: File liên quan
+
+- `app/src/main/java/com/uilover/project247/utils/ProductTourManager.kt`
+- `app/src/main/java/com/uilover/project247/DashboardActivity/MainActivity.kt`
+- `app/src/main/java/com/uilover/project247/DashboardActivity/screens/MainScreen.kt`
+- `app/src/main/java/com/uilover/project247/DashboardActivity/components/BottomNavigationBarStub.kt`
+- `app/src/main/java/com/uilover/project247/DashboardActivity/components/InAppTourOverlay.kt`
