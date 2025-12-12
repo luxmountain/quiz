@@ -4,27 +4,152 @@
 
 File này mô tả chi tiết schema của Firebase Realtime Database cho ứng dụng học từ vựng tiếng Anh.
 
+---
+
+## 💾 Ứng dụng sử dụng các hình thức lưu trữ dữ liệu như thế nào?
+
+Ứng dụng sử dụng **2 nhóm lưu trữ chính**:
+
+### 1) Firebase Realtime Database (Cloud)
+
+Mục đích: lưu **nội dung học tập dùng chung** (levels/topics/flashcards/conversations/placementTest/settings). Đây là dữ liệu “chuẩn” để mọi người dùng tải về và học.
+
+- **Cách truy cập**: qua `FirebaseRepository` (Kotlin coroutine `await()`), kết nối tới URL RTDB của dự án.
+- **Đặc điểm**:
+  - Dữ liệu tổ chức theo cây JSON (NoSQL).
+  - Ứng dụng chủ yếu **đọc (read)** dữ liệu nội dung.
+
+### 2) Local Storage (SharedPreferences + Gson)
+
+Mục đích: lưu **tiến độ học và lịch sử trên máy** để hiển thị nhanh, không phụ thuộc mạng và phục vụ AI gợi ý.
+
+- `user_progress` (class `UserProgressManager`)
+  - `study_history`: danh sách tối đa 100 phiên học (`StudyResult`).
+  - `completed_topics`: map `{topicId -> TopicCompletionStatus}` (hoàn thành topic, bestAccuracy, totalTimeSpent, learnedFlashcardIds...).
+- `dictionary_history` (class `SearchHistoryManager`)
+  - `search_history`: lịch sử tra cứu từ điển (tối đa 50 từ) dùng cho “recent searches”.
+- `placement_test_prefs` (class `PlacementTestManager`)
+  - `test_completed`, `test_result`, `recommended_level`, `completed_date`: lưu kết quả bài test đầu vào.
+
+Ghi chú: tiến độ người dùng hiện tại ưu tiên lưu local; RTDB có thể mở rộng để đồng bộ lên `/userProgress/{userId}` khi cần.
+
 ## 🗂️ Cấu trúc Database
 
 ```
 firebase-database/
-├── topics/
-│   └── {topicId}/
-├── flashcards/
-│   └── {flashcardId}/
 ├── conversations/
 │   └── {conversationId}/
+├── levels/
+│   └── {levelId}/
+│       └── topics/
+│           └── {topicId}/
+│               └── flashcards: [ ... ]
+├── placementTest/
+│   └── (single object)
 ├── userProgress/
 │   └── {userId}/
 └── settings/
     └── app/
 ```
 
+> Lưu ý: dữ liệu export hiện tại sử dụng **levels → topics → flashcards[]** (flashcards nhúng trong topic). Các node `/topics` và `/flashcards` dạng standalone có thể là schema cũ.
+
+---
+
+## 🧩 Sơ đồ quan hệ thực thể (ERD)
+
+Firebase RTDB là NoSQL, nhưng có thể quy đổi thành các “thực thể/bảng” và quan hệ như sau:
+
+```mermaid
+erDiagram
+  LEVEL ||--o{ TOPIC : contains
+  TOPIC ||--o{ FLASHCARD : has
+  TOPIC ||--o{ CONVERSATION : relates
+  FLASHCARD ||--o{ CONVERSATION : targets
+  PLACEMENT_TEST ||--o{ PLACEMENT_QUESTION : includes
+
+  LEVEL {
+    string id PK
+    string name
+    string nameVi
+    string description
+    string descriptionVi
+    int order
+    int totalTopics
+    string imageUrl
+  }
+
+  TOPIC {
+    string id PK
+    string levelId FK
+    string name
+    string nameVi
+    string description
+    string descriptionVi
+    int order
+    int totalWords
+    string imageUrl
+    long createdAt
+    long updatedAt
+  }
+
+  FLASHCARD {
+    string id PK
+    string topicId FK
+    string word
+    string meaning
+    string pronunciation
+    string wordType
+    string wordTypeVi
+    string imageUrl
+    string contextSentence
+    string contextSentenceVi
+    string example
+    string exampleVi
+    int order
+    string difficulty
+  }
+
+  CONVERSATION {
+    string id PK
+    string topicId FK
+    string title
+    string titleVi
+    string imageUrl
+    string contextDescription
+    string contextDescriptionVi
+    int order
+    long createdAt
+  }
+
+  PLACEMENT_TEST {
+    string id PK
+    string title
+    string titleEn
+    string description
+    string descriptionEn
+    int duration
+  }
+
+  PLACEMENT_QUESTION {
+    string id PK
+    string testId FK
+    int order
+    string level
+    string type
+    string question
+    string questionVi
+    int correctAnswer
+  }
+```
+
+Phần “UserProgress” trong app hiện tại lưu local (SharedPreferences), nên không được coi là “bảng cloud” trong ERD này.
+
 ---
 
 ## 📚 Topics Schema
 
-**Path**: `/topics/{topicId}`
+**Path (thực tế)**: `/levels/{levelId}/topics/{topicId}`
 
 Chứa thông tin về các chủ đề học tập.
 
@@ -66,7 +191,7 @@ Chứa thông tin về các chủ đề học tập.
 
 ## 🎴 Flashcards Schema
 
-**Path**: `/flashcards/{flashcardId}`
+**Path (thực tế)**: `/levels/{levelId}/topics/{topicId}/flashcards[]`
 
 Chứa thông tin về từ vựng (flashcard).
 
@@ -142,20 +267,15 @@ Chứa thông tin về các bài hội thoại học từ vựng.
 | Field | Type | Required | Validation | Description |
 |-------|------|----------|------------|-------------|
 | `id` | String | ✅ | Phải trùng với conversationId | Unique identifier |
-| `topicId` | String | ✅ | Phải tồn tại trong /topics | ID chủ đề |
-| `flashcardId` | String | ✅ | Phải tồn tại trong /flashcards | ID flashcard liên quan |
 | `title` | String | ✅ | Length > 0 | Tiêu đề (tiếng Anh) |
 | `titleVi` | String | ✅ | Length > 0 | Tiêu đề (tiếng Việt) |
 | `imageUrl` | String | ✅ | URL format | Hình ảnh minh họa |
 | `contextDescription` | String | ✅ | - | Mô tả ngữ cảnh (tiếng Anh) |
 | `contextDescriptionVi` | String | ✅ | - | Mô tả ngữ cảnh (tiếng Việt) |
-| `dialogue` | Array | ✅ | - | Danh sách câu thoại |
-| `targetWord` | String | ✅ | Length > 0 | Từ vựng mục tiêu |
-| `question` | String | ✅ | Length > 0 | Câu hỏi (tiếng Anh) |
-| `questionVi` | String | ✅ | Length > 0 | Câu hỏi (tiếng Việt) |
-| `options` | Array | ✅ | - | Các lựa chọn trả lời |
+| `dialogue` | Array | ✅ | - | Danh sách câu thoại (có thể kèm câu hỏi trắc nghiệm) |
+| `vocabularyWords` | Array | ✅ | - | Danh sách từ vựng xuất hiện trong hội thoại |
 | `order` | Number | ✅ | >= 0 | Thứ tự |
-| `createdAt` | Number | ✅ | - | Timestamp tạo |
+| `createdAt` | Number | ❌ | - | Timestamp tạo (nếu có) |
 
 ### Dialogue Schema:
 
@@ -165,6 +285,20 @@ Chứa thông tin về các bài hội thoại học từ vựng.
 | `text` | String | ✅ | Nội dung (tiếng Anh) |
 | `textVi` | String | ✅ | Nội dung (tiếng Việt) |
 | `order` | Number | ✅ | Thứ tự câu |
+| `vocabularyWord` | String | ❌ | Từ vựng trọng tâm của dòng này (nếu có) |
+| `question` | String | ❌ | Câu hỏi trắc nghiệm (EN) |
+| `questionVi` | String | ❌ | Câu hỏi trắc nghiệm (VI) |
+| `options` | Array | ❌ | Danh sách lựa chọn (QuizOption) |
+
+### VocabularyWord Schema:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `word` | String | ✅ | Từ vựng |
+| `meaning` | String | ✅ | Nghĩa tiếng Việt |
+| `pronunciation` | String | ✅ | Phiên âm |
+| `wordType` | String | ✅ | Loại từ (EN) |
+| `wordTypeVi` | String | ✅ | Loại từ (VI) |
 
 ### QuizOption Schema:
 
@@ -180,44 +314,57 @@ Chứa thông tin về các bài hội thoại học từ vựng.
 {
   "conversation_001": {
     "id": "conversation_001",
-    "topicId": "topic_001",
-    "flashcardId": "flashcard_001",
-    "title": "Morning Routine",
-    "titleVi": "Thói quen buổi sáng",
-    "imageUrl": "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?w=800",
-    "contextDescription": "Tom is talking to his friend Sarah about his morning habits.",
-    "contextDescriptionVi": "Tom đang nói chuyện với bạn Sarah về thói quen buổi sáng của anh ấy.",
+    "title": "Morning Routine 1",
+    "titleVi": "Thói quen buổi sáng 1",
+    "imageUrl": "https://images.pexels.com/photos/296301/pexels-photo-296301.jpeg?w=800",
+    "contextDescription": "Talking about daily morning activities",
+    "contextDescriptionVi": "Nói về các hoạt động buổi sáng hàng ngày",
+    "order": 1,
+    "createdAt": 1699488000000,
     "dialogue": [
       {
-        "speaker": "Tom",
-        "text": "I always have breakfast before going to work.",
-        "textVi": "Tôi luôn ăn sáng trước khi đi làm.",
-        "order": 1
+        "order": 0,
+        "speaker": "Person A",
+        "text": "Hello! Let's talk about morning routine.",
+        "textVi": "Xin chào! Hãy nói về thói quen buổi sáng.",
+        "vocabularyWord": "hello",
+        "question": "What does 'hello' mean?",
+        "questionVi": "'hello' có nghĩa là gì?",
+        "options": [
+          { "id": "a", "text": "xin chào", "isCorrect": true },
+          { "id": "b", "text": "tạm biệt", "isCorrect": false }
+        ]
       },
       {
-        "speaker": "Sarah",
-        "text": "That's a good habit! What do you usually eat?",
-        "textVi": "Đó là một thói quen tốt! Bạn thường ăn gì?",
-        "order": 2
+        "order": 1,
+        "speaker": "Person B",
+        "text": "Sure! I'd love to discuss this topic.",
+        "textVi": "Chắc chắn rồi! Tôi rất muốn thảo luận chủ đề này.",
+        "vocabularyWord": "discuss",
+        "question": "What does 'discuss' mean?",
+        "questionVi": "'discuss' có nghĩa là gì?",
+        "options": [
+          { "id": "a", "text": "thảo luận", "isCorrect": true },
+          { "id": "b", "text": "từ chối", "isCorrect": false }
+        ]
       }
     ],
-    "targetWord": "breakfast",
-    "question": "What does 'breakfast' mean?",
-    "questionVi": "Từ 'breakfast' có nghĩa là gì?",
-    "options": [
+    "vocabularyWords": [
       {
-        "id": "option_a",
-        "text": "bữa sáng",
-        "isCorrect": true
+        "word": "hello",
+        "meaning": "xin chào",
+        "pronunciation": "/həˈloʊ/",
+        "wordType": "interjection",
+        "wordTypeVi": "thán từ"
       },
       {
-        "id": "option_b",
-        "text": "bữa trưa",
-        "isCorrect": false
+        "word": "discuss",
+        "meaning": "thảo luận",
+        "pronunciation": "/dɪˈskʌs/",
+        "wordType": "verb",
+        "wordTypeVi": "động từ"
       }
-    ],
-    "order": 1,
-    "createdAt": 1699488000000
+    ]
   }
 }
 ```
@@ -227,6 +374,8 @@ Chứa thông tin về các bài hội thoại học từ vựng.
 ## 👤 User Progress Schema
 
 **Path**: `/userProgress/{userId}`
+
+> Ghi chú triển khai: ứng dụng hiện tại đang ưu tiên lưu tiến độ local qua `UserProgressManager` (SharedPreferences). Node `/userProgress/{userId}` là schema mở rộng để đồng bộ cloud khi cần.
 
 Lưu trữ tiến độ học tập của người dùng.
 
@@ -278,6 +427,45 @@ Lưu trữ tiến độ học tập của người dùng.
 | `attempts` | Number | ✅ | Số lần thử |
 | `correctAnswers` | Number | ✅ | Số câu trả lời đúng |
 | `lastAttemptDate` | Number/null | ❌ | Lần thử gần nhất |
+
+---
+
+## 🧪 Placement Test Schema
+
+**Path**: `/placementTest`
+
+Chứa bài test đầu vào (1 object) gồm metadata + danh sách câu hỏi.
+
+### Fields chính:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | String | ✅ | ID bài test |
+| `title` | String | ✅ | Tiêu đề (VI) |
+| `titleEn` | String | ✅ | Tiêu đề (EN) |
+| `description` | String | ✅ | Mô tả (VI) |
+| `descriptionEn` | String | ✅ | Mô tả (EN) |
+| `duration` | Number | ✅ | Thời gian (giây) |
+| `instructions` | Array<String> | ✅ | Hướng dẫn |
+| `passingScores` | Object | ✅ | Ngưỡng điểm theo level |
+| `questions` | Array<Object> | ✅ | Danh sách câu hỏi |
+
+### Question fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | String | ✅ | ID câu hỏi |
+| `order` | Number | ✅ | Thứ tự |
+| `level` | String | ✅ | beginner/elementary/intermediate/advanced |
+| `type` | String | ✅ | vocabulary/grammar/reading |
+| `question` | String | ✅ | Câu hỏi (EN) |
+| `questionVi` | String | ✅ | Câu hỏi (VI) |
+| `options` | Array<String> | ✅ | 4 lựa chọn |
+| `correctAnswer` | Number | ✅ | Index đáp án đúng (0-3) |
+| `explanation` | String | ❌ | Giải thích (EN) |
+| `explanationVi` | String | ❌ | Giải thích (VI) |
+
+> Lưu ý UI: bài kiểm tra đầu vào không hiển thị đáp án/giải thích trong lúc làm bài; `explanation*` có thể giữ lại trong data để mở rộng (ví dụ chế độ luyện tập).
 
 ---
 
