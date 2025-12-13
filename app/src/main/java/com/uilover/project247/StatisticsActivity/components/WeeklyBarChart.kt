@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -158,33 +159,51 @@ fun WeeklyBarChart(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SummaryItem(
-                    label = "Tổng từ",
-                    value = weeklyStats.getTotalWordsReviewed().toString(),
-                    iconResId = R.drawable.book,
-                    backgroundColor = Color(0xFFF6E5FC),
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SummaryItem(
+                        label = "Tổng từ",
+                        value = weeklyStats.getTotalWordsReviewed().toString(),
+                        iconResId = R.drawable.book,
+                        backgroundColor = Color(0xFFF6E5FC),
+                        modifier = Modifier.weight(1f)
+                    )
 
-                SummaryItem(
-                    label = "Thời gian",
-                    value = "${weeklyStats.getTotalStudyTime()}p",
-                    iconResId = R.drawable.watch,
-                    backgroundColor = Color(0xFFFFE5B4),
-                    modifier = Modifier.weight(1f)
-                )
-                
-                SummaryItem(
-                    label = "Độ chính xác",
-                    value = "${weeklyStats.getAverageAccuracy().toInt()}%",
-                    iconResId = R.drawable.target,
-                    backgroundColor = Color(0xFFBDE0FE),
-                    modifier = Modifier.weight(1f)
-                )
+                    SummaryItem(
+                        label = "Thời gian",
+                        value = "${weeklyStats.getTotalStudyTime()}p",
+                        iconResId = R.drawable.watch,
+                        backgroundColor = Color(0xFFFFE5B4),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SummaryItem(
+                        label = "Độ chính xác",
+                        value = "${weeklyStats.getAverageAccuracy().toInt()}%",
+                        iconResId = R.drawable.target,
+                        backgroundColor = Color(0xFFBDE0FE),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    SummaryItem(
+                        label = "Ngày học",
+                        value = "${weeklyStats.getActiveDays()}/7",
+                        iconResId = R.drawable.onfire,
+                        backgroundColor = Color(0xFFE8F5E9),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
 

@@ -154,7 +154,7 @@ class ConversationDetailViewModel(
     fun checkWriteAnswer(userAnswer: String) {
         if (_uiState.value.checkResult != CheckResult.NEUTRAL) return
         val correctWord = _uiState.value.currentDialogue?.vocabularyWord
-        if (userAnswer.equals(correctWord, ignoreCase = true)) {
+        if (userAnswer.trim().equals(correctWord?.trim(), ignoreCase = true)) {
             _uiState.update { it.copy(checkResult = CheckResult.CORRECT) }
         } else {
             _uiState.update { it.copy(checkResult = CheckResult.INCORRECT) }

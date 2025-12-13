@@ -182,13 +182,26 @@ fun MainScreen(
                 }
             )
         },
-        containerColor = Color(0xFFF5F5F5)
+        containerColor = Color.Transparent
     ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFF5F7FA),
+                            Color(0xFFE8EAF6)
+                        )
+                    )
+                )
+                .padding(paddingValues)
+        ) {
         when (selectedTab) {
             "Search" -> {
                 DictionaryScreenContent(
                     viewModel = dictionaryViewModel,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier
                 )
             }
 
@@ -196,13 +209,13 @@ fun MainScreen(
             "Review" -> {
                 // Review Screen
                 ReviewScreenContent(
-                    viewModel = reviewViewModel, // cần có ReviewViewModel trong MainViewModel
-                    modifier = Modifier.padding(paddingValues),
+                    viewModel = reviewViewModel,
+                    modifier = Modifier,
                     onReviewTopicClick = { topicId ->
                         onTopicReviewClick(topicId)
                     },
-                    onNavigateBack = null, // nếu muốn, có thể truyền { selectedTab = "Board" }
-                    onStartReviewSession = onStartReviewSession // Pass navigation callback
+                    onNavigateBack = null,
+                    onStartReviewSession = onStartReviewSession
                 )
             }
 
@@ -210,7 +223,7 @@ fun MainScreen(
                 // Conversation Screen
                 ConversationListScreenContent(
                     viewModel = conversationViewModel,
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = Modifier,
                     onConversationClick = { conversationId ->
                         onConversationClick(conversationId)
                     }
@@ -221,7 +234,7 @@ fun MainScreen(
                 // Statistics Screen
                 StatisticsScreenContent(
                     viewModel = statisticsViewModel,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier
                 )
             }
 
@@ -229,7 +242,7 @@ fun MainScreen(
                 // AI Study Assistant Screen
                 AIAssistantScreenContent(
                     viewModel = aiAssistantViewModel,
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = Modifier,
                     onReviewTopicClick = { topicId ->
                         onTopicReviewClick(topicId)
                     }
@@ -240,18 +253,14 @@ fun MainScreen(
                 // 👉 Màn hình chính (Board) - Hiển thị danh sách topics của level đã chọn
                 if (uiState.isLoading) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
                 } else if (uiState.errorMessage != null) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
@@ -270,11 +279,9 @@ fun MainScreen(
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                        modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
                         // Level progress card
                         item {
@@ -325,6 +332,7 @@ fun MainScreen(
                 }
             }
         }
+        }
     }
         
         // In-app tour overlay
@@ -357,19 +365,20 @@ private fun LevelProgressCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
+                    brush = Brush.horizontalGradient(
                         colors = listOf(
-                            Color(0xFF64B5F6), Color(0xFF1976D2)
+                            Color(0xFF667EEA),
+                            Color(0xFF764BA2)
                         )
                     )
                 )

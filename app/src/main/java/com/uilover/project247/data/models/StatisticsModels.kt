@@ -21,6 +21,7 @@ data class WeeklyStats(
         val totalQuestions = dailyStats.sumOf { it.totalCount }
         return if (totalQuestions > 0) (totalCorrect.toFloat() / totalQuestions.toFloat()) * 100f else 0f
     }
+    fun getActiveDays(): Int = dailyStats.count { it.wordsReviewed > 0 }
 }
 
 data class MonthlyHeatmapData(

@@ -83,9 +83,12 @@ class PlacementTestViewModel(application: Application) : AndroidViewModel(applic
         val currentState = _uiState.value
         val currentIndex = currentState.currentQuestionIndex
         
+        val newAnswers = currentState.userAnswers.toMutableMap()
+        newAnswers[currentIndex] = optionIndex
+        
         _uiState.update {
             it.copy(
-                userAnswers = it.userAnswers.apply { put(currentIndex, optionIndex) },
+                userAnswers = newAnswers,
                 isAnswered = true
             )
         }

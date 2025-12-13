@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,9 +15,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,17 +73,39 @@ fun ReviewScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         
-        // Header
-        NotebookHeader(totalWords = stats.totalWordsInNotebook)
+        // Header with gradient
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFFB39DDB), // Purple 200
+                            Color(0xFF7E57C2)  // Purple 500
+                        )
+                    )
+                )
+                .padding(16.dp)
+        ) {
+            NotebookHeader(totalWords = stats.totalWordsInNotebook)
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Bar Chart (in card)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            ReviewBarChart(stats = stats)
+        }
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Bar Chart
-        ReviewBarChart(stats = stats)
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // STATE A: Words are ready (dueCount > 0) - GREEN BUTTON
+        // STATE A: Words are ready (dueCount > 0) - GRADIENT BUTTON
         if (isReviewAvailable) {
             Text(
                 text = "Sẵn sàng ôn tập: $dueCount từ đã đến hạn",
@@ -97,17 +122,32 @@ fun ReviewScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(16.dp)
+                contentPadding = PaddingValues(0.dp)
             ) {
-                Text(
-                    text = "Ôn tập ngay",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF66BB6A), // Green 400
+                                    Color(0xFF2E7D32)  // Green 800
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ôn tập ngay",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
         // STATE B: Countdown Timer (nextReviewTimestamp exists)
@@ -378,19 +418,34 @@ private fun formatTimeLeft(milliseconds: Long): String {
  */
 @Composable
 private fun NotebookHeader(totalWords: Int) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(12.dp))
-            .background(Color.White, RoundedCornerShape(12.dp))
-            .padding(20.dp),
-        contentAlignment = Alignment.Center
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
+        // Icon sổ tay
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.3f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "📖",
+                fontSize = 32.sp
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        // Text "Sổ tay đã có X từ"
         Text(
-            text = "📚  Sổ tay đã có $totalWords từ",
-            fontSize = 20.sp,
+            text = "Sổ tay đã có $totalWords từ",
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF333333)
+            fontSize = 18.sp,
+            color = Color.White
         )
     }
 }
@@ -406,11 +461,30 @@ private fun ReviewBarChart(stats: ReviewStats) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "📊 Phân bố theo mức độ",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Color(0xFF333333)
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Số lượng từ trong mỗi level ôn tập",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
         // Chart area
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp)
+                .height(200.dp)
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.Bottom
@@ -435,10 +509,10 @@ private fun ReviewBarChart(stats: ReviewStats) {
         ) {
             for (level in 1..5) {
                 Text(
-                    text = "$level",
-                    fontSize = 14.sp,
+                    text = "Level $level",
+                    fontSize = 12.sp,
                     color = Color.Gray,
-                    modifier = Modifier.width(40.dp),
+                    modifier = Modifier.width(60.dp),
                     textAlign = TextAlign.Center
                 )
             }

@@ -35,7 +35,7 @@ fun BottomNavigationBarStub(
 
     NavigationBar(
         modifier = modifier,
-        containerColor = Color.White
+        containerColor = Color.White.copy(alpha = 0.8f)
     ) {
         navItems.forEach { item ->
             val isSelected = item.fourth == selectedItem

@@ -210,7 +210,7 @@ private fun StatCard3D(
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(90.dp)
                     .align(Alignment.TopEnd)
                     .offset(x = 8.dp, y = (-8).dp)
             )

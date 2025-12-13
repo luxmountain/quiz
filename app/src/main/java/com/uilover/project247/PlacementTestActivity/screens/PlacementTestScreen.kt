@@ -119,43 +119,46 @@ private fun InstructionsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
         Text(
             "🎯",
-            fontSize = 72.sp
+            fontSize = 56.sp
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             test.title,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             test.description,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     "Hướng dẫn:",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -164,16 +167,17 @@ private fun InstructionsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.Top
                     ) {
-                        Text("• ", color = Color(0xFF6200EA), fontWeight = FontWeight.Bold)
+                        Text("• ", color = Color(0xFF6200EA), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         Text(
                             instruction,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f)
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(1f),
+                            lineHeight = 18.sp
                         )
                     }
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
 
                 InfoRow("Số câu hỏi", "${test.totalQuestions} câu")
                 InfoRow("Thời gian", "${test.duration / 60} phút")
@@ -186,7 +190,7 @@ private fun InstructionsScreen(
             onClick = onStart,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(52.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF6200EA)
             )
@@ -198,11 +202,13 @@ private fun InstructionsScreen(
             )
         }
 
+        Spacer(modifier = Modifier.height(6.dp))
+
         TextButton(
             onClick = onSkip,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Bỏ qua (Học từ cơ bản)")
+            Text("Bỏ qua (Học từ cơ bản)", fontSize = 14.sp)
         }
     }
 }
@@ -300,9 +306,7 @@ private fun TestContentScreen(
                     isSelected = selectedAnswer == index,
                     isCorrect = null,
                     onClick = {
-                        if (!uiState.isAnswered) {
-                            viewModel.selectAnswer(index)
-                        }
+                        viewModel.selectAnswer(index)
                     }
                 )
             }
@@ -424,20 +428,20 @@ private fun TestResultScreen(
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(100.dp)
                         .clip(CircleShape)
                         .background(Color(0xFF6200EA)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "${result.score}",
-                        fontSize = 48.sp,
+                        fontSize = 40.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -445,7 +449,7 @@ private fun TestResultScreen(
 
                 Text(
                     "Điểm của bạn",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = Color.Gray
                 )
 
@@ -459,7 +463,7 @@ private fun TestResultScreen(
 
                 Text(
                     "Level được đề xuất",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -468,12 +472,12 @@ private fun TestResultScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFEDE7F6))
-                        .padding(16.dp),
+                        .padding(12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         result.recommendedLevelVi,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF6200EA)
                     )
@@ -487,7 +491,7 @@ private fun TestResultScreen(
             onClick = onContinue,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(52.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF6200EA)
             )
@@ -498,6 +502,8 @@ private fun TestResultScreen(
                 fontWeight = FontWeight.Bold
             )
         }
+        
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
